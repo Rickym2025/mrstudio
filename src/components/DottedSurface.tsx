@@ -24,7 +24,6 @@ export function DottedSurface() {
             10000
         );
 
-        // Telecamera ad altezza uomo che guarda l'orizzonte (Effetto Mare)
         camera.position.set(0, 400, 2000);
         camera.lookAt(0, -100, 0); 
 
