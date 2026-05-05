@@ -15,17 +15,20 @@ export function DottedSurface() {
 
         const scene = new THREE.Scene();
         const bgColor = 0x020205;
-        scene.fog = new THREE.Fog(bgColor, 500, 3000);
+        // Nebbia ravvicinata per sfumare l'orizzonte
+        scene.fog = new THREE.Fog(bgColor, 300, 2500);
 
         const camera = new THREE.PerspectiveCamera(
-            60,
+            75, // Grandangolo più ampio
             window.innerWidth / window.innerHeight,
             1,
             10000
         );
 
-        camera.position.set(0, 400, 2000);
-        camera.lookAt(0, -100, 0); 
+        // TELECAMERA BASSA AD ALTEZZA OCCHI
+        camera.position.set(0, 150, 1000);
+        // GUARDIAMO LONTANISSIMO VERSO L'ORIZZONTE
+        camera.lookAt(0, 0, -2000); 
 
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         renderer.setPixelRatio(window.devicePixelRatio);
@@ -44,6 +47,7 @@ export function DottedSurface() {
                 positions[i * 3 + 1] = 0; 
                 positions[i * 3 + 2] = iy * SEPARATION - (AMOUNTY * SEPARATION) / 2;
 
+                // Colori
                 if (Math.random() > 0.5) {
                     colors[i * 3] = 0.0; colors[i * 3 + 1] = 0.95; colors[i * 3 + 2] = 1.0; 
                 } else {
@@ -65,6 +69,11 @@ export function DottedSurface() {
         });
 
         const points = new THREE.Points(geometry, material);
+        
+        // LA MAGIA: Spingiamo tutto l'oceano fisicamente verso il basso (-300px)
+        // Così liberiamo la parte alta dello schermo per il testo!
+        points.position.y = -300;
+        
         scene.add(points);
 
         let count = 0;
@@ -79,16 +88,19 @@ export function DottedSurface() {
             let i = 0;
             for (let ix = 0; ix < AMOUNTX; ix++) {
                 for (let iy = 0; iy < AMOUNTY; iy++) {
+                    // Onde più alte (da 50 a 80) per far sembrare un vero mare
                     posArray[i * 3 + 1] =
-                        Math.sin((ix + count) * 0.3) * 50 +
-                        Math.sin((iy + count) * 0.5) * 50;
+                        Math.sin((ix + count) * 0.3) * 80 +
+                        Math.sin((iy + count) * 0.5) * 80;
                     i++;
                 }
             }
 
             posAttr.needsUpdate = true;
             renderer.render(scene, camera);
-            count += 0.03;
+            
+            // Velocità dell'acqua
+            count += 0.04; 
         };
 
         const handleResize = () => {
