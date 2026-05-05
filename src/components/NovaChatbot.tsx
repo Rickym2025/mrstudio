@@ -1,0 +1,92 @@
+import { useState, useEffect, useRef } from "react";
+import { MessageSquare, Send, X } from "lucide-react";
+
+export function NovaChatbot() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<{ text: string; sender: "bot" | "user" }[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-apertura su PC dopo 1.5 secondi
+  useEffect(() => {
+    if (window.innerWidth > 768) {
+      setTimeout(() => setIsOpen(true), 1500);
+    }
+    setMessages([{ text: "Benvenuto. Sono Nova, l'intelligenza artificiale di MR Studio.\n\nCosa vuoi dominare oggi?", sender: "bot" }]);
+  },[]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading]);
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+    const userText = input.trim();
+    setInput("");
+    setMessages((prev) =>[...prev, { text: userText, sender: "user" }]);
+    setIsLoading(true);
+
+    let sessionId = localStorage.getItem("mr_session");
+    if (!sessionId) {
+      sessionId = "mr_" + Math.random().toString(36).substring(7);
+      localStorage.setItem("mr_session", sessionId);
+    }
+
+    try {
+      const res = await fetch("https://n8n.labottegadeldelta.it/webhook/nova", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userText, sessionId })
+      });
+      const data = await res.json();
+      setMessages((prev) =>[...prev, { text: data.response || data.output || "Ricevuto.", sender: "bot" }]);
+    } catch (error) {
+      setMessages((prev) =>[...prev, { text: "I miei circuiti sono saturi. Riprova tra un istante.", sender: "bot" }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed bottom-8 left-8 z-[100] flex flex-col items-start">
+      {/* Finestra Chat */}
+      <div 
+        className={`bg-[#0a0a0c]/90 backdrop-blur-xl border border-white/10 rounded-2xl w-[350px] shadow-2xl flex flex-col overflow-hidden transition-all duration-500 origin-bottom-left ${isOpen ? 'opacity-100 scale-100 mb-4 h-[500px]' : 'opacity-0 scale-50 h-0 mb-0 pointer-events-none'}`}
+      >
+        <div className="bg-white/5 border-b border-white/5 p-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-2.5 h-2.5 bg-white rounded-full shadow-[0_0_10px_#fff] animate-pulse"></div>
+            <span className="font-bold text-sm tracking-widest text-white">NOVA AI</span>
+          </div>
+          <button onClick={() => setIsOpen(false)} className="text-white/50 hover:text-white"><X size={18} /></button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.map((m, i) => (
+            <div key={i} className={`p-3 text-sm rounded-2xl max-w-[85%] ${m.sender === 'user' ? 'bg-white text-black self-end rounded-br-sm ml-auto font-medium' : 'bg-white/10 text-white/90 border border-white/5 self-start rounded-bl-sm'}`} dangerouslySetInnerHTML={{ __html: m.text.replace(/\n/g, '<br>') }} />
+          ))}
+          {isLoading && (
+            <div className="bg-white/10 text-white/50 border border-white/5 p-3 rounded-2xl rounded-bl-sm self-start max-w-[85%] text-sm flex gap-1">
+              <span className="animate-bounce">●</span><span className="animate-bounce" style={{ animationDelay: '0.1s' }}>●</span><span className="animate-bounce" style={{ animationDelay: '0.2s' }}>●</span>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        <div className="p-4 border-t border-white/5 bg-black/50 flex gap-2">
+          <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && sendMessage()} placeholder="Chiedimi qualcosa..." className="flex-1 bg-transparent border border-white/10 rounded-xl px-4 py-2 text-sm text-white outline-none focus:border-white/50 transition-colors" />
+          <button onClick={sendMessage} className="bg-white text-black p-2 rounded-xl hover:scale-105 transition-transform"><Send size={18} /></button>
+        </div>
+      </div>
+
+      {/* Bottone Fluttuante */}
+      <button 
+        onClick={() => setIsOpen(!isOpen)} 
+        className={`w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-110 transition-transform ${isOpen ? 'hidden' : 'flex'}`}
+      >
+        <MessageSquare size={24} className="text-black" />
+      </button>
+    </div>
+  );
+}

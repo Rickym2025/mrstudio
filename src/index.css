@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+:root {
+  --background: #050505; /* Adattato al tuo tema scuro di default */
+  --foreground: #ededed;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', Arial, Helvetica, sans-serif;
+  margin: 0;
+}
