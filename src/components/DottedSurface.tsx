@@ -1,4 +1,3 @@
-// Rimosso 'React' per risolvere l'errore TS6133 di Vercel
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
@@ -11,12 +10,11 @@ export function DottedSurface() {
         containerRef.current.innerHTML = '';
 
         const SEPARATION = 100;
-        const AMOUNTX = 100; // Allargato per coprire meglio lo schermo
+        const AMOUNTX = 100;
         const AMOUNTY = 100;
 
         const scene = new THREE.Scene();
         const bgColor = 0x020205;
-        // La nebbia aiuta a sfumare i puntini in lontananza, dando profondità
         scene.fog = new THREE.Fog(bgColor, 500, 3000);
 
         const camera = new THREE.PerspectiveCamera(
@@ -26,10 +24,8 @@ export function DottedSurface() {
             10000
         );
 
-        // --- SOLUZIONE EFFETTO MARE ---
-        // Abbassiamo la telecamera (Y = 400 invece di 1200) e la spingiamo indietro (Z = 2000)
+        // Telecamera ad altezza uomo che guarda l'orizzonte (Effetto Mare)
         camera.position.set(0, 400, 2000);
-        // La facciamo guardare leggermente verso il basso sull'orizzonte
         camera.lookAt(0, -100, 0); 
 
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
@@ -84,7 +80,6 @@ export function DottedSurface() {
             let i = 0;
             for (let ix = 0; ix < AMOUNTX; ix++) {
                 for (let iy = 0; iy < AMOUNTY; iy++) {
-                    // Onde più fluide
                     posArray[i * 3 + 1] =
                         Math.sin((ix + count) * 0.3) * 50 +
                         Math.sin((iy + count) * 0.5) * 50;
@@ -93,12 +88,8 @@ export function DottedSurface() {
             }
 
             posAttr.needsUpdate = true;
-            
-            // Ho rimosso la rotazione sull'asse Y (points.rotation.y = ...) 
-            // perché faceva girare il mare come un disco, distruggendo l'effetto prospettico.
-
             renderer.render(scene, camera);
-            count += 0.03; // Velocità dell'onda
+            count += 0.03;
         };
 
         const handleResize = () => {

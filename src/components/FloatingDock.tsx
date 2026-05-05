@@ -4,8 +4,7 @@ import { toast } from "sonner";
 export function FloatingDock() {
   const handleVCardClick = () => {
     toast.success("Contatto salvato. MR Studio è ora nella tua rubrica.", {
-      style: { background: '#111', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' },
-      // Rimosso iconTheme per risolvere l'errore TS2353 di Vercel
+      style: { background: '#111', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }
     });
     
     const link = document.createElement("a");
