@@ -1,48 +1,43 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
-export function DottedSurface({ className }: { className?: string }) {
+export function DottedSurface() {
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (!containerRef.current) return;
 
-        // Pulizia per Vite HMR
+        // Pulizia per evitare duplicati
         containerRef.current.innerHTML = '';
 
         const SEPARATION = 100;
-        const AMOUNTX = 70; // Aumentato per coprire più orizzonte
-        const AMOUNTY = 70;
+        const AMOUNTX = 80; // Aumentiamo la distesa
+        const AMOUNTY = 80;
 
         // 1. Setup Scena
         const scene = new THREE.Scene();
-        
-        // Colore sfondo scuro profondo
         const bgColor = 0x020205;
-        scene.fog = new THREE.Fog(bgColor, 1000, 3000); // Nebbia per dare profondità all'orizzonte
+        scene.fog = new THREE.Fog(bgColor, 1000, 3500);
 
         const camera = new THREE.PerspectiveCamera(
-            65, // Campo visivo leggermente più largo
+            60,
             window.innerWidth / window.innerHeight,
             1,
             10000
         );
-        
-        // POSIZIONE CAMERA: Abbassata e allontanata per vedere l'onda in prospettiva (effetto mare)
-        camera.position.set(0, 650, 1500); 
-        camera.lookAt(0, 0, 0);
 
-        const renderer = new THREE.WebGLRenderer({
-            alpha: true,
-            antialias: true,
-        });
+        // --- QUESTA È LA PARTE CHE TRASFORMA LA "PARETE" IN UN "MARE" ---
+        // X=0 (centro), Y=1200 (molto in alto), Z=1800 (lontano)
+        camera.position.set(0, 1200, 1800);
+        camera.lookAt(0, 0, 0); // Punta al centro del mare di pallini
+
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setClearColor(bgColor, 1);
-
         containerRef.current.appendChild(renderer.domElement);
 
-        // 2. Creazione Particelle
+        // 2. Particelle
         const numParticles = AMOUNTX * AMOUNTY;
         const positions = new Float32Array(numParticles * 3);
         const colors = new Float32Array(numParticles * 3);
@@ -50,7 +45,7 @@ export function DottedSurface({ className }: { className?: string }) {
         let i = 0;
         for (let ix = 0; ix < AMOUNTX; ix++) {
             for (let iy = 0; iy < AMOUNTY; iy++) {
-                // Posizionamento sulla griglia XZ (orizzontale)
+                // Griglia piatta sul pavimento (X, Z)
                 positions[i * 3] = ix * SEPARATION - (AMOUNTX * SEPARATION) / 2;
                 positions[i * 3 + 1] = 0; // Altezza Y (iniziale)
                 positions[i * 3 + 2] = iy * SEPARATION - (AMOUNTY * SEPARATION) / 2;
@@ -70,7 +65,7 @@ export function DottedSurface({ className }: { className?: string }) {
         geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
         const material = new THREE.PointsMaterial({
-            size: 5, // Pallini leggermente più grandi per l'effetto wow
+            size: 4,
             vertexColors: true,
             transparent: true,
             opacity: 0.8,
@@ -91,22 +86,21 @@ export function DottedSurface({ className }: { className?: string }) {
             let i = 0;
             for (let ix = 0; ix < AMOUNTX; ix++) {
                 for (let iy = 0; iy < AMOUNTY; iy++) {
-                    // MATEMATICA ONDA DINAMICA
-                    // La Y cambia in base a ix e iy nel tempo (count)
+                    // EFFETTO ONDA: Sommiamo due seni per movimento organico
                     posArray[i * 3 + 1] =
-                        Math.sin((ix + count) * 0.3) * 50 +
-                        Math.sin((iy + count) * 0.5) * 50;
+                        Math.sin((ix + count) * 0.3) * 60 +
+                        Math.sin((iy + count) * 0.5) * 60;
                     i++;
                 }
             }
 
             posAttr.needsUpdate = true;
             
-            // Rotazione lenta della telecamera per dare dinamismo
-            points.rotation.y = Math.sin(count * 0.1) * 0.05;
+            // Rotazione panoramica lentissima
+            points.rotation.y = count * 0.02;
 
             renderer.render(scene, camera);
-            count += 0.05;
+            count += 0.04; // Velocità movimento
         };
 
         const handleResize = () => {
@@ -130,8 +124,8 @@ export function DottedSurface({ className }: { className?: string }) {
     return (
         <div
             ref={containerRef}
-            // Z-INDEX A -1 per stare dietro al testo
-            className={`pointer-events-none fixed inset-0 z-[-1] overflow-hidden bg-[#020205] ${className || ''}`}
+            // Z-INDEX -1 per stare dietro al testo
+            className="fixed inset-0 z-[-1] bg-[#020205] overflow-hidden pointer-events-none"
         />
     );
 }
