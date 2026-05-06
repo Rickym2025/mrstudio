@@ -1,6 +1,7 @@
 import { DottedSurface } from "./components/DottedSurface";
 import { NovaChatbot } from "./components/NovaChatbot";
 import { FloatingDock } from "./components/FloatingDock";
+import { ScrollAnimation } from "./components/ScrollAnimation"; // IMPORTANTE
 import { ExternalLink, Download } from "lucide-react";
 import { Toaster, toast } from "sonner";
 
@@ -21,15 +22,15 @@ export default function App() {
       
       <DottedSurface />
 
-      {/* HEADER CON LOGO */}
       <header className="absolute top-0 left-0 w-full p-6 z-50 flex justify-between items-center max-w-6xl mx-auto right-0">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="RM Studio Logo" className="w-10 h-10 object-contain" onError={(e) => (e.currentTarget.style.display = 'none')} />
+          <img src="/logo.png" alt="RM Studio Logo" className="w-10 h-10 object-contain" />
           <span className="font-black tracking-widest text-xl">RM STUDIO</span>
         </div>
       </header>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-32 flex flex-col items-center justify-center min-h-[90vh]">
+      {/* HERO SECTION */}
+      <div className="relative z-10 max-w-6xl mx-auto px-6 pt-32 pb-20 flex flex-col items-center justify-center min-h-[90vh]">
         <div className="inline-block px-4 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 backdrop-blur-md mb-8 text-[10px] font-black tracking-[4px] text-cyan-400 uppercase">
           AI Media & Automation Agency
         </div>
@@ -49,11 +50,14 @@ export default function App() {
             Salva Contatto (vCard)
           </button>
         </div>
+      </div>
 
-        <ScrollAnimation />
-        
-        {/* GRIGLIA PROGETTI (5 Schede) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl justify-center">
+      {/* SEZIONE ANIMAZIONE (Crea lo scroll lungo) */}
+      <ScrollAnimation />
+
+      {/* GRIGLIA PROGETTI */}
+      <div className="relative z-10 max-w-6xl mx-auto px-6 py-32">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full justify-center">
           <ProjectCard 
             title="DriveMotion" tag="Automotive AI" 
             logo="/logo_drivemotion.png"
@@ -104,7 +108,7 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo }: { title: string
       <div className={`absolute inset-0 bg-gradient-to-br ${glowColor} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
       <div className="flex justify-between items-start mb-6 relative z-10">
         <div className="flex items-center gap-3">
-           <img src={logo} alt={title} className="w-8 h-8 object-contain rounded-lg" onError={(e) => e.currentTarget.style.display='none'} />
+           <img src={logo} alt={title} className="w-8 h-8 object-contain rounded-lg" />
            <span className={`text-[10px] uppercase tracking-[3px] font-black bg-clip-text text-transparent bg-gradient-to-r ${glowColor}`}>{tag}</span>
         </div>
         <ExternalLink size={16} className="text-white/20 group-hover:text-white transition-colors" />
