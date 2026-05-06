@@ -75,6 +75,9 @@ export function NovaChatbot() {
           <div ref={messagesEndRef} />
         </div>
 
+
+        
+        
         {/* SUGGERIMENTI RAPIDI */}
         <div className="p-2 flex flex-wrap gap-2 bg-white/5 border-t border-white/5">
           {["Video UGC", "OmniaStudio", "Musica AI", "Parla con Riccardo"].map((text) => (
@@ -94,6 +97,8 @@ export function NovaChatbot() {
         </div>
       </div>
 
+
+      
       {/* Bottone Fluttuante */}
       <button 
         onClick={() => setIsOpen(!isOpen)} 
