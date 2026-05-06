@@ -1,5 +1,6 @@
-import { Shield, MessageSquare, Briefcase, Download } from "lucide-react";
+import { Shield, MessageSquare, Briefcase, Download, Car, Music } from "lucide-react";
 import { toast } from "sonner";
+
 
 export function FloatingDock() {
   const handleVCardClick = () => {
