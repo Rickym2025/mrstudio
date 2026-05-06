@@ -50,7 +50,7 @@ export function NovaChatbot() {
   };
 
   return (
-    <div className="fixed bottom-8 left-8 z-[100] flex flex-col items-start">
+    <div className={`fixed bottom-24 md:bottom-8 left-4 md:left-8 z-[100] flex flex-col items-start`}>
       {/* Finestra Chat */}
       <div 
         className={`bg-[#0a0a0c]/90 backdrop-blur-xl border border-white/10 rounded-2xl w-[350px] shadow-2xl flex flex-col overflow-hidden transition-all duration-500 origin-bottom-left ${isOpen ? 'opacity-100 scale-100 mb-4 h-[500px]' : 'opacity-0 scale-50 h-0 mb-0 pointer-events-none'}`}
