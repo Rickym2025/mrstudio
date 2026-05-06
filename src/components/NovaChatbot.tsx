@@ -13,7 +13,8 @@ export function NovaChatbot() {
     if (window.innerWidth > 768) {
       setTimeout(() => setIsOpen(true), 1500);
     }
-    setMessages([{ text: "Benvenuto. Sono Nova, l'intelligenza artificiale di MR Studio.\n\nCosa vuoi dominare oggi?", sender: "bot" }]);
+    setMessages([{ text: "Ciao, sono Nova, l'assistente AI di RM Studio.\n\nPosso spiegarti i nostri servizi, consigliarti la soluzione migliore per la tua azienda, o metterti in contatto diretto con Riccardo.\n\nCome posso aiutarti?", 
+      sender: "bot"  }]);
   },[]);
 
   useEffect(() => {
