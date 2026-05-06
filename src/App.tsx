@@ -1,7 +1,7 @@
 import { DottedSurface } from "./components/DottedSurface";
 import { NovaChatbot } from "./components/NovaChatbot";
 import { FloatingDock } from "./components/FloatingDock";
-import { ExternalLink, Download, Linkedin } from "lucide-react";
+import { ExternalLink, Download, Link2 as Linkedin } from "lucide-react";
 import { Toaster, toast } from "sonner";
 
 export default function App() {
