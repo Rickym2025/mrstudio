@@ -19,7 +19,7 @@ export function NovaChatbot() {
     if (window.innerWidth > 768) {
       setTimeout(() => setIsOpen(true), 1500);
     }
-    setMessages([{ text: "Ciao, sono Nova, l'assistente AI di RM Studio.\n\nPosso spiegarti i nostri servizi, consigliarti la soluzione migliore per la tua azienda, o metterti in contatto diretto con Riccardo.\n\nCome posso aiutarti?", 
+    setMessages([{ text: "L'automazione non è più un'opzione, è sopravvivenza.\n\nSono Nova, come posso rendere la tua azienda iper-efficiente?", 
       sender: "bot"  }]);
   },[]);
 
