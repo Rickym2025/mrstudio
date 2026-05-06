@@ -1,7 +1,7 @@
 import { DottedSurface } from "./components/DottedSurface";
 import { NovaChatbot } from "./components/NovaChatbot";
 import { FloatingDock } from "./components/FloatingDock";
-import { ExternalLink, Download, Link2 as Linkedin } from "lucide-react";
+import { ExternalLink, Download, Linkedin } from "lucide-react";
 import { Toaster, toast } from "sonner";
 
 export default function App() {
@@ -13,7 +13,7 @@ export default function App() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }; 
+  };
 
   return (
     <main className="min-h-screen text-white selection:bg-cyan-500 selection:text-white overflow-x-hidden relative">
