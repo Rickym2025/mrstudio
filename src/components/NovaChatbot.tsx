@@ -44,7 +44,7 @@ export function NovaChatbot() {
 
     try {
       // Inserisci l'URL del tuo Webhook n8n qui
-      const res = await fetch("https://[IL-TUO-WEBHOOK-N8N]", {
+      const res = await fetch("https://n8n.labottegadeldelta.it/webhook/nova", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userText, sessionId })
