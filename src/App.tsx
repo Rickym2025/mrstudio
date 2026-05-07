@@ -150,7 +150,7 @@ export default function App() {
   };
 
   return (
-    <main className="text-white selection:bg-cyan-500 selection:text-white relative bg-[#020205] overflow-x-hidden min-h-screen">
+    <main className="text-white selection:bg-cyan-500 selection:text-white relative bg-transparent overflow-x-hidden min-h-screen">
       <Toaster position="top-center" theme="dark" />
       
       {/* 🌌 SFONDO STELLARE CONTINUO (Funziona ovunque, non si interrompe) */}
@@ -192,9 +192,9 @@ export default function App() {
           >
             AI Engineering Lab
           </motion.div>
-          <h1 className="text-5xl md:text-8xl font-black text-center tracking-tighter leading-[0.9] mb-8">
-            L'AI che <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">Lavora per Te.</span>
+          <h1 className="text-5xl md:text-7xl font-black text-center tracking-tighter leading-tight mb-6 drop-shadow-2xl">
+            L'Intelligenza Artificiale che <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">Lavora per il tuo Business.</span>
           </h1>
           <p className="text-lg md:text-xl text-white/50 text-center max-w-2xl mb-12 font-light tracking-wide">
             Sviluppiamo ecosistemi AI su misura per abbattere i costi operativi ed espandere il tuo mercato. Zero codice, solo risultati scalabili.
