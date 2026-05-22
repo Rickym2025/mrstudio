@@ -1,0 +1,34 @@
+# RM Studio - AI Engineering Lab
+
+> Agenzia di sviluppo software e Intelligenza Artificiale fondata da Riccardo Modena. RM Studio non vende semplici software, ma costruisce ecosistemi autonomi su misura per abbattere i costi operativi ed espandere il mercato delle aziende (High-End AI Engineering).
+
+## Informazioni Generali
+- **Sito Web principale:** https://rmstudio.app/
+- **Founder:** Riccardo Modena
+- **Contatto:** Modulo integrato sul sito o download diretto vCard aziendale (Riccardo_Modena_RMStudio.vcf).
+- **Social:** Attivo su LinkedIn, Instagram, Facebook e TikTok (@mr3d.riccardo).
+
+## Ecosistemi Sviluppati (Prodotti SaaS)
+
+### 1. Concierge24 (Hospitality)
+Assistente vocale multilingua H24 per il settore alberghiero. Accoglie gli ospiti, risponde alle domande e fa up-selling dei servizi extra.
+- URL: https://concierge24.rmstudio.app/
+
+### 2. DriveMotion (Automotive AI)
+Sistema generativo per autosaloni. Sostituisce gli sfondi delle foto delle auto con scenari fotorealistici 3D e genera reel virali in automatico.
+- URL: https://drivemotion.rmstudio.app/
+
+### 3. HomeTour AI (Real Estate)
+Creazione di Reel immobiliari con veri movimenti di camera (parallasse) e voce narrante emozionale, generati a partire da semplici foto 2D.
+- URL: https://hometour.rmstudio.app/
+
+### 4. OmniaStudio (Privacy AI)
+Intelligenza artificiale 100% locale (offline) per studi legali e commercialisti. Analizza contratti, PDF e dati sensibili garantendo la privacy assoluta (zero dati inviati al cloud).
+- URL: https://omniastudio.rmstudio.app/
+
+### 5. FF Edizioni (Audio & Music)
+Creazione di identità sonore, colonne sonore AI, jingle musicali broadcast per campagne social aziendali e sound design.
+- URL: https://ff.rmstudio.app/
+
+## Risorse per Modelli Linguistici e Crawler
+- Full Markdown Mirror: https://rmstudio.app/mirrors.md
