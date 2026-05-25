@@ -486,7 +486,18 @@ export default function App() {
                 glowColor="from-green-400 to-emerald-600"
               />
 
-              {/* 4. OmniaStudio — testo destra (isReversed) */}
+              {/* 4. NexusAI  testo sinistra */}
+              <ProjectCard
+                title="NexusAI"
+                tag="AI Sales Overlay"
+                logo="/logo_nexus.png" 
+                desc="Assunzioni e vendite H24, senza cambiare una riga del tuo sito. NexusAI inietta un assistente intelligente che accoglie, informa e converte i tuoi visitatori in tempo reale."
+                url="https://demo.rmstudio.app/"
+                glowColor="from-cyan-400 to-blue-600"
+              />
+              
+
+              {/* 5. OmniaStudio — testo destra (isReversed) */}
               <ProjectCard
                 title="OmniaStudio"
                 tag="Privacy AI"
@@ -498,7 +509,7 @@ export default function App() {
                 isReversed
               />
 
-              {/* 5. FF Edizioni — testo sinistra */}
+              {/* 6. FF Edizioni — testo sinistra */}
               <ProjectCard
                 title="FF Edizioni"
                 tag="Audio & Music"
