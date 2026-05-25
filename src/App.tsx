@@ -506,8 +506,7 @@ export default function App() {
                 //gif="/hometour_gif.gif"
                 desc="La potenza dell'AI generativa, completamente offline sul tuo PC. Analizza contratti, PDF e dati sensibili senza mai inviare un solo byte al cloud. Privacy al 100%."
                 url="https://omniastudio.rmstudio.app/"
-                glowColor="from-purple-500 to-pink-500"
-                isReversed
+                glowColor="from-purple-500 to-pink-500"                
               />
 
               {/* 6. FF Edizioni — testo sinistra */}
@@ -519,6 +518,7 @@ export default function App() {
                 desc="Identità sonora e colonne sonore AI originali. Jingle musicali pronti per il broadcast e le campagne social, creati per non essere mai dimenticati dai tuoi clienti."
                 url="https://ff.rmstudio.app/"
                 glowColor="from-yellow-400 to-orange-600"
+                isReversed
               />
             </div>
           </section>
