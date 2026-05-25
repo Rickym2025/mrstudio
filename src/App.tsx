@@ -211,12 +211,13 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
       href={url}
       target="_blank"
       rel="noreferrer"
-      className={`flex flex-col ${
+      className={`group flex flex-col ${
         isReversed ? "md:flex-row-reverse" : "md:flex-row"
-      } items-center gap-8 bg-white/[0.02] p-8 md:p-10 rounded-3xl border border-white/5 hover:border-white/20 transition-all duration-500 group relative backdrop-blur-md overflow-hidden`}
+      } items-center gap-8 bg-white/[0.02] p-8 md:p-10 rounded-3xl border border-white/5 hover:border-white/20 transition-all duration-500 relative backdrop-blur-md overflow-hidden`}
     >
       <div className={`absolute inset-0 bg-gradient-to-br ${glowColor} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
 
+      {/* Testo */}
       <div className="w-full md:w-2/3 relative z-10">
         <div className="flex items-center gap-4 mb-4">
           <img
@@ -238,32 +239,33 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
         </span>
       </div>
 
-      {/* Box visuale: GIF se presente, altrimenti Logo centrale */}
-      <div className="w-full md:w-1/3 h-[220px] bg-white/5 rounded-2xl border border-white/5 flex items-center justify-center group-hover:scale-105 transition-transform duration-700 relative overflow-hidden shadow-2xl">
-        {gif ? (
-          // Vista con GIF: copre tutto il box
+      {/* Box visuale con logica Hover-to-Animate */}
+      <div className="w-full md:w-1/3 h-[220px] bg-white/5 rounded-2xl border border-white/5 flex items-center justify-center relative overflow-hidden shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]">
+        
+        {/* LOGO: Visibile di default, sparisce in hover se c'è una gif */}
+        <img
+          src={logo}
+          alt={title}
+          loading="lazy"
+          className={`w-20 h-20 object-contain transition-opacity duration-500 ${gif ? "group-hover:opacity-0" : "opacity-40"}`}
+        />
+
+        {/* GIF: Appare in hover */}
+        {gif && (
           <img
             src={gif}
             alt={`${title} demo`}
             loading="lazy"
-            className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500"
-          />
-        ) : (
-          // Vista senza GIF: mostra il logo centrale (vecchio stile)
-          <img
-            src={logo}
-            alt=""
-            loading="lazy"
-            className="w-20 h-20 object-contain opacity-20 group-hover:opacity-40 transition-opacity"
+            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
           />
         )}
 
-        {/* Overlay sfumato per coerenza cromatica */}
+        {/* Overlay sfumato di rinforzo */}
         <div className={`absolute inset-0 bg-gradient-to-br ${glowColor} opacity-10 pointer-events-none`} />
         
-        {/* Etichetta "DEMO" opzionale se c'è una GIF */}
+        {/* Etichetta "PREVIEW" */}
         {gif && (
-          <div className="absolute bottom-3 right-4 text-[8px] font-black uppercase tracking-[2px] text-white/20">
+          <div className="absolute bottom-3 right-4 text-[8px] font-black uppercase tracking-[2px] text-white/30 group-hover:opacity-0 transition-opacity">
             Preview
           </div>
         )}
