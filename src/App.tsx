@@ -515,7 +515,7 @@ export default function App() {
                 title="FF Edizioni"
                 tag="Audio & Music"
                 logo="/logo_ff.png"
-                //gif="/hometour_gif.gif"
+                gif="/ff_gif.gif"
                 desc="Identità sonora e colonne sonore AI originali. Jingle musicali pronti per il broadcast e le campagne social, creati per non essere mai dimenticati dai tuoi clienti."
                 url="https://ff.rmstudio.app/"
                 glowColor="from-yellow-400 to-orange-600"
