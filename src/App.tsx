@@ -457,7 +457,7 @@ export default function App() {
                 title="Concierge24"
                 tag="Hospitality"
                 logo="/logo_Concierge24.png"
-                //gif="/concierge24_gif.gif"
+                gif="/c24_gif.gif"
                 desc="L'assistente vocale H24 multilingua che accoglie i tuoi ospiti, risponde alle loro domande e fa up-selling dei tuoi servizi extra mentre il tuo staff riposa."
                 url="https://concierge24.rmstudio.app/"
                 glowColor="from-orange-400 to-red-500"
