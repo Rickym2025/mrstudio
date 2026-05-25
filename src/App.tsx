@@ -490,7 +490,7 @@ export default function App() {
               <ProjectCard
                 title="NexusAI"
                 tag="AI Sales Overlay"
-                logo="/logo_nexus.png" 
+                logo="/logo_nexus_bg.png" 
                 desc="Assunzioni e vendite H24, senza cambiare una riga del tuo sito. NexusAI inietta un assistente intelligente che accoglie, informa e converte i tuoi visitatori in tempo reale."
                 url="https://demo.rmstudio.app/"
                 glowColor="from-cyan-400 to-blue-600"
