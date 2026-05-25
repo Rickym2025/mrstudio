@@ -451,8 +451,8 @@ export default function App() {
               <h2 className="text-4xl md:text-6xl font-black text-center tracking-tighter mb-20 uppercase">
                 I Nostri Ecosistemi
               </h2>
-
-              {/* 1. Concierge24 — testo sinistra */}
+          
+              {/* 1. Concierge24 */}
               <ProjectCard
                 title="Concierge24"
                 tag="Hospitality"
@@ -462,20 +462,20 @@ export default function App() {
                 url="https://concierge24.rmstudio.app/"
                 glowColor="from-orange-400 to-red-500"
               />
-
-              {/* 2. DriveMotion — testo destra (isReversed) */}
+          
+              {/* 2. DriveMotion */}
               <ProjectCard
                 title="DriveMotion"
                 tag="Automotive AI"
                 logo="/logo_drivemotion.png"
-                //gif="/drivemotion_gif.gif"
+                gif="/drivemotion_gif.gif"
                 desc="Sfondi fotorealistici e video virali generati in automatico. Trasforma le foto amatoriali del tuo piazzale in reel cinematografici che aumentano il valore percepito delle tue auto."
                 url="https://drivemotion.rmstudio.app"
                 glowColor="from-blue-500 to-cyan-400"
                 isReversed
               />
-
-              {/* 3. HomeTour AI — testo sinistra */}
+          
+              {/* 3. HomeTour AI */}
               <ProjectCard
                 title="HomeTour AI"
                 tag="Real Estate"
@@ -485,8 +485,8 @@ export default function App() {
                 url="https://hometour.rmstudio.app"
                 glowColor="from-green-400 to-emerald-600"
               />
-
-              {/* 4. NexusAI  testo sinistra */}
+          
+              {/* 4. NexusAI */}
               <ProjectCard
                 title="NexusAI"
                 tag="AI Sales Overlay"
@@ -497,20 +497,19 @@ export default function App() {
                 glowColor="from-cyan-400 to-blue-600"
                 isReversed
               />
-              
-
-              {/* 5. OmniaStudio — testo destra (isReversed) */}
+          
+              {/* 5. OmniaStudio */}
               <ProjectCard
                 title="OmniaStudio"
                 tag="Privacy AI"
                 logo="/logo_OmniaStudio.png"
-                //gif="/hometour_gif.gif"
+                gif="/omnia_gif.gif"
                 desc="La potenza dell'AI generativa, completamente offline sul tuo PC. Analizza contratti, PDF e dati sensibili senza mai inviare un solo byte al cloud. Privacy al 100%."
                 url="https://omniastudio.rmstudio.app/"
-                glowColor="from-purple-500 to-pink-500"                
+                glowColor="from-purple-500 to-pink-500"
               />
-
-              {/* 6. FF Edizioni — testo sinistra */}
+          
+              {/* 6. FF Edizioni */}
               <ProjectCard
                 title="FF Edizioni"
                 tag="Audio & Music"
