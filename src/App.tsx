@@ -494,6 +494,7 @@ export default function App() {
                 desc="Assunzioni e vendite H24, senza cambiare una riga del tuo sito. NexusAI inietta un assistente intelligente che accoglie, informa e converte i tuoi visitatori in tempo reale."
                 url="https://demo.rmstudio.app/"
                 glowColor="from-cyan-400 to-blue-600"
+                isReversed
               />
               
 
