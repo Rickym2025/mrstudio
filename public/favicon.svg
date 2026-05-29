@@ -1,43 +1,44 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <!-- Gradiente lineare nativo ciano-viola allineato al brand -->
+    <!-- Gradiente lineare originale RM Studio -->
     <linearGradient id="rm-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#00f0ff" />
       <stop offset="60%" stop-color="#7000ff" />
       <stop offset="100%" stop-color="#b000ff" />
     </linearGradient>
+    
+    <!-- Filtro d'ombra per garantire leggibilità su tab bianchi senza sfondo nero -->
+    <filter id="subtle-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
   </defs>
   
-  <!-- Sfondo tondo scuro per garantire leggibilità su tab sia chiari che scuri -->
-  <circle cx="256" cy="256" r="240" fill="#030303" stroke="rgba(255,255,255,0.05)" stroke-width="8" />
-  
-  <!-- Gruppo monogramma RM in alta definizione -->
-  <g transform="translate(16, 8) scale(0.92)" fill="none" stroke="url(#rm-gradient)" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Gruppo monogramma con filtro applicato -->
+  <g filter="url(#subtle-shadow)" transform="translate(10, 10) scale(0.96)" fill="none" stroke="url(#rm-gradient)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round">
     
-    <!-- Nodo iniziale sinistro (Ciano) -->
-    <circle cx="100" cy="190" r="16" fill="#030303" stroke="url(#rm-gradient)" stroke-width="12" />
+    <!-- Nodo iniziale sinistro (Cerchio Ciano) -->
+    <circle cx="60" cy="150" r="14" fill="#050505" stroke="url(#rm-gradient)" stroke-width="12" />
     
-    <!-- Tracciato continuo RM ingegnerizzato -->
-    <path d="M 124 190 
-             L 215 190 
-             A 45 45 0 0 1 215 280 
-             L 155 280 
-             L 215 340 
-             A 20 20 0 0 0 230 345
-             L 245 345
-             A 20 20 0 0 0 265 325
-             L 265 205
-             A 15 15 0 0 1 280 190
-             L 290 190
-             A 15 15 0 0 1 303 200
-             L 345 260
-             L 387 200
-             A 15 15 0 0 1 400 190
-             L 410 190
-             A 15 15 0 0 1 425 205
-             L 425 310" />
-    
-    <!-- Nodo finale destro (Viola) -->
-    <circle cx="425" cy="310" r="16" fill="#030303" stroke="url(#rm-gradient)" stroke-width="12" />
+    <!-- Tracciato geometrico RM ad alta fedeltà -->
+    <path d="M 80 150 
+             H 215 
+             C 270 150, 270 250, 215 250 
+             H 155 
+             C 145 250, 142 255, 148 262
+             L 215 350 
+             C 225 365, 235 375, 255 375 
+             H 275
+             C 290 375, 300 365, 300 345 
+             V 165 
+             C 300 150, 305 145, 315 145 
+             H 320
+             L 360 250
+             L 400 145
+             C 410 145, 415 150, 415 165
+             V 345
+             C 415 365, 425 375, 440 375" />
+             
+    <!-- Nodo finale destro (Cerchio Viola) -->
+    <circle cx="440" cy="375" r="14" fill="#050505" stroke="url(#rm-gradient)" stroke-width="12" />
   </g>
 </svg>
