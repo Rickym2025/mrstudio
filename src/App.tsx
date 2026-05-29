@@ -499,16 +499,16 @@ export default function App() {
           html { scroll-behavior: smooth; }
         ` }} />
 
-        {/* ── VIDEO BACKGROUND ── */}
+        {/* ── VIDEO BACKGROUND OTTIMIZZATO (ACCELERATO DA GPU CON ACCESSO FLUIDO AUTO) ── */}
         <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
           <video
             autoPlay
             loop
             muted
             playsInline
-            preload="none"
+            preload="auto"
             onCanPlay={() => setVideoLoaded(true)}
-            className={`w-full h-full object-cover transition-opacity duration-1000 ${
+            className={`w-full h-full object-cover transition-opacity duration-1000 transform-gpu ${
               videoLoaded ? "opacity-30" : "opacity-0"
             }`}
           >
@@ -522,7 +522,7 @@ export default function App() {
           <div className="max-w-6xl mx-auto flex justify-between items-center">
             <div className="flex items-center gap-3">
               <img
-                src="/logo.jpg"
+                src="/logo.png"
                 alt="RM Studio Logo"
                 className="w-8 h-8 object-contain rounded-md shadow-[0_0_15px_rgba(255,255,255,0.1)]"
               />
@@ -545,7 +545,7 @@ export default function App() {
           {/* ── HERO CON STRUTTURA A "F" PER LA COMFORT ZONE (REGOLA 4) ── */}
           <section className="min-h-screen flex flex-col lg:flex-row items-center justify-center max-w-7xl mx-auto px-6 pt-24 gap-12 lg:gap-16">
             
-            {/* Sezione Sinistra dell'Asse di Lettura a F */}
+            {/* Sezione Sinistra dell&apos;Asse di Lettura a F */}
             <div className="flex-1 text-center lg:text-left z-10">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -599,20 +599,6 @@ export default function App() {
                 >
                   Esplora Ecosistemi
                 </a>
-              </div>
-
-              {/* REGOLA 5: Associazione Umana (Nova AI Assistant Avatar) */}
-              <div className="mt-10 flex items-center justify-center lg:justify-start gap-3 border-t border-white/5 pt-6 max-w-md">
-                <div className="relative">
-                  <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-xs font-bold text-cyan-400">
-                    N_AI
-                  </div>
-                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border border-black" />
-                </div>
-                <div className="text-left">
-                  <p className="text-sm font-semibold text-slate-200">Assistente Nova AI</p>
-                  <p className="text-xs text-slate-500">In linea per supportare i canali digitali della rete</p>
-                </div>
               </div>
             </div>
 
@@ -851,83 +837,6 @@ export default function App() {
                 glowColor="from-yellow-400 to-orange-600"
                 isReversed
               />
-            </div>
-          </section>
-
-          {/* ── REGOLA 8: DECOY PRICING (Ancoraggio del Prezzo Suite Licenze) ── */}
-          <section id="licenze" className="py-24 px-6 max-w-7xl mx-auto border-t border-white/5">
-            <div className="text-center mb-16">
-              <span className="text-xs uppercase tracking-widest font-black text-cyan-400 mb-3 block">Piani Licenze Suite</span>
-              <h2 className="text-3xl md:text-5xl font-black mb-4">Investimento Lineare su Misura</h2>
-              {/* REGOLA 1: Riduzione della Frizione di Lettura (Testo >= 18px) */}
-              <p className="text-lg text-white/50 max-w-2xl mx-auto">
-                Implementa la potenza dell&apos;AI generativa nei tuoi flussi operativi aziendali. Nessun costo nascosto.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch max-w-5xl mx-auto">
-              
-              {/* Starter Single App */}
-              <div className="bg-[#0a0a0c]/80 border border-white/10 rounded-3xl p-8 flex flex-col justify-between hover:border-white/20 transition-all">
-                <div>
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-4">Single Module</span>
-                  <div className="text-3xl font-black text-white mb-4">€ 49<span className="text-sm font-normal text-slate-500">/mese</span></div>
-                  <p className="text-sm text-slate-400 mb-6 leading-relaxed">
-                    Sblocca un singolo ecosistema a scelta tra i nostri 6 moduli per ottimizzare uno specifico dipartimento.
-                  </p>
-                  <ul className="space-y-3.5 text-slate-300 text-sm mb-8">
-                    <li className="flex items-center gap-2">✔ 1 Modulo AI a scelta</li>
-                    <li className="flex items-center gap-2">✔ Supporto asincrono via ticket</li>
-                    <li className="flex items-center gap-2">✔ Aggiornamenti software continui</li>
-                  </ul>
-                </div>
-                <a href="#contatti" className="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-sm font-semibold text-center transition">
-                  Attiva Modulo Singolo
-                </a>
-              </div>
-
-              {/* PRO SUITE BUNDLE - DECOY CARD (Highlighted with gold border animation and glow) */}
-              <div className="relative bg-[#0a0a0c]/95 border rounded-3xl p-8 flex flex-col justify-between transform md:-translate-y-4 gold-decoy-card z-10">
-                <div className="absolute top-0 right-8 -translate-y-1/2 bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-extrabold text-[9px] tracking-widest uppercase px-3 py-1 rounded-full shadow-lg">
-                  Miglior Valore
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-yellow-500 uppercase tracking-widest block mb-4">Full Suite PRO</span>
-                  <div className="text-4xl font-black text-white mb-4">€ 149<span className="text-sm font-normal text-slate-500">/mese</span></div>
-                  <p className="text-sm text-slate-300 mb-6 leading-relaxed">
-                    Accesso completo ed illimitato a tutti i 6 moduli AI attuali ed a quelli futuri dell&apos;ecosistema RM Studio.
-                  </p>
-                  <ul className="space-y-3.5 text-slate-200 text-sm mb-8">
-                    <li className="flex items-center gap-2 text-yellow-500 font-medium">★ Tutti i 6 ecosistemi sbloccati</li>
-                    <li className="flex items-center gap-2">✔ Account manager dedicato</li>
-                    <li className="flex items-center gap-2">✔ Integrazioni API dirette nei gestionali</li>
-                    <li className="flex items-center gap-2">✔ Supporto prioritario in 4 ore</li>
-                  </ul>
-                </div>
-                <a href="#contatti" className="w-full py-4 px-4 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-bold text-center transition shadow-lg shadow-yellow-500/20">
-                  Ottieni Suite Completa
-                </a>
-              </div>
-
-              {/* Enterprise Custom (Alto Costo per ancoraggio) */}
-              <div className="bg-[#0a0a0c]/80 border border-white/10 rounded-3xl p-8 flex flex-col justify-between hover:border-white/20 transition-all">
-                <div>
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-4">Enterprise Custom</span>
-                  <div className="text-3xl font-black text-white mb-4">€ 499<span className="text-sm font-normal text-slate-500">/mese</span></div>
-                  <p className="text-sm text-slate-400 mb-6 leading-relaxed">
-                    Sviluppo di infrastrutture e LLM proprietari operanti in locale ed offline, su misura per grandi reti commerciali.
-                  </p>
-                  <ul className="space-y-3.5 text-slate-300 text-sm mb-8">
-                    <li className="flex items-center gap-2">✔ Modelli AI addestrati sui tuoi dati</li>
-                    <li className="flex items-center gap-2">✔ Installazione on-premise offline</li>
-                    <li className="flex items-center gap-2">✔ SLA e tempi di risposta garantiti</li>
-                  </ul>
-                </div>
-                <a href="#contatti" className="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-sm font-semibold text-center transition">
-                  Contatta la Direzione
-                </a>
-              </div>
-
             </div>
           </section>
 
