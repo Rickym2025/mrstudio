@@ -197,11 +197,13 @@ function TestimonialSection() {
   );
 }
 
-// ─── 3. PROJECT CARD ──────────────────────────────────────────────────────
+// ─── 3. PROJECT CARD (SUPPORTA SIA GIF SIA VIDEO MP4) ──────────────────────
 function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }: { 
   title: string, tag: string, desc: string, url: string, glowColor: string, logo: string, gif?: string, isReversed?: boolean 
 }) {
   const hasGif = Boolean(gif && gif.trim() !== "");
+  // Controlla se la risorsa è un video MP4
+  const isVideo = hasGif && gif ? gif.endsWith(".mp4") : false;
 
   return (
     <a
@@ -250,13 +252,27 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
         />
 
         {hasGif && (
-          <img
-            src={gif}
-            alt={`${title} demo`}
-            loading="lazy"
-            decoding="async"
-            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-          />
+          isVideo ? (
+            /* Renderizza il tag video se è un MP4 (muto, in loop, autostart come una gif) */
+            <video
+              src={gif}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            />
+          ) : (
+            /* Renderizza l'immagine standard se è una GIF */
+            <img
+              src={gif}
+              alt={`${title} demo`}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            />
+          )
         )}
 
         <div className={`absolute inset-0 bg-gradient-to-br ${glowColor} opacity-10 pointer-events-none`} />
