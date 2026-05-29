@@ -7,38 +7,38 @@
       <stop offset="100%" stop-color="#b000ff" />
     </linearGradient>
     
-    <!-- Filtro d'ombra per garantire leggibilità su tab bianchi senza sfondo nero -->
+    <!-- Filtro d'ombra ottimizzato per la nuova scala gigante -->
     <filter id="subtle-shadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.6"/>
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#000000" flood-opacity="0.65"/>
     </filter>
   </defs>
   
-  <!-- Gruppo monogramma con filtro applicato -->
-  <g filter="url(#subtle-shadow)" transform="translate(10, 10) scale(0.96)" fill="none" stroke="url(#rm-gradient)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Gruppo monogramma in scala gigante senza sfondo rigido -->
+  <g filter="url(#subtle-shadow)" transform="translate(4, 4) scale(0.98)" fill="none" stroke="url(#rm-gradient)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round">
     
-    <!-- Nodo iniziale sinistro (Cerchio Ciano) -->
-    <circle cx="60" cy="150" r="14" fill="#050505" stroke="url(#rm-gradient)" stroke-width="12" />
+    <!-- Nodo iniziale sinistro (Allineato al nuovo bordo a X=45) -->
+    <circle cx="45" cy="180" r="14" fill="#050505" stroke="url(#rm-gradient)" stroke-width="12" />
     
-    <!-- Tracciato geometrico RM ad alta fedeltà -->
-    <path d="M 80 150 
+    <!-- Tracciato geometrico RM gigante ad altissima precisione -->
+    <path d="M 65 180 
              H 215 
-             C 270 150, 270 250, 215 250 
+             C 270 180, 270 280, 215 280 
              H 155 
-             C 145 250, 142 255, 148 262
-             L 215 350 
-             C 225 365, 235 375, 255 375 
+             C 145 280, 142 285, 148 292
+             L 215 410 
+             C 225 425, 235 435, 255 435 
              H 275
-             C 290 375, 300 365, 300 345 
-             V 165 
-             C 300 150, 305 145, 315 145 
+             C 290 435, 300 425, 300 405 
+             V 95 
+             C 300 80, 305 75, 315 75 
              H 320
-             L 360 250
-             L 400 145
-             C 410 145, 415 150, 415 165
-             V 345
-             C 415 365, 425 375, 440 375" />
+             L 365 220
+             L 410 75
+             C 420 75, 425 80, 425 95
+             V 405
+             C 425 425, 435 435, 450 435" />
              
-    <!-- Nodo finale destro (Cerchio Viola) -->
-    <circle cx="440" cy="375" r="14" fill="#050505" stroke="url(#rm-gradient)" stroke-width="12" />
+    <!-- Nodo finale destro (Allineato al nuovo bordo a X=465 e Y=435) -->
+    <circle cx="465" cy="435" r="14" fill="#050505" stroke="url(#rm-gradient)" stroke-width="12" />
   </g>
 </svg>
