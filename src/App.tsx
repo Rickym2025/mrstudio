@@ -115,52 +115,6 @@ const TextHoverEffect = ({ text }: { text: string }) => {
   );
 };
 
-// ─── 2. TESTIMONIAL CARD ──────────────────────────────────────────────────
-function TestimonialCard({
-  handleShuffle, testimonial, position, id, author,
-}: {
-  handleShuffle: () => void;
-  testimonial: string;
-  position: "front" | "middle" | "back";
-  id: string;
-  author: string;
-}) {
-  const dragRef = useRef(0);
-  const isFront = position === "front";
-
-  return (
-    <motion.div
-      style={{ zIndex: position === "front" ? 2 : position === "middle" ? 1 : 0 }}
-      animate={{
-        rotate: position === "front" ? "-6deg" : position === "middle" ? "0deg" : "6deg",
-        x: position === "front" ? "0%" : position === "middle" ? "33%" : "66%",
-        scale: position === "front" ? 1 : position === "middle" ? 0.95 : 0.9,
-      }}
-      drag={isFront ? "x" : false}
-      dragElastic={0.35}
-      dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
-      onDragStart={(e: any) => { dragRef.current = e.clientX; }}
-      onDragEnd={(e: any) => {
-        if (Math.abs(dragRef.current - e.clientX) > 100) handleShuffle();
-        dragRef.current = 0;
-      }}
-      transition={{ duration: 0.35 }}
-      className={`absolute left-0 top-0 grid h-[350px] w-[300px] select-none place-content-center space-y-6 rounded-3xl border border-white/10 bg-black/40 p-8 shadow-2xl backdrop-blur-xl ${
-        isFront ? "cursor-grab active:cursor-grabbing" : ""
-      }`}
-    >
-      <img
-        src={`https://i.pravatar.cc/128?img=${id}`}
-        alt={author}
-        loading="lazy"
-        className="pointer-events-none mx-auto h-20 w-20 rounded-full border-2 border-cyan-500/50 object-cover shadow-lg"
-      />
-      <p className="text-center text-sm italic text-white/70 leading-relaxed">&ldquo;{testimonial}&rdquo;</p>
-      <span className="text-center text-xs font-black tracking-widest uppercase text-cyan-400">{author}</span>
-    </motion.div>
-  );
-}
-
 const initialTestimonials = [
   // ─── HOMETOUR AI (Real Estate) ───
   { 
@@ -188,7 +142,7 @@ const initialTestimonials = [
   { 
     id: "36", 
     author: "Alessia B. (Venezia)", 
-    text: "Gestisco 8 appartamenti turistici. L'integrazione di Concierge24 ha ridotto del 70% i messaggi ripetitivi su WhatsApp, lasciandomi molto più tempo libero." 
+    text: "Gestisco 8 appartamenti turistici. L'integrazione di Concierge24 ha ridotto del 70% i messaggi ripetitivi su WhatsApp, lasciandoci molto più tempo libero." 
   },
 
   // ─── FF EDIZIONI (Audio & Music) ───
@@ -224,6 +178,18 @@ const initialTestimonials = [
     text: "L'elaborazione dati completamente locale offline è l'unica soluzione compatibile con il segreto professionale del nostro studio legale. Analisi dei contratti sicura al 100%." 
   },
 ];
+
+function TestimonialSection() {
+  const [testimonials, setTestimonials] = useState(initialTestimonials);
+
+  const handleShuffle = useCallback(() => {
+    setTestimonials((prev) => {
+      const newArr = [...prev];
+      const first = newArr.shift();
+      if (first) newArr.push(first);
+      return newArr;
+    });
+  }, []);
 
   return (
     <div className="relative w-full max-w-4xl mx-auto h-[450px] flex justify-center items-center mt-12 overflow-hidden px-4">
