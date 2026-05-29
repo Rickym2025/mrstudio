@@ -785,7 +785,7 @@ export default function App() {
                 title="DriveMotion"
                 tag="Automotive AI"
                 logo="/logo_drivemotion.png"
-                gif="/drivemotion_gif.gif"
+                gif="/drivemotion_video.mp4"
                 desc="Sfondi fotorealistici e video virali generati in automatico. Trasforma le foto amatoriali del tuo piazzale in reel cinematografici che aumentano il valore percepito delle tue auto."
                 url="https://drivemotion.rmstudio.app"
                 glowColor="from-blue-500 to-cyan-400"
