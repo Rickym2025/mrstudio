@@ -115,6 +115,52 @@ const TextHoverEffect = ({ text }: { text: string }) => {
   );
 };
 
+// ─── 2. TESTIMONIAL CARD ──────────────────────────────────────────────────
+function TestimonialCard({
+  handleShuffle, testimonial, position, id, author,
+}: {
+  handleShuffle: () => void;
+  testimonial: string;
+  position: "front" | "middle" | "back";
+  id: string;
+  author: string;
+}) {
+  const dragRef = useRef(0);
+  const isFront = position === "front";
+
+  return (
+    <motion.div
+      style={{ zIndex: position === "front" ? 2 : position === "middle" ? 1 : 0 }}
+      animate={{
+        rotate: position === "front" ? "-6deg" : position === "middle" ? "0deg" : "6deg",
+        x: position === "front" ? "0%" : position === "middle" ? "33%" : "66%",
+        scale: position === "front" ? 1 : position === "middle" ? 0.95 : 0.9,
+      }}
+      drag={isFront ? "x" : false}
+      dragElastic={0.35}
+      dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
+      onDragStart={(e: any) => { dragRef.current = e.clientX; }}
+      onDragEnd={(e: any) => {
+        if (Math.abs(dragRef.current - e.clientX) > 100) handleShuffle();
+        dragRef.current = 0;
+      }}
+      transition={{ duration: 0.35 }}
+      className={`absolute left-0 top-0 grid h-[350px] w-[300px] select-none place-content-center space-y-6 rounded-3xl border border-white/10 bg-black/40 p-8 shadow-2xl backdrop-blur-xl ${
+        isFront ? "cursor-grab active:cursor-grabbing" : ""
+      }`}
+    >
+      <img
+        src={`https://i.pravatar.cc/128?img=${id}`}
+        alt={author}
+        loading="lazy"
+        className="pointer-events-none mx-auto h-20 w-20 rounded-full border-2 border-cyan-500/50 object-cover shadow-lg"
+      />
+      <p className="text-center text-sm italic text-white/70 leading-relaxed">&ldquo;{testimonial}&rdquo;</p>
+      <span className="text-center text-xs font-black tracking-widest uppercase text-cyan-400">{author}</span>
+    </motion.div>
+  );
+}
+
 const initialTestimonials = [
   // ─── HOMETOUR AI (Real Estate) ───
   { 
@@ -209,12 +255,11 @@ function TestimonialSection() {
   );
 }
 
-// ─── 3. PROJECT CARD (SUPPORTA SIA GIF SIA VIDEO MP4) ──────────────────────
+// ─── 3. PROJECT CARD ──────────────────────────────────────────────────────
 function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }: { 
   title: string, tag: string, desc: string, url: string, glowColor: string, logo: string, gif?: string, isReversed?: boolean 
 }) {
   const hasGif = Boolean(gif && gif.trim() !== "");
-  // Controlla se la risorsa è un video MP4
   const isVideo = hasGif && gif ? gif.endsWith(".mp4") : false;
 
   return (
@@ -265,7 +310,6 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
 
         {hasGif && (
           isVideo ? (
-            /* Renderizza il tag video se è un MP4 (muto, in loop, autostart come una gif) */
             <video
               src={gif}
               autoPlay
@@ -276,7 +320,6 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
               className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
             />
           ) : (
-            /* Renderizza l'immagine standard se è una GIF */
             <img
               src={gif}
               alt={`${title} demo`}
