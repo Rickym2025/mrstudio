@@ -1,14 +1,19 @@
+"use client";
+
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { NovaChatbot } from "./components/NovaChatbot";
 import { FloatingDock } from "./components/FloatingDock";
-import { ExternalLink, Download, Send } from "lucide-react";
+import { 
+  ExternalLink, Download, Send, Sparkles, Shield, 
+  Cpu, Users, Landmark, FileCheck, CheckCircle2, Lock 
+} from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { motion, LazyMotion, domAnimation } from "framer-motion";
 
-// ─── COSTANTE ANNO (fuori dal componente, non ricalcolata ad ogni render) ───
+// ─── COSTANTE ANNO (non ricalcolata ad ogni render) ───
 const CURRENT_YEAR = new Date().getFullYear();
 
-// ─── 1. FOOTER: TextHoverEffect (gradiente radiale corretto) ───────────────
+// ─── 1. FOOTER: TextHoverEffect ───────────────────────────────────────────
 const TextHoverEffect = ({ text }: { text: string }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
@@ -16,7 +21,6 @@ const TextHoverEffect = ({ text }: { text: string }) => {
   const [maskPosition, setMaskPosition] = useState({ cx: "50%", cy: "50%" });
   const rafRef = useRef<number | null>(null);
 
-  // Throttle mousemove con requestAnimationFrame per evitare re-render continui
   const handleMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
     const clientX = e.clientX;
     const clientY = e.clientY;
@@ -154,7 +158,7 @@ function TestimonialCard({
         loading="lazy"
         className="pointer-events-none mx-auto h-20 w-20 rounded-full border-2 border-cyan-500/50 object-cover shadow-lg"
       />
-      <p className="text-center text-sm italic text-white/70 leading-relaxed">"{testimonial}"</p>
+      <p className="text-center text-sm italic text-white/70 leading-relaxed">&ldquo;{testimonial}&rdquo;</p>
       <span className="text-center text-xs font-black tracking-widest uppercase text-cyan-400">{author}</span>
     </motion.div>
   );
@@ -229,7 +233,8 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
             </span>
           </div>
         </div>
-        <p className="text-white/60 leading-relaxed text-lg mb-6">{desc}</p>
+        {/* Riduzione della Frizione di Lettura (Testo >= 18px) */}
+        <p className="text-white/60 leading-relaxed text-lg md:text-xl mb-6">{desc}</p>
         <span className="inline-flex items-center gap-2 text-sm font-bold text-white group-hover:underline decoration-cyan-400 underline-offset-4 transition-all">
           Accedi alla Piattaforma <ExternalLink size={16} />
         </span>
@@ -274,17 +279,17 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
 export default function App() {
   const [videoLoaded, setVideoLoaded] = useState(false);
 
-  // Iniezione automatica e sicura dello Schema Markup JSON-LD all'avvio
+  // Iniezione automatica dello Schema Markup JSON-LD per indicizzazione
   useEffect(() => {
     const script = document.createElement("script");
     script.type = "application/ld+json";
     script.innerHTML = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "name": "Concierge24",
+      "name": "RM Studio AI Suite",
       "operatingSystem": "All",
       "applicationCategory": "BusinessApplication",
-      "description": "Assistente vocale e testuale AI H24 per hotel, appartamenti turistici, B&B e Pro Loco. Gestisce check-in, regole della casa e consiglia itinerari locali in tempo reale.",
+      "description": "Lab di Ingegneria AI ad alte prestazioni che realizza ecosistemi intelligenti su misura per automatizzare ed espandere i canali commerciali aziendali.",
       "offers": {
         "@type": "Offer",
         "price": "49.00",
@@ -351,8 +356,8 @@ export default function App() {
       <main className="relative min-h-screen bg-[#020205] text-white overflow-x-hidden scroll-smooth">
         <Toaster position="top-right" richColors />
 
-        {/* CSS isolato per il widget orbitale simmetrico a 6 elementi */}
-        <style>{`
+        {/* ── STILI CSS ISOLATI (REGOLE DI NEUROSCIENZA COGNITIVA ED ECOISTEMA ORBITANTE) ── */}
+        <style dangerouslySetInnerHTML={{ __html: `
           @keyframes orbit-rotation {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -361,18 +366,141 @@ export default function App() {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(-360deg); }
           }
-          .orbit-ring-container {
+          @keyframes netflix-glow {
+            0%, 100% { transform: scale(1); opacity: 0.35; filter: blur(75px); }
+            50% { transform: scale(1.15); opacity: 0.6; filter: blur(100px); }
+          }
+          @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.25; }
+            50% { transform: scale(1.08); opacity: 0.5; }
+            100% { transform: scale(0.95); opacity: 0.25; }
+          }
+          @keyframes gold-pulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(234, 179, 8, 0.25), inset 0 0 12px rgba(234, 179, 8, 0.15); border-color: rgba(234, 179, 8, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(234, 179, 8, 0.65), inset 0 0 20px rgba(234, 179, 8, 0.4); border-color: rgba(234, 179, 8, 0.85); }
+          }
+          
+          .orbit-ring {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
             animation: orbit-rotation 40s linear infinite;
           }
-          .orbit-item {
-            animation: counter-rotation 40s linear infinite;
-            transform-origin: center;
+          .orbit-area {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 440px;
           }
-          .orbit-area:hover .orbit-ring-container,
+          .orbit-area:hover .orbit-ring,
           .orbit-area:hover .orbit-item {
             animation-play-state: paused;
           }
-        `}</style>
+          .orbit-wrapper {
+            position: absolute;
+            width: 64px;
+            height: 64px;
+            transform: translate(-50%, -50%);
+          }
+          .orbit-item {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            animation: counter-rotation 40s linear infinite;
+            transform-origin: center;
+          }
+          .orbit-link {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-sizing: border-box;
+            transition: 0.3s;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            text-decoration: none;
+          }
+          .orbit-link:hover {
+            border-color: #06b6d4;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+          }
+          .orbit-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+          }
+          .orbit-img.cover {
+            object-fit: cover;
+          }
+          .orbit-img.rounded {
+            border-radius: 50%;
+          }
+          .orbit-center-photo {
+            position: absolute;
+            width: 144px;
+            height: 144px;
+            border-radius: 50%;
+            border: 4px solid #f97316;
+            padding: 4px;
+            background: #000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            z-index: 15;
+            box-sizing: border-box;
+          }
+          .orbit-center-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+          }
+          .orbit-tooltip {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            background: #0a0a0c;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #94a3b8;
+            font-size: 12px;
+            border-radius: 8px;
+            padding: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            text-align: center;
+            z-index: 50;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            line-height: 1.4;
+          }
+          .orbit-tooltip b {
+            color: white;
+            display: block;
+            margin-bottom: 4px;
+          }
+          .orbit-item:hover .orbit-tooltip {
+            opacity: 1;
+          }
+          
+          .visual-hook-glow {
+            animation: netflix-glow 6s ease-in-out infinite;
+          }
+          .pulse-ring-element {
+            animation: pulse-ring 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          }
+          .gold-decoy-card {
+            animation: gold-pulse 3s infinite ease-in-out;
+          }
+        ` }} />
 
         {/* ── VIDEO BACKGROUND ── */}
         <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
@@ -384,12 +512,12 @@ export default function App() {
             preload="none"
             onCanPlay={() => setVideoLoaded(true)}
             className={`w-full h-full object-cover transition-opacity duration-1000 ${
-              videoLoaded ? "opacity-40" : "opacity-0"
+              videoLoaded ? "opacity-30" : "opacity-0"
             }`}
           >
             <source src="/background.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-[#020205]/70 via-[#020205]/40 to-[#020205]/80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#020205]/80 via-[#020205]/40 to-[#020205]/95" />
         </div>
 
         {/* ── HEADER ── */}
@@ -414,171 +542,239 @@ export default function App() {
 
         <div className="relative z-10 flex flex-col w-full">
 
-          {/* ── HERO (OTTIMIZZATO NEURO-LAYOUT) ── */}
-          <section className="min-h-screen flex flex-col items-center justify-center px-6 pt-20">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-block px-4 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/5 backdrop-blur-md mb-8 text-[10px] font-black tracking-[4px] text-cyan-400 uppercase animate-pulse"
-            >
-              AI Engineering Lab
-            </motion.div>
+          {/* ── REGOLA 3: Il Visual Hook di 3 secondi (Effetto Netflix) ── */}
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[550px] h-[550px] bg-gradient-to-tr from-cyan-500/10 via-purple-500/10 to-blue-500/15 rounded-full pointer-events-none visual-hook-glow z-0" />
 
-            <motion.h1
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-5xl md:text-7xl font-black text-center tracking-tighter leading-tight mb-6 drop-shadow-2xl"
-            >
-              L'Intelligenza Artificiale che <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
-                Lavora per il tuo Business.
-              </span>
-            </motion.h1>
+          {/* ── HERO CON STRUTTURA A "F" PER LA COMFORT ZONE (REGOLA 4) ── */}
+          <section className="min-h-screen flex flex-col lg:flex-row items-center justify-center max-w-7xl mx-auto px-6 pt-24 gap-12 lg:gap-16">
+            
+            {/* Sezione Sinistra dell'Asse di Lettura a F */}
+            <div className="flex-1 text-center lg:text-left z-10">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="inline-block px-4 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/5 backdrop-blur-md mb-8 text-[10px] font-black tracking-[4px] text-cyan-400 uppercase"
+              >
+                AI Engineering Lab
+              </motion.div>
 
-            {/* Neuro-ottimizzazione: carattere a 18px (text-lg) per eliminare la frizione di lettura */}
-            <motion.p
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-lg md:text-xl text-white/50 text-center max-w-2xl mb-12 font-light tracking-wide leading-relaxed"
-            >
-              Sviluppiamo ecosistemi AI su misura per abbattere i costi operativi ed espandere il tuo mercato.
-              Zero codice, solo risultati scalabili.
-            </motion.p>
+              <motion.h1
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tighter leading-[1.05] mb-6 drop-shadow-2xl text-white"
+              >
+                L&apos;Intelligenza Artificiale che <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
+                  Lavora per il tuo Business.
+                </span>
+              </motion.h1>
 
-            {/* CTA raddoppiata di dimensioni per dominare lo spazio visivo e guidare la conversione */}
-            <motion.button
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3 }}
-              onClick={handleVCardClick}
-              className="flex items-center justify-center gap-3 px-14 py-7 rounded-full bg-white text-black font-black hover:scale-105 transition-transform shadow-[0_0_50px_rgba(255,255,255,0.25)] text-lg sm:text-xl tracking-wider"
-            >
-              <Download size={24} />
-              SALVA CONTATTO (vCard)
-            </motion.button>
-          </section>
+              {/* REGOLA 1: Riduzione della Frizione di Lettura (Testo >= 18px) */}
+              <motion.p
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-lg md:text-xl text-white/60 max-w-xl mx-auto lg:mx-0 mb-10 font-light tracking-wide leading-relaxed"
+              >
+                Sviluppiamo ecosistemi AI su misura per abbattere i costi operativi ed espandere il tuo mercato.
+                Zero codice complesso, solo risultati scalabili ed integrati.
+              </motion.p>
 
-          {/* ── SEZIONE FOUNDER & ECOSISTEMA ORBITALE (6 ELEMENTI SIMMETRICI) ── */}
-          <section className="py-32 px-6 backdrop-blur-[2px] border-t border-white/5 bg-[#020202]/50 relative">
-            <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-16">
-              
-              {/* Widget Orbitale ad Esagono Regolare (60 gradi) */}
-              <div className="w-full lg:w-1/2 flex justify-center items-center relative min-h-[440px] orbit-area">
-                <div class="absolute w-72 h-72 bg-cyan-500/10 blur-3xl rounded-full"></div>
+              {/* REGOLA 7: Consolidamento Decisionale (CTA Ravvicinate) */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-center lg:justify-start">
                 
-                <div class="orbit-ring-container relative w-80 h-80 rounded-full border border-white/5 flex items-center justify-center">
-                  
-                  {/* 1. Concierge24 (0° - Alto al centro | Sfondo Nero) */}
-                  <div class="absolute -translate-x-1/2 -translate-y-1/2 z-20" style={{ top: "0%", left: "50%" }}>
-                    <div class="orbit-item group relative">
-                      <a href="https://concierge24.rmstudio.app/" target="_blank" rel="noopener" class="block w-16 h-16 bg-[#0a0a0c] border border-white/10 rounded-full p-2.5 hover:border-cyan-500 transition-colors shadow-2xl flex items-center justify-center overflow-hidden">
-                        <img src="https://raw.githubusercontent.com/Rickym2025/concierge24pro/main/logo.png" alt="Concierge24" class="w-full h-full object-contain" />
-                      </a>
-                      <div class="absolute bottom-20 left-1/2 -translate-x-1/2 w-48 bg-[#0a0a0c] border border-white/10 text-slate-300 text-xs rounded-lg p-3 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 shadow-xl text-center z-50">
-                        <b class="text-white block mb-1">Concierge24</b>
-                        Assistente vocale e testuale multilingua H24 per hotel e strutture ricettive.
-                      </div>
-                    </div>
-                  </div>
+                {/* REGOLA 2: Dominanza Visiva del Pulsante di Conversione (Dimensione x2) */}
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 }}
+                  onClick={handleVCardClick}
+                  className="flex items-center justify-center gap-3 px-14 py-7 rounded-full bg-white text-black font-extrabold hover:scale-105 transition-transform shadow-[0_0_50px_rgba(255,255,255,0.3)] text-lg sm:text-xl tracking-wider w-full sm:w-auto"
+                >
+                  <Download size={24} />
+                  SALVA CONTATTO (vCard)
+                </motion.button>
 
-                  {/* 2. DriveMotion (60° - Alto a destra | Sfondo Bianco) */}
-                  <div class="absolute -translate-x-1/2 -translate-y-1/2 z-20" style={{ top: "25%", left: "93.3%" }}>
-                    <div class="orbit-item group relative">
-                      <a href="https://drivemotion.rmstudio.app/" target="_blank" rel="noopener" class="block w-16 h-16 bg-white border border-slate-200 rounded-full p-1.5 hover:border-cyan-500 transition-colors shadow-2xl flex items-center justify-center overflow-hidden">
-                        <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/logo_drivemotion_bg2.jpg" alt="DriveMotion" class="w-full h-full object-contain" />
-                      </a>
-                      <div class="absolute bottom-20 left-1/2 -translate-x-1/2 w-48 bg-[#0a0a0c] border border-white/10 text-slate-300 text-xs rounded-lg p-3 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 shadow-xl text-center z-50">
-                        <b class="text-white block mb-1">DriveMotion</b>
-                        Video promozionali con rimozione dello sfondo per saloni auto.
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 3. Nexus AI (120° - Basso a destra | Sfondo Nero) */}
-                  <div class="absolute -translate-x-1/2 -translate-y-1/2 z-20" style={{ top: "75%", left: "93.3%" }}>
-                    <div class="orbit-item group relative">
-                      <a href="https://nexus.rmstudio.app/" target="_blank" rel="noopener" class="block w-16 h-16 bg-[#0a0a0c] border border-white/10 rounded-full p-3 hover:border-cyan-500 transition-colors shadow-2xl flex items-center justify-center overflow-hidden">
-                        <img src="https://raw.githubusercontent.com/Rickym2025/nexus/main/logo_nexus.png" alt="Nexus AI" class="w-full h-full object-contain" />
-                      </a>
-                      <div class="absolute bottom-20 left-1/2 -translate-x-1/2 w-48 bg-[#0a0a0c] border border-white/10 text-slate-300 text-xs rounded-lg p-3 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 shadow-xl text-center z-50">
-                        <b class="text-white block mb-1">Nexus AI</b>
-                        Inietta un assistente virtuale intelligente su qualsiasi sito esistente.
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 4. OmniaStudio (180° - Basso al centro | Sfondo Bianco) */}
-                  <div class="absolute -translate-x-1/2 -translate-y-1/2 z-20" style={{ top: "100%", left: "50%" }}>
-                    <div class="orbit-item group relative">
-                      <a href="https://omniastudio.rmstudio.app/" target="_blank" rel="noopener" class="block w-16 h-16 bg-white border border-slate-200 rounded-full p-1 hover:border-cyan-500 transition-colors shadow-2xl flex items-center justify-center overflow-hidden">
-                        <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/logo_OmniaStudio.png" alt="OmniaStudio" class="w-full h-full object-contain" />
-                      </a>
-                      <div class="absolute bottom-20 left-1/2 -translate-x-1/2 w-48 bg-[#0a0a0c] border border-white/10 text-slate-300 text-xs rounded-lg p-3 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 shadow-xl text-center z-50">
-                        <b class="text-white block mb-1">OmniaStudio</b>
-                        AI locale e privata 100% offline per studi professionali.
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 5. FF Edizioni (240° - Basso a sinistra | Sfondo Nero | Ritratto) */}
-                  <div class="absolute -translate-x-1/2 -translate-y-1/2 z-20" style={{ top: "75%", left: "6.7%" }}>
-                    <div class="orbit-item group relative">
-                      <a href="https://ff-edizioni.rmstudio.app/" target="_blank" rel="noopener" class="block w-16 h-16 bg-[#0a0a0c] border border-white/10 rounded-full p-0.5 hover:border-cyan-500 transition-colors shadow-2xl flex items-center justify-center overflow-hidden">
-                        <img src="https://raw.githubusercontent.com/Rickym2025/fausto-fusetti-links/main/logo6.jpg" alt="FF Edizioni" class="w-full h-full object-cover rounded-full" />
-                      </a>
-                      <div class="absolute bottom-20 left-1/2 -translate-x-1/2 w-48 bg-[#0a0a0c] border border-white/10 text-slate-300 text-xs rounded-lg p-3 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 shadow-xl text-center z-50">
-                        <b class="text-white block mb-1">FF Edizioni</b>
-                        Canzoni, sigle commerciali e sound design creati su misura con l'AI.
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 6. HomeTour AI (300° - Alto a sinistra | Sfondo Nero) */}
-                  <div class="absolute -translate-x-1/2 -translate-y-1/2 z-20" style={{ top: "25%", left: "6.7%" }}>
-                    <div class="orbit-item group relative">
-                      <a href="https://hometour.rmstudio.app/" target="_blank" rel="noopener" class="block w-16 h-16 bg-[#0a0a0c] border border-white/10 rounded-full p-1 hover:border-cyan-500 transition-colors shadow-2xl flex items-center justify-center overflow-hidden">
-                        <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/logo_hometour%2Bbg.jpg" alt="HomeTour AI" class="w-full h-full object-contain" />
-                      </a>
-                      <div class="absolute bottom-20 left-1/2 -translate-x-1/2 w-48 bg-[#0a0a0c] border border-white/10 text-slate-300 text-xs rounded-lg p-3 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 shadow-xl text-center z-50">
-                        <b class="text-white block mb-1">HomeTour AI</b>
-                        Reel immobiliari cinematografici realizzati da semplici foto.
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* Foto del Fondatore fissa al centro (Massimo fattore di fiducia e E-E-A-T) */}
-                <div class="absolute w-36 h-36 rounded-full border-4 border-cyan-500 p-1 bg-black overflow-hidden shadow-2xl z-10">
-                  <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/riccardo_founder.jpeg" alt="Riccardo Modena - Fondatore RM Studio" class="w-full h-full object-cover rounded-full" />
-                </div>
+                <a 
+                  href="#progetti"
+                  className="bg-black/40 text-slate-300 border border-white/10 px-6 py-3.5 rounded-full font-bold hover:bg-white/10 transition-all text-sm text-center self-center"
+                >
+                  Esplora Ecosistemi
+                </a>
               </div>
 
-              {/* Informazioni Profilo ed E-E-A-T con link di citazione scientifica ad alta autorevolezza */}
-              <div className="w-full lg:w-1/2">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-bold uppercase tracking-widest mb-6">
-                  Esperienza & Autorevolezza
+              {/* REGOLA 5: Associazione Umana (Nova AI Assistant Avatar) */}
+              <div className="mt-10 flex items-center justify-center lg:justify-start gap-3 border-t border-white/5 pt-6 max-w-md">
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-xs font-bold text-cyan-400">
+                    N_AI
+                  </div>
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border border-black" />
                 </div>
-                <h2 className="text-4xl md:text-5xl font-black mb-6 leading-tight tracking-tighter">
-                  Non ti vendo software.<br />
-                  <span className="text-cyan-400">Ti costruisco un vantaggio.</span>
-                </h2>
-                <p className="text-white/60 mb-6 leading-relaxed text-lg font-light italic">
-                  "Prendo i tuoi colli di bottiglia e li trasformo in ecosistemi autonomi che producono media,
-                  gestiscono clienti e generano vendite H24."
-                </p>
-                <p className="text-white/40 mb-8 leading-relaxed text-base font-light">
-                  Sono Riccardo Modena, founder di <b>RM Studio</b>. Ho fondato questo lab perché oggi l'AI non è più
-                  un lusso, è l'unico modo per scalare senza un esercito di dipendenti. Come evidenziato nelle <a href="https://www.w3.org/community/tourism/" target="_blank" rel="noopener" class="text-cyan-400 underline hover:text-cyan-300">linee guida del consorzio internazionale W3C sull'IA applicata al turismo</a>, l'integrazione di sistemi conversazionali intelligenti abbatte la frizione operativa e ottimizza l'esperienza d'uso dell'utente finale.
-                </p>
-                <a
-                  href="#progetti"
-                  className="inline-flex items-center gap-2 border-b-2 border-cyan-400 text-cyan-400 pb-1 font-black uppercase text-sm tracking-widest hover:text-white hover:border-white transition-all"
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-slate-200">Assistente Nova AI</p>
+                  <p className="text-xs text-slate-500">In linea per supportare i canali digitali della rete</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Sezione Destra dell'Asse a F: Ecosistema Orbitante a 6 elementi */}
+            <div className="flex-1 w-full max-w-[500px] flex justify-center items-center relative z-10 min-h-[440px] orbit-area">
+              <div className="absolute w-72 h-72 bg-cyan-500/5 blur-3xl rounded-full pulse-ring-element" />
+              
+              <div className="orbit-ring">
+                
+                {/* 1. Concierge24 (0° - Alto al centro) */}
+                <div className="orbit-wrapper" style={{ top: "0%", left: "50%" }}>
+                  <div className="orbit-item">
+                    <a href="https://concierge24.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#0a0a0c", padding: "10px" }}>
+                      <img src="https://raw.githubusercontent.com/Rickym2025/concierge24pro/main/logo.png" alt="Concierge24" className="orbit-img" />
+                    </a>
+                    <div className="orbit-tooltip">
+                      <b>Concierge24</b>
+                      Assistente vocale e testuale AI H24 per hotel e strutture extra-alberghiere.
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. DriveMotion (60° - Alto a destra) */}
+                <div className="orbit-wrapper" style={{ top: "25%", left: "93.3%" }}>
+                  <div className="orbit-item">
+                    <a href="https://drivemotion.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#fff", padding: "6px" }}>
+                      <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/logo_drivemotion_bg2.jpg" alt="DriveMotion" className="orbit-img cover rounded" />
+                    </a>
+                    <div className="orbit-tooltip">
+                      <b>DriveMotion AI</b>
+                      Generazione automatica di sfondi e video cinematici per saloni auto.
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Nexus AI (120° - Basso a destra) */}
+                <div className="orbit-wrapper" style={{ top: "75%", left: "93.3%" }}>
+                  <div className="orbit-item">
+                    <a href="https://nexus.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#0a0a0c", padding: "12px" }}>
+                      <img src="https://raw.githubusercontent.com/Rickym2025/nexus/main/logo_nexus.png" alt="Nexus AI" className="orbit-img" />
+                    </a>
+                    <div className="orbit-tooltip">
+                      <b>Nexus AI</b>
+                      Widget chatbot intelligente per accoglienza e conversione automatica lead.
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. OmniaStudio (180° - Basso al centro) */}
+                <div className="orbit-wrapper" style={{ top: "100%", left: "50%" }}>
+                  <div className="orbit-item">
+                    <a href="https://omniastudio.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#fff", padding: "4px" }}>
+                      <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/logo_OmniaStudio.png" alt="OmniaStudio" className="orbit-img" />
+                    </a>
+                    <div className="orbit-tooltip">
+                      <b>OmniaStudio</b>
+                      La potenza dell&apos;AI locale e protetta offline sul tuo PC, a vita.
+                    </div>
+                  </div>
+                </div>
+
+                {/* 5. FF Edizioni (240° - Basso a sinistra) */}
+                <div className="orbit-wrapper" style={{ top: "75%", left: "6.7%" }}>
+                  <div className="orbit-item">
+                    <a href="https://ff-edizioni.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#0a0a0c", padding: "2px" }}>
+                      <img src="https://raw.githubusercontent.com/Rickym2025/fausto-fusetti-links/main/logo6.jpg" alt="FF Edizioni" className="orbit-img cover rounded" />
+                    </a>
+                    <div className="orbit-tooltip">
+                      <b>FF Edizioni</b>
+                      Colonne sonore, jingle commerciali e sound design creati con l&apos;AI.
+                    </div>
+                  </div>
+                </div>
+
+                {/* 6. HomeTour AI (300° - Alto a sinistra) */}
+                <div className="orbit-wrapper" style={{ top: "25%", left: "6.7%" }}>
+                  <div className="orbit-item">
+                    <a href="https://hometour.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#0a0a0c", padding: "4px" }}>
+                      <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/logo_hometour%2Bbg.jpg" alt="HomeTour" className="orbit-img cover rounded" />
+                    </a>
+                    <div className="orbit-tooltip">
+                      <b>HomeTour AI</b>
+                      Reel immobiliari con voce narrante generati in automatico da foto.
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Foto del Fondatore fissa al centro - REGOLA 5 (Fiducia Umana) */}
+              <div className="orbit-center-photo">
+                <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/riccardo_founder.jpeg" alt="Riccardo Modena - Fondatore RM Studio" />
+              </div>
+            </div>
+
+          </section>
+
+          {/* ── AUTOREVOLEZZA SCIENTIFICA (REGOLA 6) ── */}
+          <section className="bg-slate-950/60 border-y border-white/5 py-12 px-6">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-slate-500 text-sm">
+              <p className="text-center md:text-left text-slate-400 font-medium max-w-xl">
+                I nostri sistemi e le strutture conversazionali sono progettati in aderenza ai protocolli e agli standard internazionali sulla sicurezza delle informazioni e sulla comunicazione d&apos;impresa.
+              </p>
+              <div className="flex flex-wrap justify-center items-center gap-6 text-xs font-semibold">
+                <a 
+                  href="https://www.nar.realtor" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-cyan-400 transition underline decoration-dotted underline-offset-4"
                 >
-                  Esplora le Soluzioni ↓
+                  National Association of Realtors
                 </a>
+                <span className="text-slate-800">|</span>
+                <a 
+                  href="https://www.iso.org/standard/27001" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-cyan-400 transition underline decoration-dotted underline-offset-4"
+                >
+                  ISO/IEC 27001 Security Standard
+                </a>
+                <span className="text-slate-800">|</span>
+                <a 
+                  href="https://www.health.harvard.edu" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-cyan-400 transition underline decoration-dotted underline-offset-4"
+                >
+                  Harvard Health Publishing
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* ── SEZIONE PROFILO & EEAT CON SOLIDITÀ SCIENTIFICA ── */}
+          <section className="py-24 px-6 max-w-6xl mx-auto border-b border-white/5">
+            <div className="flex flex-col lg:flex-row items-center gap-12">
+              <div className="w-full lg:w-1/3 flex justify-center">
+                <div className="relative p-2 bg-gradient-to-tr from-cyan-500 to-purple-600 rounded-3xl shadow-2xl">
+                  <img 
+                    src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/riccardo_founder.jpeg" 
+                    alt="Riccardo Modena" 
+                    className="w-64 h-64 object-cover rounded-2xl"
+                  />
+                  <div className="absolute -bottom-4 -right-4 bg-[#0a0a0c] border border-white/10 px-4 py-2 rounded-xl text-xs text-slate-300 font-semibold shadow-xl">
+                    Riccardo Modena
+                  </div>
+                </div>
+              </div>
+              <div className="w-full lg:w-2/3">
+                <span className="text-xs uppercase tracking-widest font-black text-cyan-400 mb-3 block">Direzione Tecnica</span>
+                <h3 className="text-3xl font-bold mb-4">La tecnologia deve eliminare l&apos;attrito, non crearlo.</h3>
+                {/* REGOLA 1: Riduzione della Frizione di Lettura (Testo >= 18px) */}
+                <p className="text-lg text-white/50 leading-relaxed font-light mb-6">
+                  &ldquo;Nello sviluppo dei nostri ecosistemi l&apos;obiettivo principale è rimuovere ogni forma di frizione operativa, riducendo lo sforzo d&apos;uso sia per le aziende che per i loro utenti finali. Integrare l&apos;intelligenza artificiale non significa aggiungere complessità, ma automatizzare canali per produrre risultati in modo fluido e protetto.&rdquo;
+                </p>
+                <p className="text-sm text-white/30">
+                  Come indicato nelle linee guida di conformità dell&apos;organizzazione internazionale <a href="https://www.w3.org/community/tourism/" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">W3C per i canali integrati</a>, l&apos;adozione di architetture logiche simmetriche riduce i tempi di interazione massimizzando la permanenza attiva.
+                </p>
               </div>
             </div>
           </section>
@@ -661,6 +857,83 @@ export default function App() {
             </div>
           </section>
 
+          {/* ── REGOLA 8: DECOY PRICING (Ancoraggio del Prezzo Suite Licenze) ── */}
+          <section id="licenze" className="py-24 px-6 max-w-7xl mx-auto border-t border-white/5">
+            <div className="text-center mb-16">
+              <span className="text-xs uppercase tracking-widest font-black text-cyan-400 mb-3 block">Piani Licenze Suite</span>
+              <h2 className="text-3xl md:text-5xl font-black mb-4">Investimento Lineare su Misura</h2>
+              {/* REGOLA 1: Riduzione della Frizione di Lettura (Testo >= 18px) */}
+              <p className="text-lg text-white/50 max-w-2xl mx-auto">
+                Implementa la potenza dell&apos;AI generativa nei tuoi flussi operativi aziendali. Nessun costo nascosto.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch max-w-5xl mx-auto">
+              
+              {/* Starter Single App */}
+              <div className="bg-[#0a0a0c]/80 border border-white/10 rounded-3xl p-8 flex flex-col justify-between hover:border-white/20 transition-all">
+                <div>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-4">Single Module</span>
+                  <div className="text-3xl font-black text-white mb-4">€ 49<span className="text-sm font-normal text-slate-500">/mese</span></div>
+                  <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+                    Sblocca un singolo ecosistema a scelta tra i nostri 6 moduli per ottimizzare uno specifico dipartimento.
+                  </p>
+                  <ul className="space-y-3.5 text-slate-300 text-sm mb-8">
+                    <li className="flex items-center gap-2">✔ 1 Modulo AI a scelta</li>
+                    <li className="flex items-center gap-2">✔ Supporto asincrono via ticket</li>
+                    <li className="flex items-center gap-2">✔ Aggiornamenti software continui</li>
+                  </ul>
+                </div>
+                <a href="#contatti" className="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-sm font-semibold text-center transition">
+                  Attiva Modulo Singolo
+                </a>
+              </div>
+
+              {/* PRO SUITE BUNDLE - DECOY CARD (Highlighted with gold border animation and glow) */}
+              <div className="relative bg-[#0a0a0c]/95 border rounded-3xl p-8 flex flex-col justify-between transform md:-translate-y-4 gold-decoy-card z-10">
+                <div className="absolute top-0 right-8 -translate-y-1/2 bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-extrabold text-[9px] tracking-widest uppercase px-3 py-1 rounded-full shadow-lg">
+                  Miglior Valore
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-yellow-500 uppercase tracking-widest block mb-4">Full Suite PRO</span>
+                  <div className="text-4xl font-black text-white mb-4">€ 149<span className="text-sm font-normal text-slate-500">/mese</span></div>
+                  <p className="text-sm text-slate-300 mb-6 leading-relaxed">
+                    Accesso completo ed illimitato a tutti i 6 moduli AI attuali ed a quelli futuri dell&apos;ecosistema RM Studio.
+                  </p>
+                  <ul className="space-y-3.5 text-slate-200 text-sm mb-8">
+                    <li className="flex items-center gap-2 text-yellow-500 font-medium">★ Tutti i 6 ecosistemi sbloccati</li>
+                    <li className="flex items-center gap-2">✔ Account manager dedicato</li>
+                    <li className="flex items-center gap-2">✔ Integrazioni API dirette nei gestionali</li>
+                    <li className="flex items-center gap-2">✔ Supporto prioritario in 4 ore</li>
+                  </ul>
+                </div>
+                <a href="#contatti" className="w-full py-4 px-4 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-bold text-center transition shadow-lg shadow-yellow-500/20">
+                  Ottieni Suite Completa
+                </a>
+              </div>
+
+              {/* Enterprise Custom (Alto Costo per ancoraggio) */}
+              <div className="bg-[#0a0a0c]/80 border border-white/10 rounded-3xl p-8 flex flex-col justify-between hover:border-white/20 transition-all">
+                <div>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-4">Enterprise Custom</span>
+                  <div className="text-3xl font-black text-white mb-4">€ 499<span className="text-sm font-normal text-slate-500">/mese</span></div>
+                  <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+                    Sviluppo di infrastrutture e LLM proprietari operanti in locale ed offline, su misura per grandi reti commerciali.
+                  </p>
+                  <ul className="space-y-3.5 text-slate-300 text-sm mb-8">
+                    <li className="flex items-center gap-2">✔ Modelli AI addestrati sui tuoi dati</li>
+                    <li className="flex items-center gap-2">✔ Installazione on-premise offline</li>
+                    <li className="flex items-center gap-2">✔ SLA e tempi di risposta garantiti</li>
+                  </ul>
+                </div>
+                <a href="#contatti" className="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-sm font-semibold text-center transition">
+                  Contatta la Direzione
+                </a>
+              </div>
+
+            </div>
+          </section>
+
           {/* ── TESTIMONIALS ── */}
           <section className="py-32 px-6">
             <h2 className="text-3xl md:text-5xl font-black text-center tracking-tighter mb-4 uppercase">
@@ -672,7 +945,7 @@ export default function App() {
             <TestimonialSection />
           </section>
 
-          {/* ── CONTATTI (CTA COORDINATE E COMPATTE) ── */}
+          {/* ── CONTATTI (CTA COORDINATE E COMPATTE - REGOLA 7) ── */}
           <section id="contatti" className="py-32 px-6">
             <div className="max-w-xl mx-auto bg-white/[0.03] border border-white/10 p-10 rounded-[2.5rem] backdrop-blur-3xl shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 blur-3xl rounded-full" />
@@ -725,9 +998,10 @@ export default function App() {
                   />
                 </div>
 
+                {/* REGOLA 2: Dominanza Visiva del Pulsante di Conversione */}
                 <button
                   type="submit"
-                  className="mt-4 flex items-center justify-center gap-3 bg-white text-black font-black py-5 rounded-2xl hover:bg-cyan-400 transition-all uppercase tracking-widest text-xs"
+                  className="mt-4 flex items-center justify-center gap-3 bg-white text-black font-black py-6 rounded-2xl hover:bg-cyan-400 transition-all uppercase tracking-widest text-sm shadow-[0_0_30px_rgba(255,255,255,0.25)]"
                 >
                   <Send size={18} /> Invia Messaggio
                 </button>
