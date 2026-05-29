@@ -3,10 +3,7 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { NovaChatbot } from "./components/NovaChatbot";
 import { FloatingDock } from "./components/FloatingDock";
-import { 
-  ExternalLink, Download, Send, Sparkles, Shield, 
-  Cpu, Users, Landmark, FileCheck, CheckCircle2, Lock 
-} from "lucide-react";
+import { ExternalLink, Download, Send } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { motion, LazyMotion, domAnimation } from "framer-motion";
 
@@ -233,7 +230,6 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
             </span>
           </div>
         </div>
-        {/* Riduzione della Frizione di Lettura (Testo >= 18px) */}
         <p className="text-white/60 leading-relaxed text-lg md:text-xl mb-6">{desc}</p>
         <span className="inline-flex items-center gap-2 text-sm font-bold text-white group-hover:underline decoration-cyan-400 underline-offset-4 transition-all">
           Accedi alla Piattaforma <ExternalLink size={16} />
@@ -500,6 +496,7 @@ export default function App() {
           .gold-decoy-card {
             animation: gold-pulse 3s infinite ease-in-out;
           }
+          html { scroll-behavior: smooth; }
         ` }} />
 
         {/* ── VIDEO BACKGROUND ── */}
@@ -619,7 +616,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Sezione Destra dell'Asse a F: Ecosistema Orbitante a 6 elementi */}
+            {/* Sezione Destra dell&apos;Asse a F: Ecosistema Orbitante a 6 elementi */}
             <div className="flex-1 w-full max-w-[500px] flex justify-center items-center relative z-10 min-h-[440px] orbit-area">
               <div className="absolute w-72 h-72 bg-cyan-500/5 blur-3xl rounded-full pulse-ring-element" />
               
