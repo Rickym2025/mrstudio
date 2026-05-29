@@ -836,7 +836,7 @@ export default function App() {
                 title="OmniaStudio"
                 tag="Privacy AI"
                 logo="/logo_OmniaStudio.png"
-                gif="/omnia_gif.gif"
+                gif="/omniastudio_video.mp4"
                 desc="La potenza dell'AI generativa, completamente offline sul tuo PC. Analizza contratti, PDF e dati sensibili senza mai inviare un solo byte al cloud. Privacy al 100%."
                 url="https://omniastudio.rmstudio.app/"
                 glowColor="from-purple-500 to-pink-500"
