@@ -162,22 +162,68 @@ function TestimonialCard({
 }
 
 const initialTestimonials = [
-  { id: "12", author: "Marco G. (Modena)", text: "Abbiamo venduto un immobile in 4 giorni dall'annuncio. Il Reel di HomeTour ha fatto 10k views organiche su Instagram." },
-  { id: "32", author: "Sara L. (Roma)", text: "L'assistente Concierge24 ha letteralmente azzerato le chiamate in reception per chiedere la password del WiFi." },
-  { id: "53", author: "Studio Rossi", text: "Marketing di un altro livello. Le auto sembrano fotografate in studio. DriveMotion ha cambiato le nostre vendite." },
+  // ─── HOMETOUR AI (Real Estate) ───
+  { 
+    id: "12", 
+    author: "Marco G. (Modena)", 
+    text: "Abbiamo venduto un immobile in 4 giorni dall'annuncio. Il Reel di HomeTour ha fatto 10k views organiche su Instagram." 
+  },
+  { 
+    id: "15", 
+    author: "Elena V. (Milano)", 
+    text: "I miei clienti venditori rimangono colpiti quando mostro l'animazione 3D del loro appartamento. Un valore aggiunto concreto per acquisire mandati in esclusiva." 
+  },
+
+  // ─── CONCIERGE24 (Hospitality) ───
+  { 
+    id: "32", 
+    author: "Sara L. (Roma)", 
+    text: "L'assistente Concierge24 ha letteralmente azzerato le chiamate in reception per chiedere la password del WiFi e gli orari di colazione." 
+  },
+  { 
+    id: "34", 
+    author: "Giuseppe T. (Firenze)", 
+    text: "I clienti internazionali apprezzano l'assistenza multilingua attiva anche di notte. Risponde all'istante su check-in tardivi e consigli logistici locali." 
+  },
+  { 
+    id: "36", 
+    author: "Alessia B. (Venezia)", 
+    text: "Gestisco 8 appartamenti turistici. L'integrazione di Concierge24 ha ridotto del 70% i messaggi ripetitivi su WhatsApp, lasciandomi molto più tempo libero." 
+  },
+
+  // ─── FF EDIZIONI (Audio & Music) ───
+  { 
+    id: "42", 
+    author: "Claudio M. (Napoli)", 
+    text: "Il jingle creato per la nostra campagna radiofonica locale è orecchiabile e professionale. Ottimo lavoro di sintonizzazione con l'identità del nostro brand." 
+  },
+  { 
+    id: "45", 
+    author: "Valentina R. (Bologna)", 
+    text: "Colonne sonore ideali per i nostri spot di lancio sui social. FF Edizioni ci permette di ottenere sonorità originali senza preoccuparci delle licenze di copyright." 
+  },
+
+  // ─── DRIVEMOTION (Automotive AI) ───
+  { 
+    id: "53", 
+    author: "Fabio R. (Torino)", 
+    text: "La rimozione dello sfondo e l'inserimento automatico nei saloni virtuali ha dato alle nostre vetture usate un aspetto ordinato e professionale sul portale." 
+  },
+
+  // ─── NEXUS AI (Sales AI) ───
+  { 
+    id: "58", 
+    author: "Studio Associato B. (Milano)", 
+    text: "Nexus AI gestisce i flussi di contatto sul nostro sito principale. Filtra le richieste degli indecisi e risponde ai dubbi tecnici anche durante il fine settimana." 
+  },
+
+  // ─── OMNIASTUDIO (Privacy AI) ───
+  { 
+    id: "62", 
+    author: "Avv. De Luca (Napoli)", 
+    text: "L'elaborazione dati completamente locale offline è l'unica soluzione compatibile con il segreto professionale del nostro studio legale. Analisi dei contratti sicura al 100%." 
+  },
 ];
-
-function TestimonialSection() {
-  const [testimonials, setTestimonials] = useState(initialTestimonials);
-
-  const handleShuffle = useCallback(() => {
-    setTestimonials((prev) => {
-      const newArr = [...prev];
-      const first = newArr.shift();
-      if (first) newArr.push(first);
-      return newArr;
-    });
-  }, []);
 
   return (
     <div className="relative w-full max-w-4xl mx-auto h-[450px] flex justify-center items-center mt-12 overflow-hidden px-4">
