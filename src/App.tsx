@@ -1034,7 +1034,14 @@ export default function App() {
 
             <div className="relative z-10 text-white/20 text-[10px] font-bold tracking-[4px] text-center uppercase">
               © {CURRENT_YEAR} Riccardo Modena • RM STUDIO <br />
-              <span className="text-cyan-500/50">High-End AI Engineering</span>
+              <span className="text-cyan-500/50">High-End AI Engineering</span> <br />
+              <a 
+                href="/privacy.html" 
+                target="_blank" 
+                className="text-white/30 hover:text-cyan-400 underline transition-colors mt-2 inline-block lowercase font-sans normal-case"
+              >
+                Privacy Policy
+              </a>
             </div>
           </footer>
 
