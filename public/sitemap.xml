@@ -8,6 +8,14 @@
     <priority>1.0</priority>
   </url>
 
+   <!-- Privacy Policy -->
+  <url>
+    <loc>https://rmstudio.app/privacy.html</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
   <!-- Mirror testuale per motori di ricerca IA -->
   <url>
     <loc>https://rmstudio.app/mirrors.md</loc>
