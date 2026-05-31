@@ -7,7 +7,7 @@ import { ExternalLink, Download, Send } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { motion, LazyMotion, domAnimation } from "framer-motion";
 
-// ─── COSTANTE ANNO (non ricalcolata ad ogni render) ───
+// ─── COSTANTE ANNO ───
 const CURRENT_YEAR = new Date().getFullYear();
 
 // ─── 1. FOOTER: TextHoverEffect ───────────────────────────────────────────
@@ -162,7 +162,7 @@ function TestimonialCard({
 }
 
 const initialTestimonials = [
-  // ─── HOMETOUR AI (Real Estate) ───
+  // ─── HOMETOUR AI ───
   { 
     id: "12", 
     author: "Marco G. (Modena)", 
@@ -174,7 +174,7 @@ const initialTestimonials = [
     text: "I miei clienti venditori rimangono colpiti quando mostro l'animazione 3D del loro appartamento. Un valore aggiunto concreto per acquisire mandati in esclusiva." 
   },
 
-  // ─── CONCIERGE24 (Hospitality) ───
+  // ─── CONCIERGE24 ───
   { 
     id: "32", 
     author: "Sara L. (Roma)", 
@@ -191,7 +191,7 @@ const initialTestimonials = [
     text: "Gestisco 8 appartamenti turistici. L'integrazione di Concierge24 ha ridotto del 70% i messaggi ripetitivi su WhatsApp, lasciandoci molto più tempo libero." 
   },
 
-  // ─── FF EDIZIONI (Audio & Music) ───
+  // ─── FF EDIZIONI ───
   { 
     id: "42", 
     author: "Claudio M. (Napoli)", 
@@ -203,21 +203,21 @@ const initialTestimonials = [
     text: "Colonne sonore ideali per i nostri spot di lancio sui social. FF Edizioni ci permette di ottenere sonorità originali senza preoccuparci delle licenze di copyright." 
   },
 
-  // ─── DRIVEMOTION (Automotive AI) ───
+  // ─── DRIVEMOTION ───
   { 
     id: "53", 
     author: "Fabio R. (Torino)", 
     text: "La rimozione dello sfondo e l'inserimento automatico nei saloni virtuali ha dato alle nostre vetture usate un aspetto ordinato e professionale sul portale." 
   },
 
-  // ─── NEXUS AI (Sales AI) ───
+  // ─── NEXUS AI ───
   { 
     id: "58", 
     author: "Studio Associato B. (Milano)", 
     text: "Nexus AI gestisce i flussi di contatto sul nostro sito principale. Filtra le richieste degli indecisi e risponde ai dubbi tecnici anche durante il fine settimana." 
   },
 
-  // ─── OMNIASTUDIO (Privacy AI) ───
+  // ─── OMNIASTUDIO ───
   { 
     id: "62", 
     author: "Avv. De Luca (Napoli)", 
@@ -263,38 +263,22 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
   const isVideo = hasGif && gif ? gif.endsWith(".mp4") : false;
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Forza il muting via codice all'avvio per risolvere il bug di React
+  // Risolve in modo permanente le restrizioni di riproduzione asincrona all'hover
   useEffect(() => {
     const video = videoRef.current;
     if (video) {
       video.muted = true;
       video.defaultMuted = true;
       video.playsInline = true;
+      video.play().catch(() => {}); // Autoplay continuo silenzioso ad opacità 0
     }
   }, []);
-
-  // Riproduce in modo pulito all'entrata e mette in pausa all'uscita
-  const handleMouseEnter = () => {
-    const video = videoRef.current;
-    if (video) {
-      video.play().catch(() => {});
-    }
-  };
-
-  const handleMouseLeave = () => {
-    const video = videoRef.current;
-    if (video) {
-      video.pause();
-    }
-  };
 
   return (
     <a
       href={url}
       target="_blank"
       rel="noreferrer"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       className={`group flex flex-col ${
         isReversed ? "md:flex-row-reverse" : "md:flex-row"
       } items-center gap-8 bg-white/[0.02] p-8 md:p-10 rounded-3xl border border-white/5 hover:border-white/20 transition-all duration-500 relative backdrop-blur-md overflow-hidden`}
@@ -344,8 +328,9 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
               loop
               muted
               playsInline
-              preload="auto" // Abilitato pre-rendering per risposta di avvio istantanea all'hover
-              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+              autoPlay
+              preload="auto"
+              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gpu-accelerated"
             />
           ) : (
             <img
@@ -449,7 +434,7 @@ export function App() {
       <main className="relative min-h-screen bg-[#020205] text-white overflow-x-hidden scroll-smooth">
         <Toaster position="top-right" richColors />
 
-        {/* ── STILI CSS ISOLATI (OTTIMIZZATI CON SFOCATURA LEGGERA PER EVITARE SCATTI) ── */}
+        {/* ── STILI CSS CONFIGURATI PER MASSIMO FRAME RATE GPU (NIENTE SCATTI) ── */}
         <style dangerouslySetInnerHTML={{ __html: `
           @keyframes orbit-rotation {
             0% { transform: rotate(0deg); }
@@ -459,14 +444,14 @@ export function App() {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(-360deg); }
           }
-          @keyframes netflix-glow {
-            0%, 100% { transform: scale(1); opacity: 0.25; filter: blur(50px); }
-            50% { transform: scale(1.1); opacity: 0.4; filter: blur(70px); }
+          /* RISOLTO: Rimosso il calcolo dinamico del raggio sfocatura (blur) per eliminare i micro-scatti del video */
+          @keyframes netflix-glow-optimized {
+            0%, 100% { opacity: 0.15; }
+            50% { opacity: 0.35; }
           }
-          @keyframes pulse-ring {
-            0% { transform: scale(0.95); opacity: 0.25; }
-            50% { transform: scale(1.08); opacity: 0.5; }
-            100% { transform: scale(0.95); opacity: 0.25; }
+          @keyframes pulse-ring-optimized {
+            0%, 100% { opacity: 0.2; transform: scale(0.95); }
+            50% { opacity: 0.4; transform: scale(1.05); }
           }
           @keyframes gold-pulse {
             0%, 100% { box-shadow: 0 0 15px rgba(234, 179, 8, 0.25), inset 0 0 12px rgba(234, 179, 8, 0.15); border-color: rgba(234, 179, 8, 0.3); }
@@ -476,6 +461,13 @@ export function App() {
             0%, 100% { border-color: rgba(6, 182, 212, 0.6); box-shadow: 0 0 15px rgba(6, 182, 212, 0.25); }
             33% { border-color: rgba(139, 92, 246, 0.6); box-shadow: 0 0 15px rgba(139, 92, 246, 0.25); }
             66% { border-color: rgba(236, 72, 153, 0.6); box-shadow: 0 0 15px rgba(236, 72, 153, 0.25); }
+          }
+          
+          .gpu-accelerated {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+            will-change: transform, opacity;
           }
           .animated-gradient-border {
             animation: animated-border-glow 6s linear infinite;
@@ -595,10 +587,13 @@ export function App() {
           }
           
           .visual-hook-glow {
-            animation: netflix-glow 6s ease-in-out infinite;
+            filter: blur(50px);
+            will-change: opacity;
+            animation: netflix-glow-optimized 6s ease-in-out infinite;
           }
           .pulse-ring-element {
-            animation: pulse-ring 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            will-change: transform, opacity;
+            animation: pulse-ring-optimized 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
           }
           .gold-decoy-card {
             animation: gold-pulse 3s infinite ease-in-out;
@@ -606,7 +601,7 @@ export function App() {
           html { scroll-behavior: smooth; }
         ` }} />
 
-        {/* ── VIDEO BACKGROUND OTTIMIZZATO (SENZA UPDATE DI STATO PER EVITARE SCATTI) ── */}
+        {/* ── VIDEO BACKGROUND CON COMPOSITING GPU FORZATO (ELIMINATO LO STUTTERING) ── */}
         <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-[#020205]">
           <video
             autoPlay
@@ -614,12 +609,11 @@ export function App() {
             muted
             playsInline
             preload="auto"
-            className="w-full h-full object-cover opacity-20 transform-gpu"
-            style={{ willChange: "opacity" }}
+            className="w-full h-full object-cover opacity-20 gpu-accelerated"
           >
             <source src="/background.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-[#020205]/80 via-[#020205]/40 to-[#020205]/95" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#020205]/80 via-[#020205]/40 to-[#020205]/95 pointer-events-none" />
         </div>
 
         {/* ── HEADER ── */}
@@ -644,8 +638,8 @@ export function App() {
 
         <div className="relative z-10 flex flex-col w-full">
 
-          {/* ── REGOLA 3: Il Visual Hook (Sfocatura leggera ottimizzata per frame rate elevato) ── */}
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-cyan-500/5 via-purple-500/5 to-blue-500/10 rounded-full pointer-events-none visual-hook-glow z-0" />
+          {/* ── IL VISUAL HOOK SFOCATO CON METODI COMPOSITI ACCELERATI (PREVIENE I CALI DI FRAME RATE) ── */}
+          <div className="absolute top-1/4 left-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-cyan-500/5 via-purple-500/5 to-blue-500/10 rounded-full pointer-events-none visual-hook-glow z-0 -translate-x-1/2 -translate-y-1/2" />
 
           {/* ── HERO CON STRUTTURA A "F" ── */}
           <section className="min-h-screen flex flex-col lg:flex-row items-center justify-center max-w-7xl mx-auto px-6 pt-24 gap-12 lg:gap-16">
@@ -915,7 +909,7 @@ export function App() {
                 tag="Privacy AI"
                 logo="/logo_OmniaStudio.png"
                 gif="/omniastudio_video.mp4"
-                desc="La potenza dell'AI generativa, completely offline sul tuo PC. Analizza contratti, PDF e dati sensibili senza mai inviare un solo byte al cloud. Privacy al 100%."
+                desc="La potenza dell'AI generativa, completamente offline sul tuo PC. Analizza contratti, PDF e dati sensibili senza mai inviare un solo byte al cloud. Privacy al 100%."
                 url="https://omniastudio.rmstudio.app/"
                 glowColor="from-purple-500 to-pink-500"
               />
