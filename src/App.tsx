@@ -155,7 +155,6 @@ function TestimonialCard({
         loading="lazy"
         className="pointer-events-none mx-auto h-20 w-20 rounded-full border-2 border-cyan-500/50 object-cover shadow-lg"
       />
-      {/* Font ottimizzato a 16px */}
       <p className="text-center text-[16px] italic text-white/70 leading-relaxed">&ldquo;{testimonial}&rdquo;</p>
       <span className="text-center text-[16px] font-black tracking-widest uppercase text-cyan-400">{author}</span>
     </motion.div>
@@ -264,16 +263,28 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
   const isVideo = hasGif && gif ? gif.endsWith(".mp4") : false;
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Gestione esplicita eventi hover per forzare l'avvio fluido dell'MP4
+  // Forza il muting via codice all'avvio per risolvere il bug di React
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.muted = true;
+      video.defaultMuted = true;
+      video.playsInline = true;
+    }
+  }, []);
+
+  // Riproduce in modo pulito all'entrata e mette in pausa all'uscita
   const handleMouseEnter = () => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {});
+    const video = videoRef.current;
+    if (video) {
+      video.play().catch(() => {});
     }
   };
 
   const handleMouseLeave = () => {
-    if (videoRef.current) {
-      videoRef.current.pause();
+    const video = videoRef.current;
+    if (video) {
+      video.pause();
     }
   };
 
@@ -301,14 +312,12 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
           />
           <div>
             <h3 className="text-3xl font-bold">{title}</h3>
-            {/* Font impostato a 16px */}
             <span className={`text-[16px] uppercase tracking-[3px] font-black bg-clip-text text-transparent bg-gradient-to-r ${glowColor}`}>
               {tag}
             </span>
           </div>
         </div>
         <p className="text-white/60 leading-relaxed text-[16px] md:text-xl mb-6">{desc}</p>
-        {/* Font impostato a 16px */}
         <span className="inline-flex items-center gap-2 text-[16px] font-bold text-white group-hover:underline decoration-cyan-400 underline-offset-4 transition-all">
           Accedi alla Piattaforma <ExternalLink size={16} />
         </span>
@@ -335,7 +344,7 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
               loop
               muted
               playsInline
-              preload="metadata"
+              preload="auto" // Abilitato pre-rendering per risposta di avvio istantanea all'hover
               className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
             />
           ) : (
@@ -352,7 +361,6 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
         <div className={`absolute inset-0 bg-gradient-to-br ${glowColor} opacity-10 pointer-events-none`} />
         
         {hasGif && (
-          /* Font impostato a 16px */
           <div className="absolute bottom-3 right-4 text-[16px] font-black uppercase tracking-[2px] text-white/30 group-hover:opacity-0 transition-opacity">
             Preview
           </div>
@@ -363,8 +371,8 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
 }
 
 // ─── 4. MAIN APP ──────────────────────────────────────────────────────────
-export default function App() {
-  // Iniezione automatica dello Schema Markup JSON-LD per indicizzazione
+export function App() {
+  // Iniezione dello Schema Markup JSON-LD
   useEffect(() => {
     const script = document.createElement("script");
     script.type = "application/ld+json";
@@ -566,7 +574,7 @@ export default function App() {
             background: #0a0a0c;
             border: 1px solid rgba(255,255,255,0.08);
             color: #94a3b8;
-            font-size: 16px; /* RISOLTO: Font impostato a 16px */
+            font-size: 16px;
             border-radius: 8px;
             padding: 12px;
             opacity: 0;
@@ -598,7 +606,7 @@ export default function App() {
           html { scroll-behavior: smooth; }
         ` }} />
 
-        {/* ── VIDEO BACKGROUND FLUIDO (SENZA COINVOLGIMENTO DI UPDATE DI STATO DI REACT PER EVITARE LAG) ── */}
+        {/* ── VIDEO BACKGROUND OTTIMIZZATO (SENZA UPDATE DI STATO PER EVITARE SCATTI) ── */}
         <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-[#020205]">
           <video
             autoPlay
@@ -639,7 +647,7 @@ export default function App() {
           {/* ── REGOLA 3: Il Visual Hook (Sfocatura leggera ottimizzata per frame rate elevato) ── */}
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-cyan-500/5 via-purple-500/5 to-blue-500/10 rounded-full pointer-events-none visual-hook-glow z-0" />
 
-          {/* ── HERO ── */}
+          {/* ── HERO CON STRUTTURA A "F" ── */}
           <section className="min-h-screen flex flex-col lg:flex-row items-center justify-center max-w-7xl mx-auto px-6 pt-24 gap-12 lg:gap-16">
             
             <div className="flex-1 text-center lg:text-left z-10">
@@ -667,7 +675,7 @@ export default function App() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-[16px] md:text-xl text-white/60 max-w-xl mx-auto lg:mx-0 mb-10 font-light tracking-wide leading-relaxed"
+                className="text-lg md:text-xl text-white/60 max-w-xl mx-auto lg:mx-0 mb-10 font-light tracking-wide leading-relaxed"
               >
                 Sviluppiamo ecosistemi AI su misura per abbattere i costi operativi ed espandere il tuo mercato.
                 Zero codice complesso, solo risultati scalabili ed integrati.
@@ -695,7 +703,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Sezione Destra dell'Asse a F: Ecosistema Orbitante */}
+            {/* Sezione Destra dell'Asse a F */}
             <div className="flex-1 w-full max-w-[500px] flex justify-center items-center relative z-10 min-h-[440px] orbit-area">
               <div className="absolute w-72 h-72 bg-cyan-500/5 blur-3xl rounded-full pulse-ring-element" />
               
@@ -907,7 +915,7 @@ export default function App() {
                 tag="Privacy AI"
                 logo="/logo_OmniaStudio.png"
                 gif="/omniastudio_video.mp4"
-                desc="La potenza dell'AI generativa, completamente offline sul tuo PC. Analizza contratti, PDF e dati sensibili senza mai inviare un solo byte al cloud. Privacy al 100%."
+                desc="La potenza dell'AI generativa, completely offline sul tuo PC. Analizza contratti, PDF e dati sensibili senza mai inviare un solo byte al cloud. Privacy al 100%."
                 url="https://omniastudio.rmstudio.app/"
                 glowColor="from-purple-500 to-pink-500"
               />
@@ -1064,3 +1072,5 @@ export default function App() {
     </LazyMotion>
   );
 }
+
+export default App;
