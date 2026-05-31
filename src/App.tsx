@@ -345,7 +345,7 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
           preload="metadata"
           className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gpu-accelerated"
         />
-      ) : (
+      )} : (
             <img
               src={gif}
               alt={`${title} demo`}
