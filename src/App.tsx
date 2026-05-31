@@ -316,8 +316,14 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
               loop
               muted
               playsInline
-              preload="auto"
+              preload="metadata" // Carica solo i metadati iniziali salvando banda ed eliminando i rallentamenti
               className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+              ref={(el) => {
+                if (el) {
+                  el.muted = true;
+                  el.playsInline = true;
+                }
+              }}
             />
           ) : (
             <img
@@ -329,18 +335,6 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
             />
           )
         )}
-
-        <div className={`absolute inset-0 bg-gradient-to-br ${glowColor} opacity-10 pointer-events-none`} />
-        
-        {hasGif && (
-          <div className="absolute bottom-3 right-4 text-[8px] font-black uppercase tracking-[2px] text-white/30 group-hover:opacity-0 transition-opacity">
-            Preview
-          </div>
-        )}
-      </div>
-    </a>
-  );
-}
 
 // ─── 4. MAIN APP ──────────────────────────────────────────────────────────
 export default function App() {
@@ -445,6 +439,17 @@ export default function App() {
           @keyframes gold-pulse {
             0%, 100% { box-shadow: 0 0 15px rgba(234, 179, 8, 0.25), inset 0 0 12px rgba(234, 179, 8, 0.15); border-color: rgba(234, 179, 8, 0.3); }
             50% { box-shadow: 0 0 30px rgba(234, 179, 8, 0.65), inset 0 0 20px rgba(234, 179, 8, 0.4); border-color: rgba(234, 179, 8, 0.85); }
+          }
+
+          @keyframes animated-border-glow {
+            0%, 100% { border-color: rgba(6, 182, 212, 0.6); box-shadow: 0 0 15px rgba(6, 182, 212, 0.25); }
+            33% { border-color: rgba(139, 92, 246, 0.6); box-shadow: 0 0 15px rgba(139, 92, 246, 0.25); }
+            66% { border-color: rgba(236, 72, 153, 0.6); box-shadow: 0 0 15px rgba(236, 72, 153, 0.25); }
+          }
+          .animated-gradient-border {
+            animation: animated-border-glow 6s linear infinite;
+            border-width: 1.5px;
+            border-style: solid;
           }
           
           .orbit-ring {
@@ -658,7 +663,7 @@ export default function App() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.3 }}
                   onClick={handleVCardClick}
-                  className="flex items-center justify-center gap-3 px-6 py-4 sm:px-14 sm:py-7 rounded-full bg-white text-black font-extrabold hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.2)] sm:shadow-[0_0_50px_rgba(255,255,255,0.3)] text-sm sm:text-lg md:text-xl tracking-wider w-full sm:w-auto"
+                  className="flex items-center justify-center gap-3 px-5 py-3 sm:px-8 sm:py-4 rounded-full bg-white text-black font-extrabold hover:scale-105 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.15)] sm:shadow-[0_0_30px_rgba(255,255,255,0.25)] text-[18px] tracking-wider w-full sm:w-auto"
                 >
                   <Download className="w-5 h-5 sm:w-6 sm:h-6" />
                   SALVA CONTATTO (vCard)
