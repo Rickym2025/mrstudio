@@ -155,8 +155,9 @@ function TestimonialCard({
         loading="lazy"
         className="pointer-events-none mx-auto h-20 w-20 rounded-full border-2 border-cyan-500/50 object-cover shadow-lg"
       />
-      <p className="text-center text-sm italic text-white/70 leading-relaxed">&ldquo;{testimonial}&rdquo;</p>
-      <span className="text-center text-xs font-black tracking-widest uppercase text-cyan-400">{author}</span>
+      {/* Font adeguato a minimo 18px per accessibilità */}
+      <p className="text-center text-[18px] italic text-white/70 leading-relaxed">&ldquo;{testimonial}&rdquo;</p>
+      <span className="text-center text-[18px] font-black tracking-widest uppercase text-cyan-400">{author}</span>
     </motion.div>
   );
 }
@@ -284,13 +285,15 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
           />
           <div>
             <h3 className="text-3xl font-bold">{title}</h3>
-            <span className={`text-xs uppercase tracking-[3px] font-black bg-clip-text text-transparent bg-gradient-to-r ${glowColor}`}>
+            {/* Font impostato a minimo 18px per accessibilità */}
+            <span className={`text-[18px] uppercase tracking-[3px] font-black bg-clip-text text-transparent bg-gradient-to-r ${glowColor}`}>
               {tag}
             </span>
           </div>
         </div>
         <p className="text-white/60 leading-relaxed text-lg md:text-xl mb-6">{desc}</p>
-        <span className="inline-flex items-center gap-2 text-sm font-bold text-white group-hover:underline decoration-cyan-400 underline-offset-4 transition-all">
+        {/* Font impostato a minimo 18px */}
+        <span className="inline-flex items-center gap-2 text-[18px] font-bold text-white group-hover:underline decoration-cyan-400 underline-offset-4 transition-all">
           Accedi alla Piattaforma <ExternalLink size={16} />
         </span>
       </div>
@@ -316,7 +319,7 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
               loop
               muted
               playsInline
-              preload="metadata" // Carica solo i metadati iniziali salvando banda ed eliminando i rallentamenti
+              preload="metadata" // RISOLTO: Caricamento metadati mirato per eliminare la lentezza o la saturazione di rete su Vercel
               className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
               ref={(el) => {
                 if (el) {
@@ -336,6 +339,19 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
           )
         )}
 
+        <div className={`absolute inset-0 bg-gradient-to-br ${glowColor} opacity-10 pointer-events-none`} />
+        
+        {hasGif && (
+          /* Font impostato a minimo 18px per accessibilità */
+          <div className="absolute bottom-3 right-4 text-[18px] font-black uppercase tracking-[2px] text-white/30 group-hover:opacity-0 transition-opacity">
+            Preview
+          </div>
+        )}
+      </div>
+    </a>
+  );
+}
+
 // ─── 4. MAIN APP ──────────────────────────────────────────────────────────
 export default function App() {
   const [videoLoaded, setVideoLoaded] = useState(false);
@@ -350,7 +366,7 @@ export default function App() {
       "name": "RM Studio AI Suite",
       "operatingSystem": "All",
       "applicationCategory": "BusinessApplication",
-      "description": "Lab di Ingegneria AI ad alte prestazioni che realizza ecosistemi intelligenti su misura per automatizzare ed espandere i canali commerciali aziendali.",
+      "description": "Lab di Ingegneria AI ad alte prestazioni che realizza ecosistemi intelligenti su maura per automatizzare ed espandere i canali commerciali aziendali.",
       "offers": {
         "@type": "Offer",
         "price": "49.00",
@@ -440,7 +456,6 @@ export default function App() {
             0%, 100% { box-shadow: 0 0 15px rgba(234, 179, 8, 0.25), inset 0 0 12px rgba(234, 179, 8, 0.15); border-color: rgba(234, 179, 8, 0.3); }
             50% { box-shadow: 0 0 30px rgba(234, 179, 8, 0.65), inset 0 0 20px rgba(234, 179, 8, 0.4); border-color: rgba(234, 179, 8, 0.85); }
           }
-
           @keyframes animated-border-glow {
             0%, 100% { border-color: rgba(6, 182, 212, 0.6); box-shadow: 0 0 15px rgba(6, 182, 212, 0.25); }
             33% { border-color: rgba(139, 92, 246, 0.6); box-shadow: 0 0 15px rgba(139, 92, 246, 0.25); }
@@ -543,7 +558,7 @@ export default function App() {
             background: #0a0a0c;
             border: 1px solid rgba(255,255,255,0.08);
             color: #94a3b8;
-            font-size: 12px;
+            font-size: 18px; /* RISOLTO: Font alzato ad almeno 18px */
             border-radius: 8px;
             padding: 12px;
             opacity: 0;
@@ -602,11 +617,12 @@ export default function App() {
                 alt="RM Studio Logo"
                 className="w-8 h-8 object-contain rounded-md shadow-[0_0_15px_rgba(255,255,255,0.1)]"
               />
-              <span className="font-black tracking-[0.2em] text-lg uppercase">RM Studio</span>
+              {/* Font a 18px per l'header per conformità mobile */}
+              <span className="font-black tracking-[0.2em] text-[18px] uppercase">RM Studio</span>
             </div>
             <a
               href="#contatti"
-              className="text-[10px] font-black uppercase tracking-widest text-cyan-400 hover:text-cyan-300 transition-colors border border-cyan-500/30 px-5 py-2.5 rounded-full bg-cyan-500/5"
+              className="text-[18px] font-black uppercase tracking-widest text-cyan-400 hover:text-cyan-300 transition-colors border border-cyan-500/30 px-5 py-2.5 rounded-full bg-cyan-500/5"
             >
               Contattaci
             </a>
@@ -621,12 +637,12 @@ export default function App() {
           {/* ── HERO CON STRUTTURA A "F" PER LA COMFORT ZONE (REGOLA 4) ── */}
           <section className="min-h-screen flex flex-col lg:flex-row items-center justify-center max-w-7xl mx-auto px-6 pt-24 gap-12 lg:gap-16">
             
-            {/* Sezione Sinistra dell&apos;Asse di Lettura a F */}
+            {/* Sezione Sinistra dell'Asse di Lettura a F */}
             <div className="flex-1 text-center lg:text-left z-10">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="inline-block px-4 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/5 backdrop-blur-md mb-8 text-[10px] font-black tracking-[4px] text-cyan-400 uppercase"
+                className="inline-block px-4 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/5 backdrop-blur-md mb-8 text-[18px] font-black tracking-[4px] text-cyan-400 uppercase"
               >
                 AI Engineering Lab
               </motion.div>
@@ -657,7 +673,7 @@ export default function App() {
               {/* REGOLA 7: Consolidamento Decisionale (CTA Ravvicinate) */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-center lg:justify-start">
                 
-                {/* REGOLA 2: Dominanza Visiva del Pulsante di Conversione */}
+                {/* REGOLA 2: Dominanza Visiva del Pulsante di Conversione ridimensionato sia per mobile che desktop */}
                 <motion.button
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -671,14 +687,14 @@ export default function App() {
 
                 <a 
                   href="#progetti"
-                  className="bg-black/40 text-slate-300 border border-white/10 px-6 py-3.5 rounded-full font-bold hover:bg-white/10 transition-all text-sm text-center self-center"
+                  className="bg-black/40 text-slate-300 border border-white/10 px-6 py-3.5 rounded-full font-bold hover:bg-white/10 transition-all text-[18px] text-center self-center"
                 >
                   Esplora Ecosistemi
                 </a>
               </div>
             </div>
 
-            {/* Sezione Destra dell&apos;Asse a F: Ecosistema Orbitante a 6 elementi */}
+            {/* Sezione Destra dell'Asse a F: Ecosistema Orbitante a 6 elementi */}
             <div className="flex-1 w-full max-w-[500px] flex justify-center items-center relative z-10 min-h-[440px] orbit-area">
               <div className="absolute w-72 h-72 bg-cyan-500/5 blur-3xl rounded-full pulse-ring-element" />
               
@@ -688,7 +704,7 @@ export default function App() {
                 <div className="orbit-wrapper" style={{ top: "0%", left: "50%" }}>
                   <div className="orbit-item">
                     <a href="https://concierge24.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#0a0a0c", padding: "10px" }}>
-                      <img src="https://raw.githubusercontent.com/Rickym2025/concierge24pro/main/logo.png" alt="Concierge24" className="orbit-img" />
+                      <img src="/logo_Concierge24.png" alt="Concierge24" className="orbit-img" />
                     </a>
                     <div className="orbit-tooltip">
                       <b>Concierge24</b>
@@ -701,7 +717,7 @@ export default function App() {
                 <div className="orbit-wrapper" style={{ top: "25%", left: "93.3%" }}>
                   <div className="orbit-item">
                     <a href="https://drivemotion.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#fff", padding: "6px" }}>
-                      <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/logo_drivemotion_bg2.jpg" alt="DriveMotion" className="orbit-img cover rounded" />
+                      <img src="/logo_drivemotion_bg2.jpg" alt="DriveMotion" className="orbit-img cover rounded" />
                     </a>
                     <div className="orbit-tooltip">
                       <b>DriveMotion AI</b>
@@ -714,7 +730,7 @@ export default function App() {
                 <div className="orbit-wrapper" style={{ top: "75%", left: "93.3%" }}>
                   <div className="orbit-item">
                     <a href="https://nexus.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#0a0a0c", padding: "12px" }}>
-                      <img src="https://raw.githubusercontent.com/Rickym2025/nexus/main/logo_nexus.png" alt="Nexus AI" className="orbit-img" />
+                      <img src="/logo_nexus_bg.png" alt="Nexus AI" className="orbit-img" />
                     </a>
                     <div className="orbit-tooltip">
                       <b>Nexus AI</b>
@@ -727,7 +743,7 @@ export default function App() {
                 <div className="orbit-wrapper" style={{ top: "100%", left: "50%" }}>
                   <div className="orbit-item">
                     <a href="https://omniastudio.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#fff", padding: "4px" }}>
-                      <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/logo_OmniaStudio.png" alt="OmniaStudio" className="orbit-img" />
+                      <img src="/logo_OmniaStudio.png" alt="OmniaStudio" className="orbit-img" />
                     </a>
                     <div className="orbit-tooltip">
                       <b>OmniaStudio</b>
@@ -740,7 +756,7 @@ export default function App() {
                 <div className="orbit-wrapper" style={{ top: "75%", left: "6.7%" }}>
                   <div className="orbit-item">
                     <a href="https://ff.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#0a0a0c", padding: "2px" }}>
-                      <img src="https://raw.githubusercontent.com/Rickym2025/fausto-fusetti-links/main/logo6.jpg" alt="FF Edizioni" className="orbit-img cover rounded" />
+                      <img src="/logo_ff.png" alt="FF Edizioni" className="orbit-img cover rounded" />
                     </a>
                     <div className="orbit-tooltip">
                       <b>FF Edizioni</b>
@@ -753,7 +769,7 @@ export default function App() {
                 <div className="orbit-wrapper" style={{ top: "25%", left: "6.7%" }}>
                   <div className="orbit-item">
                     <a href="https://hometour.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#0a0a0c", padding: "4px" }}>
-                      <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/logo_hometour%2Bbg.jpg" alt="HomeTour" className="orbit-img cover rounded" />
+                      <img src="/logo_hometour+bg.jpg" alt="HomeTour" className="orbit-img cover rounded" />
                     </a>
                     <div className="orbit-tooltip">
                       <b>HomeTour AI</b>
@@ -766,7 +782,7 @@ export default function App() {
 
               {/* Foto del Fondatore fissa al centro - REGOLA 5 (Fiducia Umana) */}
               <div className="orbit-center-photo">
-                <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/riccardo_founder.jpeg" alt="Riccardo Modena - Fondatore RM Studio" />
+                <img src="/riccardo_founder.jpeg" alt="Riccardo Modena - Fondatore RM Studio" />
               </div>
             </div>
 
@@ -774,11 +790,11 @@ export default function App() {
 
           {/* ── AUTOREVOLEZZA SCIENTIFICA (REGOLA 6) ── */}
           <section className="bg-slate-950/60 border-y border-white/5 py-12 px-6">
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-slate-500 text-sm">
-              <p className="text-center md:text-left text-slate-400 font-medium max-w-xl">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-slate-500 text-[18px]">
+              <p className="text-center md:text-left text-slate-400 font-medium max-w-xl text-[18px]">
                 I nostri sistemi e le strutture conversazionali sono progettati in aderenza ai protocolli e agli standard internazionali sulla sicurezza delle informazioni e sulla comunicazione d&apos;impresa.
               </p>
-              <div className="flex flex-wrap justify-center items-center gap-6 text-xs font-semibold">
+              <div className="flex flex-wrap justify-center items-center gap-6 text-[18px] font-semibold">
                 <a 
                   href="https://www.nar.realtor" 
                   target="_blank" 
@@ -815,23 +831,23 @@ export default function App() {
               <div className="w-full lg:w-1/3 flex justify-center">
                 <div className="relative p-2 bg-gradient-to-tr from-cyan-500 to-purple-600 rounded-3xl shadow-2xl">
                   <img 
-                    src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/riccardo_founder.jpeg" 
+                    src="/riccardo_founder.jpeg" 
                     alt="Riccardo Modena" 
                     className="w-64 h-64 object-cover rounded-2xl"
                   />
-                  <div className="absolute -bottom-4 -right-4 bg-[#0a0a0c] border border-white/10 px-4 py-2 rounded-xl text-xs text-slate-300 font-semibold shadow-xl">
+                  <div className="absolute -bottom-4 -right-4 bg-[#0a0a0c] border border-white/10 px-4 py-2 rounded-xl text-[18px] text-slate-300 font-semibold shadow-xl">
                     Riccardo Modena
                   </div>
                 </div>
               </div>
               <div className="w-full lg:w-2/3">
-                <span className="text-xs uppercase tracking-widest font-black text-cyan-400 mb-3 block">Direzione Tecnica</span>
+                <span className="text-[18px] uppercase tracking-widest font-black text-cyan-400 mb-3 block">Direzione Tecnica</span>
                 <h3 className="text-3xl font-bold mb-4">La tecnologia deve eliminare l&apos;attrito, non crearlo.</h3>
                 {/* REGOLA 1: Riduzione della Frizione di Lettura (Testo >= 18px) */}
                 <p className="text-lg text-white/50 leading-relaxed font-light mb-6">
                   &ldquo;Nello sviluppo dei nostri ecosistemi l&apos;obiettivo principale è rimuovere ogni forma di frizione operativa, riducendo lo sforzo d&apos;uso sia per le aziende che per i loro utenti finali. Integrare l&apos;intelligenza artificiale non significa aggiungere complessità, ma automatizzare canali per produrre risultati in modo fluido e protetto.&rdquo;
                 </p>
-                <p className="text-sm text-white/30">
+                <p className="text-[18px] text-white/30">
                   Come indicato nelle linee guida di conformità dell&apos;organizzazione internazionale <a href="https://www.w3.org/community/tourism/" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">W3C per i canali integrati</a>, l&apos;adozione di architetture logiche simmetriche riduce i tempi di interazione massimizzando la permanenza attiva.
                 </p>
               </div>
@@ -921,7 +937,8 @@ export default function App() {
             <h2 className="text-3xl md:text-5xl font-black text-center tracking-tighter mb-4 uppercase">
               Dicono di noi
             </h2>
-            <p className="text-center text-white/30 mb-12 tracking-widest uppercase text-[10px] font-bold">
+            {/* Font impostato a minimo 18px */}
+            <p className="text-center text-white/30 mb-12 tracking-widest uppercase text-[18px] font-bold">
               Slide per scoprire i feedback
             </p>
             <TestimonialSection />
@@ -934,7 +951,7 @@ export default function App() {
               <h2 className="text-4xl font-black mb-2 text-center tracking-tighter">
                 Parliamo del tuo Progetto
               </h2>
-              <p className="text-white/40 text-center mb-10 font-light">
+              <p className="text-white/40 text-center mb-10 font-light text-[18px]">
                 Compila il modulo, rispondo personalmente in meno di 24 ore.
               </p>
 
@@ -942,40 +959,43 @@ export default function App() {
                 <input type="hidden" name="subject" value="Nuovo Lead da RMStudio.app" />
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase tracking-[2px] text-white/30 ml-2">
+                  {/* Font impostato a minimo 18px */}
+                  <label className="text-[18px] font-black uppercase tracking-[2px] text-white/30 ml-2">
                     Nome Completo
                   </label>
                   <input
                     type="text"
                     name="name"
                     required
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-cyan-500/50 transition-all placeholder:text-white/10"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-cyan-500/50 transition-all placeholder:text-white/10 text-[18px]"
                     placeholder="Esempio: Mario Rossi"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase tracking-[2px] text-white/30 ml-2">
+                  {/* Font impostato a minimo 18px */}
+                  <label className="text-[18px] font-black uppercase tracking-[2px] text-white/30 ml-2">
                     Email Aziendale
                   </label>
                   <input
                     type="email"
                     name="email"
                     required
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-cyan-500/50 transition-all placeholder:text-white/10"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-cyan-500/50 transition-all placeholder:text-white/10 text-[18px]"
                     placeholder="nome@azienda.it"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase tracking-[2px] text-white/30 ml-2">
+                  {/* Font impostato a minimo 18px */}
+                  <label className="text-[18px] font-black uppercase tracking-[2px] text-white/30 ml-2">
                     Il tuo Obiettivo
                   </label>
                   <textarea
                     name="message"
                     required
                     rows={4}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-cyan-500/50 transition-all resize-none placeholder:text-white/10"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-cyan-500/50 transition-all resize-none placeholder:text-white/10 text-[18px]"
                     placeholder="Quale processo vuoi automatizzare?"
                   />
                 </div>
@@ -983,7 +1003,7 @@ export default function App() {
                 {/* REGOLA 2: Dominanza Visiva del Pulsante di Conversione */}
                 <button
                   type="submit"
-                  className="mt-4 flex items-center justify-center gap-3 bg-white text-black font-black py-6 rounded-2xl hover:bg-cyan-400 transition-all uppercase tracking-widest text-sm shadow-[0_0_30px_rgba(255,255,255,0.25)]"
+                  className="mt-4 flex items-center justify-center gap-3 bg-white text-black font-black py-6 rounded-2xl hover:bg-cyan-400 transition-all uppercase tracking-widest text-[18px] shadow-[0_0_30px_rgba(255,255,255,0.25)]"
                 >
                   <Send size={18} /> Invia Messaggio
                 </button>
@@ -1004,14 +1024,14 @@ export default function App() {
 
             <div className="relative z-10 flex flex-wrap justify-center gap-10 mb-12">
               <a href="https://www.facebook.com/riccardo.modena.792" target="_blank" rel="noreferrer"
-                className="text-white/40 hover:text-white transition-all flex items-center gap-2 text-xs font-black uppercase tracking-widest">
+                className="text-white/40 hover:text-white transition-all flex items-center gap-2 text-[18px] font-black uppercase tracking-widest">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                 </svg>
                 Facebook
               </a>
               <a href="https://instagram.com/riccardo_mode_" target="_blank" rel="noreferrer"
-                className="text-white/40 hover:text-white transition-all flex items-center gap-2 text-xs font-black uppercase tracking-widest">
+                className="text-white/40 hover:text-white transition-all flex items-center gap-2 text-[18px] font-black uppercase tracking-widest">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
                   <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
@@ -1020,7 +1040,7 @@ export default function App() {
                 Instagram
               </a>
               <a href="https://www.linkedin.com/in/riccardo-modena-13918a61/" target="_blank" rel="noreferrer"
-                className="text-white/40 hover:text-white transition-all flex items-center gap-2 text-xs font-black uppercase tracking-widest">
+                className="text-white/40 hover:text-white transition-all flex items-center gap-2 text-[18px] font-black uppercase tracking-widest">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
                   <rect x="2" y="9" width="4" height="12" />
@@ -1029,7 +1049,7 @@ export default function App() {
                 LinkedIn
               </a>
               <a href="https://tiktok.com/@mr3d.riccardo" target="_blank" rel="noreferrer"
-                className="text-white/40 hover:text-white transition-all flex items-center gap-2 text-xs font-black uppercase tracking-widest">
+                className="text-white/40 hover:text-white transition-all flex items-center gap-2 text-[18px] font-black uppercase tracking-widest">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
                 </svg>
@@ -1037,13 +1057,13 @@ export default function App() {
               </a>
             </div>
 
-            <div className="relative z-10 text-white/20 text-[10px] font-bold tracking-[4px] text-center uppercase">
+            <div className="relative z-10 text-white/20 text-[18px] font-bold tracking-[4px] text-center uppercase leading-relaxed">
               © {CURRENT_YEAR} Riccardo Modena • RM STUDIO <br />
               <span className="text-cyan-500/50">High-End AI Engineering</span> <br />
               <div className="mt-3 flex items-center justify-center gap-3">
-                <a href="/privacy.html" target="_blank" className="text-white/30 hover:text-cyan-400 underline transition-colors inline-block lowercase font-sans normal-case">Privacy Policy</a>
+                <a href="/privacy.html" target="_blank" className="text-white/30 hover:text-cyan-400 underline transition-colors inline-block lowercase font-sans normal-case text-[18px]">Privacy Policy</a>
                 <span className="text-white/20 font-sans">|</span>
-                <a href="/termini.html" target="_blank" className="text-white/30 hover:text-cyan-400 underline transition-colors inline-block lowercase font-sans normal-case">Termini e Condizioni</a>
+                <a href="/termini.html" target="_blank" className="text-white/30 hover:text-cyan-400 underline transition-colors inline-block lowercase font-sans normal-case text-[18px]">Termini e Condizioni</a>
               </div>
             </div>
           </footer>
