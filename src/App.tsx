@@ -6,6 +6,7 @@ import { FloatingDock } from "./components/FloatingDock";
 import { ExternalLink, Download, Send } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { motion, LazyMotion, domAnimation } from "framer-motion";
+import { Analytics } from "@vercel/analytics/react";
 
 // ─── COSTANTE ANNO (non ricalcolata ad ogni render) ───
 const CURRENT_YEAR = new Date().getFullYear();
@@ -1047,6 +1048,7 @@ export default function App() {
 
         <NovaChatbot />
         <FloatingDock />
+        <Analytics />
       </main>
     </LazyMotion>
   );
