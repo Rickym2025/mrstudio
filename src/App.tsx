@@ -139,9 +139,9 @@ function TestimonialCard({
       drag={isFront ? "x" : false}
       dragElastic={0.35}
       dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
-      onDragStart={(e: React.PointerEvent) => { dragRef.current = e.clientX; }}
-      onDragEnd={(e: React.PointerEvent) => {
-        if (Math.abs(dragRef.current - e.clientX) > 100) handleShuffle();
+      onDragStart={(_e, info) => { dragRef.current = info.point.x; }}
+      onDragEnd={(_e, info) => {
+        if (Math.abs(dragRef.current - info.point.x) > 100) handleShuffle();
         dragRef.current = 0;
       }}
       transition={{ duration: 0.35 }}
