@@ -139,8 +139,8 @@ function TestimonialCard({
       drag={isFront ? "x" : false}
       dragElastic={0.35}
       dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
-      onDragStart={(e: any) => { dragRef.current = e.clientX; }}
-      onDragEnd={(e: any) => {
+      onDragStart={(e: React.PointerEvent) => { dragRef.current = e.clientX; }}
+      onDragEnd={(e: React.PointerEvent) => {
         if (Math.abs(dragRef.current - e.clientX) > 100) handleShuffle();
         dragRef.current = 0;
       }}
@@ -162,66 +162,55 @@ function TestimonialCard({
 }
 
 const initialTestimonials = [
-  // ─── HOMETOUR AI ───
-  { 
-    id: "12", 
-    author: "Marco G. (Modena)", 
-    text: "Abbiamo venduto un immobile in 4 giorni dall'annuncio. Il Reel di HomeTour ha fatto 10k views organiche su Instagram." 
+  {
+    id: "12",
+    author: "Marco G. (Modena)",
+    text: "Abbiamo venduto un immobile in 4 giorni dall'annuncio. Il Reel di HomeTour ha fatto 10k views organiche su Instagram.",
   },
-  { 
-    id: "15", 
-    author: "Elena V. (Milano)", 
-    text: "I miei clienti venditori rimangono colpiti quando mostro l'animazione 3D del loro appartamento. Un valore aggiunto concreto per acquisire mandati in esclusiva." 
+  {
+    id: "15",
+    author: "Elena V. (Milano)",
+    text: "I miei clienti venditori rimangono colpiti quando mostro l'animazione 3D del loro appartamento. Un valore aggiunto concreto per acquisire mandati in esclusiva.",
   },
-
-  // ─── CONCIERGE24 ───
-  { 
-    id: "32", 
-    author: "Sara L. (Roma)", 
-    text: "L'assistente Concierge24 ha letteralmente azzerato le chiamate in reception per chiedere la password del WiFi e gli orari di colazione." 
+  {
+    id: "32",
+    author: "Sara L. (Roma)",
+    text: "L'assistente Concierge24 ha letteralmente azzerato le chiamate in reception per chiedere la password del WiFi e gli orari di colazione.",
   },
-  { 
-    id: "34", 
-    author: "Giuseppe T. (Firenze)", 
-    text: "I clienti internazionali apprezzano l'assistenza multilingua attiva anche di notte. Risponde all'istante su check-in tardivi e consigli logistici locali." 
+  {
+    id: "34",
+    author: "Giuseppe T. (Firenze)",
+    text: "I clienti internazionali apprezzano l'assistenza multilingua attiva anche di notte. Risponde all'istante su check-in tardivi e consigli logistici locali.",
   },
-  { 
-    id: "36", 
-    author: "Alessia B. (Venezia)", 
-    text: "Gestisco 8 appartamenti turistici. L'integrazione di Concierge24 ha ridotto del 70% i messaggi ripetitivi su WhatsApp, lasciandoci molto più tempo libero." 
+  {
+    id: "36",
+    author: "Alessia B. (Venezia)",
+    text: "Gestisco 8 appartamenti turistici. L'integrazione di Concierge24 ha ridotto del 70% i messaggi ripetitivi su WhatsApp, lasciandoci molto più tempo libero.",
   },
-
-  // ─── FF EDIZIONI ───
-  { 
-    id: "42", 
-    author: "Claudio M. (Napoli)", 
-    text: "Il jingle creato per la nostra campagna radiofonica locale è orecchiabile e professionale. Ottimo lavoro di sintonizzazione con l'identità del nostro brand." 
+  {
+    id: "42",
+    author: "Claudio M. (Napoli)",
+    text: "Il jingle creato per la nostra campagna radiofonica locale è orecchiabile e professionale. Ottimo lavoro di sintonizzazione con l'identità del nostro brand.",
   },
-  { 
-    id: "45", 
-    author: "Valentina R. (Bologna)", 
-    text: "Colonne sonore ideali per i nostri spot di lancio sui social. FF Edizioni ci permette di ottenere sonorità originali senza preoccuparci delle licenze di copyright." 
+  {
+    id: "45",
+    author: "Valentina R. (Bologna)",
+    text: "Colonne sonore ideali per i nostri spot di lancio sui social. FF Edizioni ci permette di ottenere sonorità originali senza preoccuparci delle licenze di copyright.",
   },
-
-  // ─── DRIVEMOTION ───
-  { 
-    id: "53", 
-    author: "Fabio R. (Torino)", 
-    text: "La rimozione dello sfondo e l'inserimento automatico nei saloni virtuali ha dato alle nostre vetture usate un aspetto ordinato e professionale sul portale." 
+  {
+    id: "53",
+    author: "Fabio R. (Torino)",
+    text: "La rimozione dello sfondo e l'inserimento automatico nei saloni virtuali ha dato alle nostre vetture usate un aspetto ordinato e professionale sul portale.",
   },
-
-  // ─── NEXUS AI ───
-  { 
-    id: "58", 
-    author: "Studio Associato B. (Milano)", 
-    text: "Nexus AI gestisce i flussi di contatto sul nostro sito principale. Filtra le richieste degli indecisi e risponde ai dubbi tecnici anche durante il fine settimana." 
+  {
+    id: "58",
+    author: "Studio Associato B. (Milano)",
+    text: "Nexus AI gestisce i flussi di contatto sul nostro sito principale. Filtra le richieste degli indecisi e risponde ai dubbi tecnici anche durante il fine settimana.",
   },
-
-  // ─── OMNIASTUDIO ───
-  { 
-    id: "62", 
-    author: "Avv. De Luca (Napoli)", 
-    text: "L'elaborazione dati completamente locale offline è l'unica soluzione compatibile con il segreto professionale del nostro studio legale. Analisi dei contratti sicura al 100%." 
+  {
+    id: "62",
+    author: "Avv. De Luca (Napoli)",
+    text: "L'elaborazione dati completamente locale offline è l'unica soluzione compatibile con il segreto professionale del nostro studio legale. Analisi dei contratti sicura al 100%.",
   },
 ];
 
@@ -256,8 +245,24 @@ function TestimonialSection() {
 }
 
 // ─── 3. PROJECT CARD ──────────────────────────────────────────────────────
-function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }: { 
-  title: string, tag: string, desc: string, url: string, glowColor: string, logo: string, gif?: string, isReversed?: boolean 
+function ProjectCard({
+  title,
+  tag,
+  desc,
+  url,
+  glowColor,
+  logo,
+  gif,
+  isReversed,
+}: {
+  title: string;
+  tag: string;
+  desc: string;
+  url: string;
+  glowColor: string;
+  logo: string;
+  gif?: string;
+  isReversed?: boolean;
 }) {
   const hasGif = Boolean(gif && gif.trim() !== "");
   const isVideo = hasGif && gif ? gif.endsWith(".mp4") : false;
@@ -289,7 +294,7 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
   }, [isVideo]);
 
   return (
-    
+    <a
       ref={cardRef}
       href={url}
       target="_blank"
@@ -329,35 +334,36 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
           loading="lazy"
           decoding="async"
           className={`w-20 h-20 object-contain transition-all duration-500 ${
-            hasGif 
-              ? "opacity-60 group-hover:opacity-0 group-hover:scale-90" 
+            hasGif
+              ? "opacity-60 group-hover:opacity-0 group-hover:scale-90"
               : "opacity-40 group-hover:opacity-100 group-hover:scale-110"
           }`}
         />
 
+        {hasGif && !isVideo && (
+          <img
+            src={gif}
+            alt={`${title} demo`}
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          />
+        )}
+
         {hasGif && isVideo && (
-        <video
-          ref={videoRef}
-          src={gif}
-          loop
-          muted
-          playsInline
-          preload="metadata"
-          className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gpu-accelerated"
-        />
-      )} : (
-            <img
-              src={gif}
-              alt={`${title} demo`}
-              loading="lazy"
-              decoding="async"
-              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-            />
-          )
+          <video
+            ref={videoRef}
+            src={gif}
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gpu-accelerated"
+          />
         )}
 
         <div className={`absolute inset-0 bg-gradient-to-br ${glowColor} opacity-10 pointer-events-none`} />
-        
+
         {hasGif && (
           <div className="absolute bottom-3 right-4 text-[16px] font-black uppercase tracking-[2px] text-white/30 group-hover:opacity-0 transition-opacity">
             Preview
@@ -370,7 +376,6 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
 
 // ─── 4. MAIN APP ──────────────────────────────────────────────────────────
 export function App() {
-  // Iniezione dello Schema Markup JSON-LD
   useEffect(() => {
     const script = document.createElement("script");
     script.type = "application/ld+json";
@@ -384,18 +389,18 @@ export function App() {
       "offers": {
         "@type": "Offer",
         "price": "49.00",
-        "priceCurrency": "EUR"
+        "priceCurrency": "EUR",
       },
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": "4.9",
-        "reviewCount": "128"
+        "reviewCount": "128",
       },
       "author": {
         "@type": "Person",
         "name": "Riccardo Modena",
-        "url": "https://www.linkedin.com/in/riccardo-modena-13918a61/"
-      }
+        "url": "https://www.linkedin.com/in/riccardo-modena-13918a61/",
+      },
     });
     document.head.appendChild(script);
     return () => {
@@ -437,7 +442,7 @@ export function App() {
       } else {
         toast.error("Errore nell'invio del messaggio. Verifica i dati e riprova.");
       }
-    } catch (error) {
+    } catch {
       toast.error("Errore di rete. Controlla la connessione e riprova.");
     }
   };
@@ -447,7 +452,6 @@ export function App() {
       <main className="relative min-h-screen bg-[#020205] text-white overflow-x-hidden scroll-smooth">
         <Toaster position="top-right" richColors />
 
-        {/* ── STILI CSS CONFIGURATI PER MASSIMO FRAME RATE GPU (NIENTE SCATTI) ── */}
         <style dangerouslySetInnerHTML={{ __html: `
           @keyframes orbit-rotation {
             0% { transform: rotate(0deg); }
@@ -457,7 +461,6 @@ export function App() {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(-360deg); }
           }
-          /* RISOLTO: Rimosso il calcolo dinamico del raggio sfocatura (blur) per eliminare i micro-scatti del video */
           @keyframes netflix-glow-optimized {
             0%, 100% { opacity: 0.15; }
             50% { opacity: 0.35; }
@@ -475,7 +478,6 @@ export function App() {
             33% { border-color: rgba(139, 92, 246, 0.6); box-shadow: 0 0 15px rgba(139, 92, 246, 0.25); }
             66% { border-color: rgba(236, 72, 153, 0.6); box-shadow: 0 0 15px rgba(236, 72, 153, 0.25); }
           }
-          
           .gpu-accelerated {
             transform: translate3d(0, 0, 0);
             backface-visibility: hidden;
@@ -487,7 +489,6 @@ export function App() {
             border-width: 1.5px;
             border-style: solid;
           }
-          
           .orbit-ring {
             position: relative;
             width: 320px;
@@ -598,7 +599,6 @@ export function App() {
           .orbit-item:hover .orbit-tooltip {
             opacity: 1;
           }
-          
           .visual-hook-glow {
             filter: blur(50px);
             will-change: opacity;
@@ -614,7 +614,7 @@ export function App() {
           html { scroll-behavior: smooth; }
         ` }} />
 
-        {/* ── VIDEO BACKGROUND CON COMPOSITING GPU FORZATO (ELIMINATO LO STUTTERING) ── */}
+        {/* ── VIDEO BACKGROUND ── */}
         <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-[#020205]">
           <video
             autoPlay
@@ -651,12 +651,11 @@ export function App() {
 
         <div className="relative z-10 flex flex-col w-full">
 
-          {/* ── IL VISUAL HOOK SFOCATO CON METODI COMPOSITI ACCELERATI (PREVIENE I CALI DI FRAME RATE) ── */}
           <div className="absolute top-1/4 left-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-cyan-500/5 via-purple-500/5 to-blue-500/10 rounded-full pointer-events-none visual-hook-glow z-0 -translate-x-1/2 -translate-y-1/2" />
 
-          {/* ── HERO CON STRUTTURA A "F" ── */}
+          {/* ── HERO ── */}
           <section className="min-h-screen flex flex-col lg:flex-row items-center justify-center max-w-7xl mx-auto px-6 pt-24 gap-12 lg:gap-16">
-            
+
             <div className="flex-1 text-center lg:text-left z-10">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -689,7 +688,6 @@ export function App() {
               </motion.p>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-center lg:justify-start">
-                
                 <motion.button
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -701,7 +699,7 @@ export function App() {
                   SALVA CONTATTO (vCard)
                 </motion.button>
 
-                <a 
+                <a
                   href="#progetti"
                   className="bg-black/40 text-slate-300 border border-white/10 px-6 py-3.5 rounded-full font-bold hover:bg-white/10 transition-all text-[16px] text-center self-center"
                 >
@@ -710,13 +708,12 @@ export function App() {
               </div>
             </div>
 
-            {/* Sezione Destra dell'Asse a F */}
+            {/* Orbit */}
             <div className="flex-1 w-full max-w-[500px] flex justify-center items-center relative z-10 min-h-[440px] orbit-area">
               <div className="absolute w-72 h-72 bg-cyan-500/5 blur-3xl rounded-full pulse-ring-element" />
-              
+
               <div className="orbit-ring">
-                
-                {/* 1. Concierge24 */}
+
                 <div className="orbit-wrapper" style={{ top: "0%", left: "50%" }}>
                   <div className="orbit-item">
                     <a href="https://concierge24.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#0a0a0c", padding: "10px" }}>
@@ -729,7 +726,6 @@ export function App() {
                   </div>
                 </div>
 
-                {/* 2. DriveMotion */}
                 <div className="orbit-wrapper" style={{ top: "25%", left: "93.3%" }}>
                   <div className="orbit-item">
                     <a href="https://drivemotion.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#fff", padding: "6px" }}>
@@ -742,7 +738,6 @@ export function App() {
                   </div>
                 </div>
 
-                {/* 3. Nexus AI */}
                 <div className="orbit-wrapper" style={{ top: "75%", left: "93.3%" }}>
                   <div className="orbit-item">
                     <a href="https://nexus.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#0a0a0c", padding: "12px" }}>
@@ -755,7 +750,6 @@ export function App() {
                   </div>
                 </div>
 
-                {/* 4. OmniaStudio */}
                 <div className="orbit-wrapper" style={{ top: "100%", left: "50%" }}>
                   <div className="orbit-item">
                     <a href="https://omniastudio.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#fff", padding: "4px" }}>
@@ -768,7 +762,6 @@ export function App() {
                   </div>
                 </div>
 
-                {/* 5. FF Edizioni */}
                 <div className="orbit-wrapper" style={{ top: "75%", left: "6.7%" }}>
                   <div className="orbit-item">
                     <a href="https://ff.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#0a0a0c", padding: "2px" }}>
@@ -781,7 +774,6 @@ export function App() {
                   </div>
                 </div>
 
-                {/* 6. HomeTour AI */}
                 <div className="orbit-wrapper" style={{ top: "25%", left: "6.7%" }}>
                   <div className="orbit-item">
                     <a href="https://hometour.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#0a0a0c", padding: "4px" }}>
@@ -803,35 +795,35 @@ export function App() {
 
           </section>
 
-          {/* ── AUTOREVOLEZZA SCIENTIFICA ── */}
+          {/* ── AUTOREVOLEZZA ── */}
           <section className="bg-slate-950/60 border-y border-white/5 py-12 px-6">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-slate-500 text-[16px]">
               <p className="text-center md:text-left text-slate-400 font-medium max-w-xl text-[16px]">
                 I nostri sistemi e le strutture conversazionali sono progettati in aderenza ai protocolli e agli standard internazionali sulla sicurezza delle informazioni e sulla comunicazione d&apos;impresa.
               </p>
               <div className="flex flex-wrap justify-center items-center gap-6 text-[16px] font-semibold">
-                <a 
-                  href="https://www.nar.realtor" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                <a
+                  href="https://www.nar.realtor"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="hover:text-cyan-400 transition underline decoration-dotted underline-offset-4"
                 >
                   National Association of Realtors
                 </a>
                 <span className="text-slate-800">|</span>
-                <a 
-                  href="https://www.iso.org/standard/27001" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                <a
+                  href="https://www.iso.org/standard/27001"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="hover:text-cyan-400 transition underline decoration-dotted underline-offset-4"
                 >
                   ISO/IEC 27001 Security Standard
                 </a>
                 <span className="text-slate-800">|</span>
-                <a 
-                  href="https://www.health.harvard.edu" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                <a
+                  href="https://www.health.harvard.edu"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="hover:text-cyan-400 transition underline decoration-dotted underline-offset-4"
                 >
                   Harvard Health Publishing
@@ -840,14 +832,14 @@ export function App() {
             </div>
           </section>
 
-          {/* ── SEZIONE PROFILO & EEAT CON SOLIDITÀ SCIENTIFICA ── */}
+          {/* ── PROFILO ── */}
           <section className="py-24 px-6 max-w-6xl mx-auto border-b border-white/5">
             <div className="flex flex-col lg:flex-row items-center gap-12">
               <div className="w-full lg:w-1/3 flex justify-center">
                 <div className="relative p-2 bg-gradient-to-tr from-cyan-500 to-purple-600 rounded-3xl shadow-2xl">
-                  <img 
-                    src="/riccardo_founder.jpeg" 
-                    alt="Riccardo Modena" 
+                  <img
+                    src="/riccardo_founder.jpeg"
+                    alt="Riccardo Modena"
                     className="w-64 h-64 object-cover rounded-2xl"
                   />
                   <div className="absolute -bottom-4 -right-4 bg-[#0a0a0c] border border-white/10 px-4 py-2 rounded-xl text-[16px] text-slate-300 font-semibold shadow-xl">
@@ -862,7 +854,11 @@ export function App() {
                   &ldquo;Nello sviluppo dei nostri ecosistemi l&apos;obiettivo principale è rimuovere ogni forma di frizione operativa, riducendo lo sforzo d&apos;uso sia per le aziende che per i loro utenti finali. Integrare l&apos;intelligenza artificiale non significa aggiungere complessità, ma automatizzare canali per produrre risultati in modo fluido e protetto.&rdquo;
                 </p>
                 <p className="text-[16px] text-white/30">
-                  Come indicato nelle linee guida di conformità dell&apos;organizzazione internazionale <a href="https://www.w3.org/community/tourism/" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">W3C per i canali integrati</a>, l&apos;adozione di architetture logiche simmetriche riduce i tempi di interazione massimizzando la permanenza attiva.
+                  Come indicato nelle linee guida di conformità dell&apos;organizzazione internazionale{" "}
+                  <a href="https://www.w3.org/community/tourism/" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">
+                    W3C per i canali integrati
+                  </a>
+                  , l&apos;adozione di architetture logiche simmetriche riduce i tempi di interazione massimizzando la permanenza attiva.
                 </p>
               </div>
             </div>
@@ -874,7 +870,7 @@ export function App() {
               <h2 className="text-4xl md:text-6xl font-black text-center tracking-tighter mb-20 uppercase">
                 I Nostri Ecosistemi
               </h2>
-          
+
               <ProjectCard
                 title="Concierge24"
                 tag="Hospitality"
@@ -884,7 +880,7 @@ export function App() {
                 url="https://concierge24.rmstudio.app/"
                 glowColor="from-orange-400 to-red-500"
               />
-          
+
               <ProjectCard
                 title="DriveMotion"
                 tag="Automotive AI"
@@ -895,7 +891,7 @@ export function App() {
                 glowColor="from-blue-500 to-cyan-400"
                 isReversed
               />
-          
+
               <ProjectCard
                 title="HomeTour AI"
                 tag="Real Estate"
@@ -905,18 +901,18 @@ export function App() {
                 url="https://hometour.rmstudio.app"
                 glowColor="from-green-400 to-emerald-600"
               />
-          
+
               <ProjectCard
                 title="NexusAI"
                 tag="AI Sales Overlay"
-                logo="/logo_nexus_bg.png" 
+                logo="/logo_nexus_bg.png"
                 gif="/nexus_gif.gif"
                 desc="Assunzioni e vendite H24, senza cambiare una riga del tuo sito. NexusAI inietta un assistente intelligente che accoglie, informa e converte i tuoi visitatori in tempo reale."
                 url="https://demo.rmstudio.app/"
                 glowColor="from-cyan-400 to-blue-600"
                 isReversed
               />
-          
+
               <ProjectCard
                 title="OmniaStudio"
                 tag="Privacy AI"
@@ -926,7 +922,7 @@ export function App() {
                 url="https://omniastudio.rmstudio.app/"
                 glowColor="from-purple-500 to-pink-500"
               />
-          
+
               <ProjectCard
                 title="FF Edizioni"
                 tag="Audio & Music"
