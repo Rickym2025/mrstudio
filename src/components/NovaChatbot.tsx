@@ -88,12 +88,11 @@ export function NovaChatbot() {
   return (
     <div className="fixed bottom-24 md:bottom-8 left-4 md:left-8 z-[100] flex flex-col items-start">
       
-      {/* Finestra chat con bordo animato e font a 16px */}
-      <div className={`bg-[#0a0a0f]/95 backdrop-blur-2xl animated-gradient-border rounded-2xl w-[350px] shadow-[0_0_40px_rgba(6,182,212,0.15)] flex flex-col overflow-hidden transition-all duration-500 origin-bottom-left ${isOpen ? 'opacity-100 scale-100 mb-4 h-[550px]' : 'opacity-0 scale-50 h-0 mb-0 pointer-events-none'}`}>
+      {/* Finestra chat rialzata (h-[680px]), allargata (w-[380px]) e con testi ad alta leggibilità */}
+      <div className={`bg-[#0a0a0f]/95 backdrop-blur-2xl animated-gradient-border rounded-2xl w-[380px] max-w-[calc(100vw-2rem)] shadow-[0_0_40px_rgba(6,182,212,0.15)] flex flex-col overflow-hidden transition-all duration-500 origin-bottom-left ${isOpen ? 'opacity-100 scale-100 mb-4 h-[680px] max-h-[80vh]' : 'opacity-0 scale-50 h-0 mb-0 pointer-events-none'}`}>
         
         <div className="bg-gradient-to-r from-cyan-500/10 to-purple-600/10 border-b border-white/5 p-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            {/* Visualizzazione del logo dinamico in sequenza anche all'interno del chatbot */}
             <img 
               src={logos[currentLogoIdx]} 
               alt="RM Studio Logo" 
@@ -110,9 +109,18 @@ export function NovaChatbot() {
           <button onClick={() => setIsOpen(false)} className="text-white/50 hover:text-white"><X size={18} /></button>
         </div>
 
+        {/* Corpo della chat con spaziatura p-4 per massima leggibilità */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
           {messages.map((m, i) => (
-            <div key={i} className={`p-3 text-[16px] rounded-2xl max-w-[85%] ${m.sender === 'user' ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white self-end rounded-br-sm ml-auto font-medium shadow-lg' : 'bg-white/5 text-white/90 border border-white/5 self-start rounded-bl-sm leading-relaxed'}`} dangerouslySetInnerHTML={{ __html: m.text.replace(/\n/g, '<br>') }} />
+            <div 
+              key={i} 
+              className={`p-4 text-[16px] rounded-2xl max-w-[85%] leading-relaxed tracking-wide ${
+                m.sender === 'user' 
+                  ? 'bg-cyan-600 text-white self-end rounded-br-sm ml-auto font-semibold shadow-lg' 
+                  : 'bg-white/[0.07] text-slate-100 border border-white/5 self-start rounded-bl-sm'
+              }`} 
+              dangerouslySetInnerHTML={{ __html: m.text.replace(/\n/g, '<br>') }} 
+            />
           ))}
           {isLoading && (
             <div className="bg-white/5 text-cyan-400 border border-white/5 p-3 rounded-2xl rounded-bl-sm self-start max-w-[85%] text-[16px] flex gap-1">
@@ -122,9 +130,14 @@ export function NovaChatbot() {
           <div ref={messagesEndRef} />
         </div>
 
+        {/* Pulsanti di domanda rapida con font ridimensionato a 13px */}
         <div className="p-3 flex flex-wrap gap-2 bg-black/40 border-t border-white/5">
           {suggestions.map((text) => (
-            <button key={text} onClick={() => sendMessage(text)} className="text-[16px] font-bold text-cyan-100 bg-cyan-500/10 hover:bg-cyan-500/30 border border-cyan-500/20 px-3 py-1.5 rounded-full transition-all">
+            <button 
+              key={text} 
+              onClick={() => sendMessage(text)} 
+              className="text-[13px] font-bold text-cyan-100 bg-cyan-500/10 hover:bg-cyan-500/30 border border-cyan-500/20 px-3.5 py-2 rounded-full transition-all"
+            >
               {text}
             </button>
           ))}
@@ -136,7 +149,7 @@ export function NovaChatbot() {
         </div>
       </div>
 
-      {/* Pulsante esterno d'apertura a rettangolo smussato con sequenza loghi e fallback di sicurezza se l'immagine locale fallisce */}
+      {/* Pulsante esterno */}
       <button 
         onClick={() => setIsOpen(!isOpen)} 
         className={`w-16 h-16 bg-[#0a0a0f]/90 border border-white/10 rounded-2xl flex items-center justify-center shadow-[0_0_25px_rgba(6,182,212,0.3)] hover:scale-110 transition-transform overflow-hidden ${isOpen ? 'hidden' : 'flex'}`}
@@ -144,7 +157,7 @@ export function NovaChatbot() {
         <img 
           src={logos[currentLogoIdx]} 
           alt="RM Studio Logo" 
-          className="w-12 h-12 object-contain transition-all duration-300 transform" 
+          className="w-12 h-12 object-contain transition-all duration-500 transform" 
           onError={(e) => {
             e.currentTarget.src = "https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/logo.png";
           }}
