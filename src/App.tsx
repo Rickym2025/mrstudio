@@ -262,20 +262,35 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
   const hasGif = Boolean(gif && gif.trim() !== "");
   const isVideo = hasGif && gif ? gif.endsWith(".mp4") : false;
   const videoRef = useRef<HTMLVideoElement>(null);
+  const cardRef = useRef<HTMLAnchorElement>(null);
 
-  // Risolve in modo permanente le restrizioni di riproduzione asincrona all'hover
   useEffect(() => {
+    if (!isVideo) return;
+    const card = cardRef.current;
     const video = videoRef.current;
-    if (video) {
-      video.muted = true;
-      video.defaultMuted = true;
-      video.playsInline = true;
-      video.play().catch(() => {}); // Autoplay continuo silenzioso ad opacità 0
-    }
-  }, []);
+    if (!card || !video) return;
+
+    const handleEnter = () => {
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    };
+    const handleLeave = () => {
+      video.pause();
+      video.currentTime = 0;
+    };
+
+    card.addEventListener("mouseenter", handleEnter);
+    card.addEventListener("mouseleave", handleLeave);
+
+    return () => {
+      card.removeEventListener("mouseenter", handleEnter);
+      card.removeEventListener("mouseleave", handleLeave);
+    };
+  }, [isVideo]);
 
   return (
-    <a
+    
+      ref={cardRef}
       href={url}
       target="_blank"
       rel="noreferrer"
@@ -320,19 +335,17 @@ function ProjectCard({ title, tag, desc, url, glowColor, logo, gif, isReversed }
           }`}
         />
 
-        {hasGif && (
-          isVideo ? (
-            <video
-              ref={videoRef}
-              src={gif}
-              loop
-              muted
-              playsInline
-              autoPlay
-              preload="auto"
-              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gpu-accelerated"
-            />
-          ) : (
+        {hasGif && isVideo && (
+        <video
+          ref={videoRef}
+          src={gif}
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gpu-accelerated"
+        />
+      ) : (
             <img
               src={gif}
               alt={`${title} demo`}
