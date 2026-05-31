@@ -652,15 +652,15 @@ export default function App() {
               {/* REGOLA 7: Consolidamento Decisionale (CTA Ravvicinate) */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-center lg:justify-start">
                 
-                {/* REGOLA 2: Dominanza Visiva del Pulsante di Conversione (Dimensione x2) */}
+                {/* REGOLA 2: Dominanza Visiva del Pulsante di Conversione */}
                 <motion.button
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.3 }}
                   onClick={handleVCardClick}
-                  className="flex items-center justify-center gap-3 px-14 py-7 rounded-full bg-white text-black font-extrabold hover:scale-105 transition-transform shadow-[0_0_50px_rgba(255,255,255,0.3)] text-lg sm:text-xl tracking-wider w-full sm:w-auto"
+                  className="flex items-center justify-center gap-3 px-6 py-4 sm:px-14 sm:py-7 rounded-full bg-white text-black font-extrabold hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.2)] sm:shadow-[0_0_50px_rgba(255,255,255,0.3)] text-sm sm:text-lg md:text-xl tracking-wider w-full sm:w-auto"
                 >
-                  <Download size={24} />
+                  <Download className="w-5 h-5 sm:w-6 sm:h-6" />
                   SALVA CONTATTO (vCard)
                 </motion.button>
 
