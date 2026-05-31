@@ -42,7 +42,7 @@ export function FloatingDock() {
             <span className="relative z-10 transition-all duration-300 group-hover:translate-x-[-35px] group-hover:text-white" style={{ color: item.color }}>
               {item.icon}
             </span>
-            <span className="absolute left-12 text-white text-[18px] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">
+            <span className="absolute left-12 text-white text-[16px] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">
               {item.title}
             </span>
           </li>
