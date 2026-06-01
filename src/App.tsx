@@ -908,7 +908,7 @@ export function App() {
                 logo="/logo_nexus_bg.png"
                 gif="/nexus_gif.gif"
                 desc="Assunzioni e vendite H24, senza cambiare una riga del tuo sito. NexusAI inietta un assistente intelligente che accoglie, informa e converte i tuoi visitatori in tempo reale."
-                url="https://demo.rmstudio.app/"
+                url="https://nexus.rmstudio.app/"
                 glowColor="from-cyan-400 to-blue-600"
                 isReversed
               />
