@@ -357,7 +357,7 @@ function ProjectCard({
             loop
             muted
             playsInline
-            preload="none" // Cambiato in 'none' per non scaricare i video fino all'hover reale, salvando banda ed eliminando i rallentamenti
+            preload="none"
             className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gpu-accelerated"
           />
         )}
@@ -375,7 +375,7 @@ function ProjectCard({
 }
 
 // ─── 4. MAIN APP ──────────────────────────────────────────────────────────
-export function App() {
+export default function App() {
   const orbitContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
