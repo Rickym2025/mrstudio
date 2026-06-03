@@ -266,15 +266,35 @@ function ProjectCard({
 }) {
   const hasGif = Boolean(gif && gif.trim() !== "");
   const isVideo = hasGif && gif ? gif.endsWith(".mp4") : false;
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      // play() dopo che React ha aggiornato il DOM (visibile a Chrome)
+      requestAnimationFrame(() => {
+        videoRef.current?.play().catch(() => {});
+      });
+    }
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }, []);
 
   return (
     <a
       href={url}
       target="_blank"
       rel="noreferrer"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={isVideo ? handleMouseEnter : undefined}
+      onMouseLeave={isVideo ? handleMouseLeave : undefined}
       className={`group flex flex-col ${
         isReversed ? "md:flex-row-reverse" : "md:flex-row"
       } items-center gap-8 bg-white/[0.02] p-8 md:p-10 rounded-3xl border border-white/5 hover:border-white/20 transition-all duration-500 relative backdrop-blur-md overflow-hidden`}
@@ -328,8 +348,8 @@ function ProjectCard({
 
         {hasGif && isVideo && (
           <video
+            ref={videoRef}
             src={gif}
-            autoPlay
             loop
             muted
             playsInline
