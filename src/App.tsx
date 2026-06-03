@@ -10,17 +10,8 @@ import { motion, LazyMotion, domAnimation } from "framer-motion";
 // ─── COSTANTE ANNO ───
 const CURRENT_YEAR = new Date().getFullYear();
 
-// ─── DICHIARAZIONE TIPI PER WEB COMPONENT (TYPESCRIPT) ───
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'rm-orbit-ecosystem': React.DetailedHTMLProps<
-        React.HTMLAttributes<HTMLElement> & { 'base-url'?: string },
-        HTMLElement
-      >;
-    }
-  }
-}
+// ─── DEFINIZIONE DEL WEB COMPONENT PER BYPASSARE TS ───
+const RmOrbitEcosystem = "rm-orbit-ecosystem" as any;
 
 // ─── 1. FOOTER: TextHoverEffect ───────────────────────────────────────────
 const TextHoverEffect = ({ text }: { text: string }) => {
@@ -595,7 +586,7 @@ export function App() {
 
             {/* Orbit (Richiama il Custom Element salvato nella cartella public) */}
             <div className="flex-1 w-full max-w-[500px] flex justify-center items-center relative z-10 min-h-[440px]">
-              <rm-orbit-ecosystem />
+              <RmOrbitEcosystem />
             </div>
 
           </section>
