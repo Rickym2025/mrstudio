@@ -279,38 +279,28 @@ function ProjectCard({
   const hasGif = Boolean(gif && gif.trim() !== "");
   const isVideo = hasGif && gif ? gif.endsWith(".mp4") : false;
   const videoRef = useRef<HTMLVideoElement>(null);
-  const cardRef = useRef<HTMLAnchorElement>(null);
 
-  useEffect(() => {
-    if (!isVideo) return;
-    const card = cardRef.current;
-    const video = videoRef.current;
-    if (!card || !video) return;
+  const handleMouseEnter = () => {
+    if (isVideo && videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(() => {});
+    }
+  };
 
-    const handleEnter = () => {
-      video.currentTime = 0;
-      video.play().catch(() => {});
-    };
-    const handleLeave = () => {
-      video.pause();
-      video.currentTime = 0;
-    };
-
-    card.addEventListener("mouseenter", handleEnter);
-    card.addEventListener("mouseleave", handleLeave);
-
-    return () => {
-      card.removeEventListener("mouseenter", handleEnter);
-      card.removeEventListener("mouseleave", handleLeave);
-    };
-  }, [isVideo]);
+  const handleMouseLeave = () => {
+    if (isVideo && videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  };
 
   return (
     <a
-      ref={cardRef}
       href={url}
       target="_blank"
       rel="noreferrer"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className={`group flex flex-col ${
         isReversed ? "md:flex-row-reverse" : "md:flex-row"
       } items-center gap-8 bg-white/[0.02] p-8 md:p-10 rounded-3xl border border-white/5 hover:border-white/20 transition-all duration-500 relative backdrop-blur-md overflow-hidden`}
