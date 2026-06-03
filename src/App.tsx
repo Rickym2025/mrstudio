@@ -10,6 +10,18 @@ import { motion, LazyMotion, domAnimation } from "framer-motion";
 // ─── COSTANTE ANNO ───
 const CURRENT_YEAR = new Date().getFullYear();
 
+// ─── DICHIARAZIONE TIPI PER WEB COMPONENT (TYPESCRIPT) ───
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'rm-orbit-ecosystem': React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement> & { 'base-url'?: string },
+        HTMLElement
+      >;
+    }
+  }
+}
+
 // ─── 1. FOOTER: TextHoverEffect ───────────────────────────────────────────
 const TextHoverEffect = ({ text }: { text: string }) => {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -377,9 +389,16 @@ function ProjectCard({
 // ─── 4. MAIN APP ──────────────────────────────────────────────────────────
 export function App() {
   useEffect(() => {
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.innerHTML = JSON.stringify({
+    // 1. Carica lo script del Web Component dell'ecosistema orbitale
+    const orbitScript = document.createElement("script");
+    orbitScript.src = "/orbit-ecosystem.js";
+    orbitScript.defer = true;
+    document.body.appendChild(orbitScript);
+
+    // 2. Carica il JSON-LD per la SEO
+    const ldScript = document.createElement("script");
+    ldScript.type = "application/ld+json";
+    ldScript.innerHTML = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "RM Studio AI Suite",
@@ -402,9 +421,11 @@ export function App() {
         "url": "https://www.linkedin.com/in/riccardo-modena-13918a61/",
       },
     });
-    document.head.appendChild(script);
+    document.head.appendChild(ldScript);
+
     return () => {
-      document.head.removeChild(script);
+      document.body.removeChild(orbitScript);
+      document.head.removeChild(ldScript);
     };
   }, []);
 
@@ -453,21 +474,9 @@ export function App() {
         <Toaster position="top-right" richColors />
 
         <style dangerouslySetInnerHTML={{ __html: `
-          @keyframes orbit-rotation {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-          @keyframes counter-rotation {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(-360deg); }
-          }
           @keyframes netflix-glow-optimized {
             0%, 100% { opacity: 0.15; }
             50% { opacity: 0.35; }
-          }
-          @keyframes pulse-ring-optimized {
-            0%, 100% { opacity: 0.2; transform: scale(0.95); }
-            50% { opacity: 0.4; transform: scale(1.05); }
           }
           @keyframes gold-pulse {
             0%, 100% { box-shadow: 0 0 15px rgba(234, 179, 8, 0.25), inset 0 0 12px rgba(234, 179, 8, 0.15); border-color: rgba(234, 179, 8, 0.3); }
@@ -489,124 +498,10 @@ export function App() {
             border-width: 1.5px;
             border-style: solid;
           }
-          .orbit-ring {
-            position: relative;
-            width: 320px;
-            height: 320px;
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
-            animation: orbit-rotation 40s linear infinite;
-          }
-          .orbit-area {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 440px;
-          }
-          .orbit-area:hover .orbit-ring,
-          .orbit-area:hover .orbit-item {
-            animation-play-state: paused;
-          }
-          .orbit-wrapper {
-            position: absolute;
-            width: 64px;
-            height: 64px;
-            transform: translate(-50%, -50%);
-          }
-          .orbit-item {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            animation: counter-rotation 40s linear infinite;
-            transform-origin: center;
-          }
-          .orbit-link {
-            display: flex;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-sizing: border-box;
-            transition: 0.3s;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            text-decoration: none;
-          }
-          .orbit-link:hover {
-            border-color: #06b6d4;
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
-          }
-          .orbit-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-          }
-          .orbit-img.cover {
-            object-fit: cover;
-          }
-          .orbit-img.rounded {
-            border-radius: 50%;
-          }
-          .orbit-center-photo {
-            position: absolute;
-            width: 144px;
-            height: 144px;
-            border-radius: 50%;
-            border: 4px solid #f97316;
-            padding: 4px;
-            background: #000;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-            z-index: 15;
-            box-sizing: border-box;
-          }
-          .orbit-center-photo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-          }
-          .orbit-tooltip {
-            position: absolute;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            background: #0a0a0c;
-            border: 1px solid rgba(255,255,255,0.08);
-            color: #94a3b8;
-            font-size: 16px;
-            border-radius: 8px;
-            padding: 12px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
-            text-align: center;
-            z-index: 50;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            line-height: 1.4;
-          }
-          .orbit-tooltip b {
-            color: white;
-            display: block;
-            margin-bottom: 4px;
-          }
-          .orbit-item:hover .orbit-tooltip {
-            opacity: 1;
-          }
           .visual-hook-glow {
             filter: blur(50px);
             will-change: opacity;
             animation: netflix-glow-optimized 6s ease-in-out infinite;
-          }
-          .pulse-ring-element {
-            will-change: transform, opacity;
-            animation: pulse-ring-optimized 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
           }
           .gold-decoy-card {
             animation: gold-pulse 3s infinite ease-in-out;
@@ -708,89 +603,9 @@ export function App() {
               </div>
             </div>
 
-            {/* Orbit */}
-            <div className="flex-1 w-full max-w-[500px] flex justify-center items-center relative z-10 min-h-[440px] orbit-area">
-              <div className="absolute w-72 h-72 bg-cyan-500/5 blur-3xl rounded-full pulse-ring-element" />
-
-              <div className="orbit-ring">
-
-                <div className="orbit-wrapper" style={{ top: "0%", left: "50%" }}>
-                  <div className="orbit-item">
-                    <a href="https://concierge24.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#0a0a0c", padding: "10px" }}>
-                      <img src="/logo_Concierge24.png" alt="Concierge24" className="orbit-img" />
-                    </a>
-                    <div className="orbit-tooltip">
-                      <b>Concierge24</b>
-                      Assistente vocale e testuale AI H24 per hotel e strutture extra-alberghiere.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="orbit-wrapper" style={{ top: "25%", left: "93.3%" }}>
-                  <div className="orbit-item">
-                    <a href="https://drivemotion.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#fff", padding: "6px" }}>
-                      <img src="/logo_drivemotion_bg2.jpg" alt="DriveMotion" className="orbit-img cover rounded" />
-                    </a>
-                    <div className="orbit-tooltip">
-                      <b>DriveMotion AI</b>
-                      Generazione automatica di sfondi e video cinematici per saloni auto.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="orbit-wrapper" style={{ top: "75%", left: "93.3%" }}>
-                  <div className="orbit-item">
-                    <a href="https://nexus.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#0a0a0c", padding: "12px" }}>
-                      <img src="/logo_nexus_bg.png" alt="Nexus AI" className="orbit-img" />
-                    </a>
-                    <div className="orbit-tooltip">
-                      <b>Nexus AI</b>
-                      Widget chatbot intelligente per accoglienza e conversione automatica lead.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="orbit-wrapper" style={{ top: "100%", left: "50%" }}>
-                  <div className="orbit-item">
-                    <a href="https://omniastudio.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#fff", padding: "4px" }}>
-                      <img src="/logo_OmniaStudio.png" alt="OmniaStudio" className="orbit-img" />
-                    </a>
-                    <div className="orbit-tooltip">
-                      <b>OmniaStudio</b>
-                      La potenza dell&apos;AI locale e protetta offline sul tuo PC, a vita.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="orbit-wrapper" style={{ top: "75%", left: "6.7%" }}>
-                  <div className="orbit-item">
-                    <a href="https://ff.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#0a0a0c", padding: "2px" }}>
-                      <img src="/logo_ff.png" alt="FF Edizioni" className="orbit-img cover rounded" />
-                    </a>
-                    <div className="orbit-tooltip">
-                      <b>FF Edizioni</b>
-                      Colonne sonore, jingle commerciali e sound design creati con l&apos;AI.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="orbit-wrapper" style={{ top: "25%", left: "6.7%" }}>
-                  <div className="orbit-item">
-                    <a href="https://hometour.rmstudio.app" target="_blank" rel="noopener noreferrer" className="orbit-link" style={{ background: "#0a0a0c", padding: "4px" }}>
-                      <img src="/logo_hometour+bg.jpg" alt="HomeTour" className="orbit-img cover rounded" />
-                    </a>
-                    <div className="orbit-tooltip">
-                      <b>HomeTour AI</b>
-                      Reel immobiliari con voce narrante generati in automatico da foto.
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-
-              <div className="orbit-center-photo">
-                <img src="/riccardo_founder.jpeg" alt="Riccardo Modena - Fondatore RM Studio" />
-              </div>
+            {/* Orbit (Richiama il Custom Element salvato nella cartella public) */}
+            <div className="flex-1 w-full max-w-[500px] flex justify-center items-center relative z-10 min-h-[440px]">
+              <rm-orbit-ecosystem />
             </div>
 
           </section>
