@@ -5,8 +5,6 @@ class RmOrbitEcosystem extends HTMLElement {
   }
 
   connectedCallback() {
-    // Definizione del base URL per recuperare gli asset multimediali in modo assoluto.
-    // Puoi passare l'attributo "base-url" dall'esterno oppure userà il dominio di default.
     const baseUrl = this.getAttribute("base-url") || "https://rmstudio.app";
 
     this.shadowRoot.innerHTML = `
@@ -24,10 +22,7 @@ class RmOrbitEcosystem extends HTMLElement {
           50% { opacity: 0.4; transform: scale(1.05); }
         }
         :host {
-          display: block;
-          width: 100%;
-          max-width: 500px;
-          margin: 0 auto;
+          display: contents; /* Rimuove l'impatto del box fittizio del custom element sul flexbox genitore */
         }
         .orbit-area {
           position: relative;
@@ -35,6 +30,8 @@ class RmOrbitEcosystem extends HTMLElement {
           justify-content: center;
           align-items: center;
           min-height: 440px;
+          width: 100%;
+          max-width: 500px;
           font-family: system-ui, -apple-system, sans-serif;
         }
         .orbit-area:hover .orbit-ring,
@@ -156,7 +153,6 @@ class RmOrbitEcosystem extends HTMLElement {
         <div class="pulse-ring-element"></div>
 
         <div class="orbit-ring">
-          <!-- Concierge24 -->
           <div class="orbit-wrapper" style="top: 0%; left: 50%;">
             <div class="orbit-item">
               <a href="https://concierge24.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #0a0a0c; padding: 10px;">
@@ -169,7 +165,6 @@ class RmOrbitEcosystem extends HTMLElement {
             </div>
           </div>
 
-          <!-- DriveMotion -->
           <div class="orbit-wrapper" style="top: 25%; left: 93.3%;">
             <div class="orbit-item">
               <a href="https://drivemotion.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #fff; padding: 6px;">
@@ -182,7 +177,6 @@ class RmOrbitEcosystem extends HTMLElement {
             </div>
           </div>
 
-          <!-- Nexus AI -->
           <div class="orbit-wrapper" style="top: 75%; left: 93.3%;">
             <div class="orbit-item">
               <a href="https://nexus.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #0a0a0c; padding: 12px;">
@@ -195,7 +189,6 @@ class RmOrbitEcosystem extends HTMLElement {
             </div>
           </div>
 
-          <!-- OmniaStudio -->
           <div class="orbit-wrapper" style="top: 100%; left: 50%;">
             <div class="orbit-item">
               <a href="https://omniastudio.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #fff; padding: 4px;">
@@ -208,7 +201,6 @@ class RmOrbitEcosystem extends HTMLElement {
             </div>
           </div>
 
-          <!-- FF Edizioni -->
           <div class="orbit-wrapper" style="top: 75%; left: 6.7%;">
             <div class="orbit-item">
               <a href="https://ff.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #0a0a0c; padding: 2px;">
@@ -221,7 +213,6 @@ class RmOrbitEcosystem extends HTMLElement {
             </div>
           </div>
 
-          <!-- HomeTour AI -->
           <div class="orbit-wrapper" style="top: 25%; left: 6.7%;">
             <div class="orbit-item">
               <a href="https://hometour.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #0a0a0c; padding: 4px;">
