@@ -267,34 +267,38 @@ function ProjectCard({
   const hasGif = Boolean(gif && gif.trim() !== "");
   const isVideo = hasGif && gif ? gif.endsWith(".mp4") : false;
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
+  const cardRef = useRef<HTMLAnchorElement>(null);
 
-  const handleMouseEnter = useCallback(() => {
-    setIsHovered(true);
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-      // play() dopo che React ha aggiornato il DOM (visibile a Chrome)
-      requestAnimationFrame(() => {
-        videoRef.current?.play().catch(() => {});
-      });
-    }
-  }, []);
+  useEffect(() => {
+    if (!isVideo) return;
+    const card = cardRef.current;
+    const video = videoRef.current;
+    if (!card || !video) return;
 
-  const handleMouseLeave = useCallback(() => {
-    setIsHovered(false);
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
-  }, []);
+    const handleEnter = () => {
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    };
+    const handleLeave = () => {
+      video.pause();
+      video.currentTime = 0;
+    };
+
+    card.addEventListener("mouseenter", handleEnter);
+    card.addEventListener("mouseleave", handleLeave);
+
+    return () => {
+      card.removeEventListener("mouseenter", handleEnter);
+      card.removeEventListener("mouseleave", handleLeave);
+    };
+  }, [isVideo]);
 
   return (
     <a
+      ref={cardRef}
       href={url}
       target="_blank"
       rel="noreferrer"
-      onMouseEnter={isVideo ? handleMouseEnter : undefined}
-      onMouseLeave={isVideo ? handleMouseLeave : undefined}
       className={`group flex flex-col ${
         isReversed ? "md:flex-row-reverse" : "md:flex-row"
       } items-center gap-8 bg-white/[0.02] p-8 md:p-10 rounded-3xl border border-white/5 hover:border-white/20 transition-all duration-500 relative backdrop-blur-md overflow-hidden`}
@@ -353,10 +357,8 @@ function ProjectCard({
             loop
             muted
             playsInline
-            preload="auto"
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 pointer-events-none gpu-accelerated ${
-              isHovered ? "opacity-100" : "opacity-0"
-            }`}
+            preload="none"
+            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gpu-accelerated"
           />
         )}
 
@@ -503,8 +505,8 @@ export default function App() {
           }
           .orbit-ring {
             position: relative;
-            width: 320px;
-            height: 320px;
+            width: 380px;
+            height: 380px;
             border-radius: 50%;
             border: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
@@ -518,7 +520,7 @@ export default function App() {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 440px;
+            min-height: 500px;
           }
           .orbit-area:hover .orbit-ring,
           .orbit-area:hover .orbit-item {
@@ -526,8 +528,8 @@ export default function App() {
           }
           .orbit-wrapper {
             position: absolute;
-            width: 64px;
-            height: 64px;
+            width: 72px;
+            height: 72px;
             transform: translate(-50%, -50%);
           }
           .orbit-item {
@@ -567,14 +569,14 @@ export default function App() {
           }
           .orbit-center-photo {
             position: absolute;
-            width: 144px;
-            height: 144px;
+            width: 220px;
+            height: 220px;
             border-radius: 50%;
             border: 4px solid #f97316;
             padding: 4px;
             background: #000;
             box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-            z-index: 15;
+            z-index: 10;
             box-sizing: border-box;
           }
           .orbit-center-photo img {
@@ -585,7 +587,7 @@ export default function App() {
           }
           .orbit-tooltip {
             position: absolute;
-            bottom: 80px;
+            bottom: 95px;
             left: 50%;
             transform: translateX(-50%);
             width: 200px;
@@ -599,7 +601,7 @@ export default function App() {
             pointer-events: none;
             transition: opacity 0.2s;
             text-align: center;
-            z-index: 50;
+            z-index: 100;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             line-height: 1.4;
           }
@@ -619,8 +621,8 @@ export default function App() {
           /* Forziamo gli stili nativi per prevenire la rimozione delle classi nel template asincrono esterno */
           .pulse-ring-element {
             position: absolute;
-            width: 288px;
-            height: 288px;
+            width: 360px;
+            height: 360px;
             background-color: rgba(6, 182, 212, 0.05);
             filter: blur(48px);
             border-radius: 9999px;
@@ -731,7 +733,7 @@ export default function App() {
             {/* Orbit (Caricato asincronamente dall'HTML statico esterno per preservare il layout nativo al 100%) */}
             <div 
               ref={orbitContainerRef}
-              className="flex-1 w-full max-w-[500px] flex justify-center items-center relative z-10 min-h-[440px] orbit-area"
+              className="flex-1 w-full max-w-[500px] flex justify-center items-center relative z-10 min-h-[500px] orbit-area"
             >
               {/* Iniettato dinamicamente */}
             </div>
