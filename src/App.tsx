@@ -10,9 +10,6 @@ import { motion, LazyMotion, domAnimation } from "framer-motion";
 // ─── COSTANTE ANNO ───
 const CURRENT_YEAR = new Date().getFullYear();
 
-// ─── DEFINIZIONE DEL WEB COMPONENT PER BYPASSARE TS ───
-const RmOrbitEcosystem = "rm-orbit-ecosystem" as any;
-
 // ─── 1. FOOTER: TextHoverEffect ───────────────────────────────────────────
 const TextHoverEffect = ({ text }: { text: string }) => {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -270,28 +267,38 @@ function ProjectCard({
   const hasGif = Boolean(gif && gif.trim() !== "");
   const isVideo = hasGif && gif ? gif.endsWith(".mp4") : false;
   const videoRef = useRef<HTMLVideoElement>(null);
+  const cardRef = useRef<HTMLAnchorElement>(null);
 
-  const handleMouseEnter = () => {
-    if (isVideo && videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play().catch(() => {});
-    }
-  };
+  useEffect(() => {
+    if (!isVideo) return;
+    const card = cardRef.current;
+    const video = videoRef.current;
+    if (!card || !video) return;
 
-  const handleMouseLeave = () => {
-    if (isVideo && videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
-  };
+    const handleEnter = () => {
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    };
+    const handleLeave = () => {
+      video.pause();
+      video.currentTime = 0;
+    };
+
+    card.addEventListener("mouseenter", handleEnter);
+    card.addEventListener("mouseleave", handleLeave);
+
+    return () => {
+      card.removeEventListener("mouseenter", handleEnter);
+      card.removeEventListener("mouseleave", handleLeave);
+    };
+  }, [isVideo]);
 
   return (
     <a
+      ref={cardRef}
       href={url}
       target="_blank"
       rel="noreferrer"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       className={`group flex flex-col ${
         isReversed ? "md:flex-row-reverse" : "md:flex-row"
       } items-center gap-8 bg-white/[0.02] p-8 md:p-10 rounded-3xl border border-white/5 hover:border-white/20 transition-all duration-500 relative backdrop-blur-md overflow-hidden`}
@@ -369,17 +376,23 @@ function ProjectCard({
 
 // ─── 4. MAIN APP ──────────────────────────────────────────────────────────
 export function App() {
-  useEffect(() => {
-    // 1. Carica lo script del Web Component dell'ecosistema orbitale
-    const orbitScript = document.createElement("script");
-    orbitScript.src = "/orbit-ecosystem.js";
-    orbitScript.defer = true;
-    document.body.appendChild(orbitScript);
+  const orbitContainerRef = useRef<HTMLDivElement>(null);
 
-    // 2. Carica il JSON-LD per la SEO
-    const ldScript = document.createElement("script");
-    ldScript.type = "application/ld+json";
-    ldScript.innerHTML = JSON.stringify({
+  useEffect(() => {
+    // 1. Carica l'HTML dell'ecosistema orbitale dal file esterno in public/
+    fetch("/orbit-template.html")
+      .then((res) => res.text())
+      .then((html) => {
+        if (orbitContainerRef.current) {
+          orbitContainerRef.current.innerHTML = html;
+        }
+      })
+      .catch((err) => console.error("Errore nel recupero del template orbitale:", err));
+
+    // 2. Crea lo script Schema.org per la SEO
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.innerHTML = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "RM Studio AI Suite",
@@ -402,11 +415,10 @@ export function App() {
         "url": "https://www.linkedin.com/in/riccardo-modena-13918a61/",
       },
     });
-    document.head.appendChild(ldScript);
-
+    document.head.appendChild(script);
+    
     return () => {
-      document.body.removeChild(orbitScript);
-      document.head.removeChild(ldScript);
+      document.head.removeChild(script);
     };
   }, []);
 
@@ -455,9 +467,21 @@ export function App() {
         <Toaster position="top-right" richColors />
 
         <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes orbit-rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          @keyframes counter-rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
+          }
           @keyframes netflix-glow-optimized {
             0%, 100% { opacity: 0.15; }
             50% { opacity: 0.35; }
+          }
+          @keyframes pulse-ring-optimized {
+            0%, 100% { opacity: 0.2; transform: scale(0.95); }
+            50% { opacity: 0.4; transform: scale(1.05); }
           }
           @keyframes gold-pulse {
             0%, 100% { box-shadow: 0 0 15px rgba(234, 179, 8, 0.25), inset 0 0 12px rgba(234, 179, 8, 0.15); border-color: rgba(234, 179, 8, 0.3); }
@@ -479,10 +503,124 @@ export function App() {
             border-width: 1.5px;
             border-style: solid;
           }
+          .orbit-ring {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
+            animation: orbit-rotation 40s linear infinite;
+          }
+          .orbit-area {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 440px;
+          }
+          .orbit-area:hover .orbit-ring,
+          .orbit-area:hover .orbit-item {
+            animation-play-state: paused;
+          }
+          .orbit-wrapper {
+            position: absolute;
+            width: 64px;
+            height: 64px;
+            transform: translate(-50%, -50%);
+          }
+          .orbit-item {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            animation: counter-rotation 40s linear infinite;
+            transform-origin: center;
+          }
+          .orbit-link {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-sizing: border-box;
+            transition: 0.3s;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            text-decoration: none;
+          }
+          .orbit-link:hover {
+            border-color: #06b6d4;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+          }
+          .orbit-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+          }
+          .orbit-img.cover {
+            object-fit: cover;
+          }
+          .orbit-img.rounded {
+            border-radius: 50%;
+          }
+          .orbit-center-photo {
+            position: absolute;
+            width: 144px;
+            height: 144px;
+            border-radius: 50%;
+            border: 4px solid #f97316;
+            padding: 4px;
+            background: #000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            z-index: 15;
+            box-sizing: border-box;
+          }
+          .orbit-center-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+          }
+          .orbit-tooltip {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            background: #0a0a0c;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #94a3b8;
+            font-size: 16px;
+            border-radius: 8px;
+            padding: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            text-align: center;
+            z-index: 50;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            line-height: 1.4;
+          }
+          .orbit-tooltip b {
+            color: white;
+            display: block;
+            margin-bottom: 4px;
+          }
+          .orbit-item:hover .orbit-tooltip {
+            opacity: 1;
+          }
           .visual-hook-glow {
             filter: blur(50px);
             will-change: opacity;
             animation: netflix-glow-optimized 6s ease-in-out infinite;
+          }
+          .pulse-ring-element {
+            will-change: transform, opacity;
+            animation: pulse-ring-optimized 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
           }
           .gold-decoy-card {
             animation: gold-pulse 3s infinite ease-in-out;
@@ -584,9 +722,12 @@ export function App() {
               </div>
             </div>
 
-            {/* Orbit (Richiama il Custom Element salvato nella cartella public) */}
-            <div className="flex-1 w-full max-w-[500px] flex justify-center items-center relative z-10 min-h-[440px]">
-              <RmOrbitEcosystem />
+            {/* Orbit (Caricato asincronamente dall'HTML statico esterno per preservare il layout nativo al 100%) */}
+            <div 
+              ref={orbitContainerRef}
+              className="flex-1 w-full max-w-[500px] flex justify-center items-center relative z-10 min-h-[440px] orbit-area"
+            >
+              {/* Iniettato dinamicamente */}
             </div>
 
           </section>
