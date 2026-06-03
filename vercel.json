@@ -20,6 +20,10 @@
   ],
   "rewrites": [
     {
+      "source": "/orbit-template",
+      "destination": "/orbit-template.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
