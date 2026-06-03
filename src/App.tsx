@@ -357,7 +357,7 @@ function ProjectCard({
             loop
             muted
             playsInline
-            preload="metadata"
+            preload="none" // Cambiato in 'none' per non scaricare i video fino all'hover reale, salvando banda ed eliminando i rallentamenti
             className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gpu-accelerated"
           />
         )}
@@ -565,7 +565,7 @@ export function App() {
             object-fit: cover;
           }
           .orbit-img.rounded {
-            border-radius: 50%;
+            border-radius: 9999px;
           }
           .orbit-center-photo {
             position: absolute;
@@ -618,7 +618,14 @@ export function App() {
             will-change: opacity;
             animation: netflix-glow-optimized 6s ease-in-out infinite;
           }
+          /* Forziamo gli stili nativi per prevenire la rimozione delle classi nel template asincrono esterno */
           .pulse-ring-element {
+            position: absolute;
+            width: 288px;
+            height: 288px;
+            background-color: rgba(6, 182, 212, 0.05);
+            filter: blur(48px);
+            border-radius: 9999px;
             will-change: transform, opacity;
             animation: pulse-ring-optimized 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
           }
@@ -702,15 +709,16 @@ export function App() {
               </motion.p>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-center lg:justify-start">
+                {/* Salva Contatto: vCard - Colori forzati per non scolorire mai in caso di focus o click */}
                 <motion.button
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.3 }}
                   onClick={handleVCardClick}
-                  className="flex items-center justify-center gap-3 px-5 py-3 sm:px-8 sm:py-4 rounded-full bg-white text-black font-extrabold hover:scale-105 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.15)] sm:shadow-[0_0_30px_rgba(255,255,255,0.25)] text-[16px] tracking-wider w-full sm:w-auto"
+                  className="flex items-center justify-center gap-3 px-5 py-3 sm:px-8 sm:py-4 rounded-full bg-white text-black hover:text-black focus:text-black active:text-black font-extrabold hover:scale-105 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] sm:shadow-[0_0_30px_rgba(255,255,255,0.25)] text-[16px] tracking-wider w-full sm:w-auto focus:outline-none"
                 >
-                  <Download className="w-5 h-5 sm:w-6 sm:h-6" />
-                  SALVA CONTATTO (vCard)
+                  <Download className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
+                  <span className="text-black font-extrabold">SALVA CONTATTO (vCard)</span>
                 </motion.button>
 
                 <a
@@ -948,7 +956,7 @@ export function App() {
           </section>
 
           {/* ── FOOTER ── */}
-          <footer className="relative w-full pt-40 pb-12 bg-black border-t border-white/5 flex flex-col items-center overflow-hidden">
+          <footer className="relative w-full pt-40 pb-56 bg-black border-t border-white/5 flex flex-col items-center overflow-hidden">
             <div
               className="absolute inset-0 z-0"
               style={{ background: "radial-gradient(100% 100% at 50% 0%, rgba(6,182,212,0.1) 0%, transparent 100%)" }}
@@ -993,7 +1001,7 @@ export function App() {
               </a>
             </div>
 
-            <div className="relative z-10 text-white/20 text-[16px] font-bold tracking-[4px] text-center uppercase leading-relaxed">
+            <div className="relative z-10 text-white/20 text-[16px] font-bold tracking-[4px] text-center uppercase leading-relaxed pb-12">
               © {CURRENT_YEAR} Riccardo Modena • RM STUDIO <br />
               <span className="text-cyan-500/50">High-End AI Engineering</span> <br />
               <div className="mt-3 flex items-center justify-center gap-3">
@@ -1012,5 +1020,3 @@ export function App() {
     </LazyMotion>
   );
 }
-
-export default App;
