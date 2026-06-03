@@ -275,8 +275,8 @@ function ProjectCard({
     const video = videoRef.current;
     if (!card || !video) return;
 
-    // Pre-carica i metadati così il browser conosce il codec e la dimensione
-    // prima ancora che l'utente faccia hover → elimina il jank al primo play
+    // Pre-carica i metadati: il browser conosce codec e dimensioni
+    // prima dell'hover → elimina il jank al primo play (soprattutto Safari)
     video.load();
 
     const handleEnter = () => {
@@ -510,8 +510,8 @@ export default function App() {
           }
           .orbit-ring {
             position: relative;
-            width: 500px;
-            height: 500px;
+            width: 320px;
+            height: 320px;
             border-radius: 50%;
             border: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
@@ -525,7 +525,7 @@ export default function App() {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 580px;
+            min-height: 440px;
           }
           .orbit-area:hover .orbit-ring,
           .orbit-area:hover .orbit-item {
@@ -533,8 +533,8 @@ export default function App() {
           }
           .orbit-wrapper {
             position: absolute;
-            width: 82px;
-            height: 82px;
+            width: 64px;
+            height: 64px;
             transform: translate(-50%, -50%);
           }
           .orbit-item {
@@ -574,8 +574,8 @@ export default function App() {
           }
           .orbit-center-photo {
             position: absolute;
-            width: 184px;
-            height: 184px;
+            width: 144px;
+            height: 144px;
             border-radius: 50%;
             border: 4px solid #f97316;
             padding: 4px;
@@ -626,8 +626,8 @@ export default function App() {
           /* Forziamo gli stili nativi per prevenire la rimozione delle classi nel template asincrono esterno */
           .pulse-ring-element {
             position: absolute;
-            width: 460px;
-            height: 460px;
+            width: 288px;
+            height: 288px;
             background-color: rgba(6, 182, 212, 0.05);
             filter: blur(48px);
             border-radius: 9999px;
@@ -738,7 +738,7 @@ export default function App() {
             {/* Orbit (Caricato asincronamente dall'HTML statico esterno per preservare il layout nativo al 100%) */}
             <div 
               ref={orbitContainerRef}
-              className="flex-1 w-full max-w-[600px] flex justify-center items-center relative z-10 min-h-[580px] orbit-area"
+              className="flex-1 w-full max-w-[500px] flex justify-center items-center relative z-10 min-h-[440px] orbit-area"
             >
               {/* Iniettato dinamicamente */}
             </div>
