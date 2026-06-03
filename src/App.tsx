@@ -266,50 +266,15 @@ function ProjectCard({
 }) {
   const hasGif = Boolean(gif && gif.trim() !== "");
   const isVideo = hasGif && gif ? gif.endsWith(".mp4") : false;
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const cardRef = useRef<HTMLAnchorElement>(null);
-  const [videoVisible, setVideoVisible] = useState(false);
-
-  useEffect(() => {
-    if (!isVideo) return;
-    const card = cardRef.current;
-    const video = videoRef.current;
-    if (!card || !video) return;
-
-    // Precarica subito i metadati senza aspettare hover
-    video.load();
-
-    const handleEnter = async () => {
-      video.currentTime = 0;
-      setVideoVisible(true);
-      try {
-        await video.play();
-      } catch {
-        // autoplay bloccato dal browser, ignora silenziosamente
-      }
-    };
-
-    const handleLeave = () => {
-      video.pause();
-      video.currentTime = 0;
-      setVideoVisible(false);
-    };
-
-    card.addEventListener("mouseenter", handleEnter);
-    card.addEventListener("mouseleave", handleLeave);
-
-    return () => {
-      card.removeEventListener("mouseenter", handleEnter);
-      card.removeEventListener("mouseleave", handleLeave);
-    };
-  }, [isVideo]);
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <a
-      ref={cardRef}
       href={url}
       target="_blank"
       rel="noreferrer"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={`group flex flex-col ${
         isReversed ? "md:flex-row-reverse" : "md:flex-row"
       } items-center gap-8 bg-white/[0.02] p-8 md:p-10 rounded-3xl border border-white/5 hover:border-white/20 transition-all duration-500 relative backdrop-blur-md overflow-hidden`}
@@ -363,14 +328,14 @@ function ProjectCard({
 
         {hasGif && isVideo && (
           <video
-            ref={videoRef}
             src={gif}
+            autoPlay
             loop
             muted
             playsInline
-            preload="metadata"
+            preload="auto"
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 pointer-events-none gpu-accelerated ${
-              videoVisible ? "opacity-100" : "opacity-0"
+              isHovered ? "opacity-100" : "opacity-0"
             }`}
           />
         )}
