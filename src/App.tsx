@@ -268,6 +268,7 @@ function ProjectCard({
   const isVideo = hasGif && gif ? gif.endsWith(".mp4") : false;
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLAnchorElement>(null);
+  const [videoVisible, setVideoVisible] = useState(false);
 
   useEffect(() => {
     if (!isVideo) return;
@@ -275,18 +276,23 @@ function ProjectCard({
     const video = videoRef.current;
     if (!card || !video) return;
 
-    // Pre-carica i metadati: il browser conosce codec e dimensioni
-    // prima dell'hover → elimina il jank al primo play (soprattutto Safari)
+    // Precarica subito i metadati senza aspettare hover
     video.load();
 
-    const handleEnter = () => {
+    const handleEnter = async () => {
       video.currentTime = 0;
-      const p = video.play();
-      if (p) p.catch(() => {});
+      setVideoVisible(true);
+      try {
+        await video.play();
+      } catch {
+        // autoplay bloccato dal browser, ignora silenziosamente
+      }
     };
+
     const handleLeave = () => {
       video.pause();
       video.currentTime = 0;
+      setVideoVisible(false);
     };
 
     card.addEventListener("mouseenter", handleEnter);
@@ -363,7 +369,9 @@ function ProjectCard({
             muted
             playsInline
             preload="metadata"
-            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gpu-accelerated"
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 pointer-events-none gpu-accelerated ${
+              videoVisible ? "opacity-100" : "opacity-0"
+            }`}
           />
         )}
 
