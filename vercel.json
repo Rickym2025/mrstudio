@@ -1,7 +1,7 @@
 {
   "headers": [
     {
-      "source": "/orbit-template.html",
+      "source": "/orbit-template(.*)",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
