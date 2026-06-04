@@ -3,25 +3,27 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { NovaChatbot } from "./components/NovaChatbot";
 import { FloatingDock } from "./components/FloatingDock";
-import { ExternalLink, Download, Send, ArrowDown } from "lucide-react";
+import { ExternalLink, Download, Send, ArrowRight } from "lucide-react";
 import { Toaster, toast } from "sonner";
-import { motion, LazyMotion, domAnimation, useScroll, useTransform } from "framer-motion";
+import { motion, LazyMotion, domAnimation, useScroll, useTransform, useSpring } from "framer-motion";
 
-// ─── COSTANTE ANNO ───
 const CURRENT_YEAR = new Date().getFullYear();
 
-// ─── DATI ECOSISTEMI (Incluso Dentis) ──────────────────────────────────
-const ECOSYSTEM_PRODUCTS = [
+// ─── COORDINATE DEI PRODOTTI NELLO SPAZIO 3D ───
+// Ogni prodotto ha una posizione fisica (X, Y, Z in pixel) e una rotazione (RY in gradi) nel "mondo".
+const THREE_D_ECOSYSTEM = [
   {
     id: "concierge24",
     title: "Concierge24",
     tag: "Hospitality AI",
     logo: "/logo_Concierge24.png",
     gif: "/c24_gif.gif",
-    desc: "L'assistente vocale H24 multilingua che accoglie gli ospiti, risponde alle domande sulla struttura ed esegue l'up-selling dei servizi extra mentre lo staff riposa.",
+    desc: "L'assistente vocale H24 multilingua che accoglie gli ospiti, risponde alle domande sulla struttura ed esegue l'up-selling dei servizi extra.",
     url: "https://concierge24.rmstudio.app/",
-    glowColor: "from-orange-500/20 via-orange-600/10 to-transparent",
-    accentBorder: "rgba(249, 115, 22, 0.3)"
+    // Posizione nello spazio 3D
+    posX: 0, posY: 0, posZ: 0, rotY: 0,
+    themeGlow: "rgba(249, 115, 22, 0.15)",
+    envMarker: "Prato fiorito & Lanterne calde"
   },
   {
     id: "drivemotion",
@@ -29,10 +31,12 @@ const ECOSYSTEM_PRODUCTS = [
     tag: "Automotive AI",
     logo: "/logo_drivemotion.png",
     gif: "/drivemotion_video.mp4",
-    desc: "Sfondi fotorealistici e video virali generati in automatico. Trasforma le foto amatoriali del piazzale in reel cinematografici che aumentano il valore percepito delle vetture.",
+    desc: "Sfondi fotorealistici e video virali generati in automatico. Trasforma le foto del piazzale in reel cinematografici che aumentano il valore delle vetture.",
     url: "https://drivemotion.rmstudio.app",
-    glowColor: "from-blue-500/20 via-blue-600/10 to-transparent",
-    accentBorder: "rgba(59, 130, 246, 0.3)"
+    // Spostato a destra, più profondo e ruotato
+    posX: 800, posY: -100, posZ: -1200, rotY: -45,
+    themeGlow: "rgba(59, 130, 246, 0.15)",
+    envMarker: "Città Cyber & Neon Riflessi"
   },
   {
     id: "hometour",
@@ -40,21 +44,25 @@ const ECOSYSTEM_PRODUCTS = [
     tag: "Real Estate AI",
     logo: "/logo_HomeTour.png",
     gif: "/hometour_gif.gif",
-    desc: "Reel immobiliari con voce narrante emozionale, generati in automatico da semplici fotografie di appartamenti per vendere l'esperienza d'acquisto prima della visita.",
+    desc: "Reel immobiliari con voce narrante emozionale, generati in automatico da semplici fotografie di appartamenti per vendere l'esperienza prima della visita.",
     url: "https://hometour.rmstudio.app",
-    glowColor: "from-green-500/20 via-emerald-600/10 to-transparent",
-    accentBorder: "rgba(34, 197, 94, 0.3)"
+    // Profondissimo a sinistra
+    posX: -800, posY: 150, posZ: -2400, rotY: 40,
+    themeGlow: "rgba(34, 197, 94, 0.15)",
+    envMarker: "Bosco di betulle & Luce filtrante"
   },
   {
     id: "dentis",
     title: "Dentis",
     tag: "Dental AI Receptionist",
-    logo: "/logo_dentis.png", // Nome logo dal file di allineamento
+    logo: "/logo_dentis.png",
     gif: "/dentis_video.mp4",
-    desc: "La segretaria virtuale H24 per l'odontoiatria. Risponde con voce naturale rassicurante, gestisce gli appuntamenti su Google Calendar e rileva le urgenze mediche.",
+    desc: "La segretaria virtuale H24 per l'odontoiatria. Risponde con voce naturale, gestisce gli appuntamenti su Google Calendar e rileva le urgenze mediche.",
     url: "https://dentis.rmstudio.app",
-    glowColor: "from-teal-500/20 via-cyan-600/10 to-transparent",
-    accentBorder: "rgba(20, 184, 166, 0.3)"
+    // Molto in alto a destra
+    posX: 900, posY: -300, posZ: -3600, rotY: -30,
+    themeGlow: "rgba(20, 184, 166, 0.15)",
+    envMarker: "Studio asettico & Cerchi di luce bianca"
   },
   {
     id: "nexus",
@@ -62,10 +70,12 @@ const ECOSYSTEM_PRODUCTS = [
     tag: "AI Sales Overlay",
     logo: "/logo_nexus_bg.png",
     gif: "/nexus_gif.gif",
-    desc: "Inietta un assistente intelligente che accoglie, informa e converte i visitatori in tempo reale sul tuo sito attuale, senza modificare il codice sorgente o il CMS.",
+    desc: "Inietta un assistente intelligente che accoglie, informa e converte i visitatori in tempo reale sul tuo sito attuale, senza modificare il codice o il CMS.",
     url: "https://nexus.rmstudio.app/",
-    glowColor: "from-cyan-500/20 via-blue-600/10 to-transparent",
-    accentBorder: "rgba(6, 182, 212, 0.3)"
+    // Profondo a sinistra, quasi ortogonale
+    posX: -1000, posY: -50, posZ: -4800, rotY: 65,
+    themeGlow: "rgba(6, 182, 212, 0.15)",
+    envMarker: "Portale di codice & Flussi di dati"
   },
   {
     id: "omniastudio",
@@ -73,10 +83,12 @@ const ECOSYSTEM_PRODUCTS = [
     tag: "Privacy AI Offline",
     logo: "/logo_OmniaStudio.png",
     gif: "/omniastudio_video.mp4",
-    desc: "La potenza dei modelli linguistici locali sul tuo computer. Analizza contratti, PDF e dati sensibili con elaborazione 100% offline a tutela del segreto professionale.",
+    desc: "La potenza dei modelli linguistici locali sul tuo computer. Analizza contratti, PDF e dati sensibili con elaborazione 100% offline a tutela del segreto.",
     url: "https://omniastudio.rmstudio.app/",
-    glowColor: "from-purple-500/20 via-pink-600/10 to-transparent",
-    accentBorder: "rgba(168, 85, 247, 0.3)"
+    // In basso, centrato e profondo
+    posX: 0, posY: 400, posZ: -6000, rotY: 0,
+    themeGlow: "rgba(168, 85, 247, 0.15)",
+    envMarker: "Caveau blindato & Lastre di vetro viola"
   },
   {
     id: "ffedizioni",
@@ -84,14 +96,16 @@ const ECOSYSTEM_PRODUCTS = [
     tag: "Audio & Sound Design",
     logo: "/logo_ff.png",
     gif: "/ff_gif.gif",
-    desc: "Identità sonore e colonne sonore AI originali con la direzione artistica del M° Fausto Fusetti. Jingle commerciali pronti per le campagne radio e social del tuo brand.",
+    desc: "Identità sonore e colonne sonore AI originali con la direzione artistica del M° Fausto Fusetti. Jingle commerciali pronti per le campagne del tuo brand.",
     url: "https://ff.rmstudio.app/",
-    glowColor: "from-yellow-500/20 via-orange-600/10 to-transparent",
-    accentBorder: "rgba(234, 179, 8, 0.3)"
+    // Svolta finale a destra, ad angolo acuto
+    posX: 600, posY: 0, posZ: -7200, rotY: -75,
+    themeGlow: "rgba(234, 179, 8, 0.15)",
+    envMarker: "Onde sonore dorate & Particelle di ottone"
   }
 ];
 
-// ─── 1. FOOTER: TextHoverEffect ───────────────────────────────────────────
+// ─── TEXT HOVER EFFECT (FOOTER) ───
 const TextHoverEffect = ({ text }: { text: string }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
@@ -136,76 +150,34 @@ const TextHoverEffect = ({ text }: { text: string }) => {
       className="select-none uppercase cursor-pointer w-full h-full"
     >
       <defs>
-        <radialGradient
-          id="textGradient"
-          gradientUnits="userSpaceOnUse"
-          cx={maskPosition.cx}
-          cy={maskPosition.cy}
-          r="40%"
-        >
+        <radialGradient id="textGradient" gradientUnits="userSpaceOnUse" cx={maskPosition.cx} cy={maskPosition.cy} r="40%">
           <stop offset="0%" stopColor="#06b6d4" />
           <stop offset="50%" stopColor="#8b5cf6" />
           <stop offset="100%" stopColor="#3b82f6" />
         </radialGradient>
-
-        <radialGradient
-          id="revealMask"
-          gradientUnits="userSpaceOnUse"
-          cx={maskPosition.cx}
-          cy={maskPosition.cy}
-          r="20%"
-        >
+        <radialGradient id="revealMask" gradientUnits="userSpaceOnUse" cx={maskPosition.cx} cy={maskPosition.cy} r="20%">
           <stop offset="0%" stopColor="white" />
           <stop offset="100%" stopColor="black" />
         </radialGradient>
-
         <mask id="textMask">
           <rect x="0" y="0" width="100%" height="100%" fill="url(#revealMask)" />
         </mask>
       </defs>
-
-      <text
-        x="50%" y="50%" textAnchor="middle" dominantBaseline="middle"
-        strokeWidth="0.3"
-        className="fill-transparent stroke-white/10 font-black text-6xl"
-        style={{ opacity: hovered ? 0.7 : 0 }}
-      >
+      <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" strokeWidth="0.3" className="fill-transparent stroke-white/10 font-black text-6xl" style={{ opacity: hovered ? 0.7 : 0 }}>
         {text}
       </text>
-
-      <motion.text
-        x="50%" y="50%" textAnchor="middle" dominantBaseline="middle"
-        strokeWidth="0.3"
-        className="fill-transparent stroke-cyan-500/50 font-black text-6xl"
-        initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
-        animate={{ strokeDashoffset: 0, strokeDasharray: 1000 }}
-        transition={{ duration: 4, ease: "easeInOut" }}
-      >
+      <motion.text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" strokeWidth="0.3" className="fill-transparent stroke-cyan-500/50 font-black text-6xl" initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }} animate={{ strokeDashoffset: 0, strokeDasharray: 1000 }} transition={{ duration: 4, ease: "easeInOut" }}>
         {text}
       </motion.text>
-
-      <text
-        x="50%" y="50%" textAnchor="middle" dominantBaseline="middle"
-        stroke="url(#textGradient)" strokeWidth="0.3"
-        mask="url(#textMask)"
-        className="fill-transparent font-black text-6xl"
-      >
+      <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" stroke="url(#textGradient)" strokeWidth="0.3" mask="url(#textMask)" className="fill-transparent font-black text-6xl">
         {text}
       </text>
     </svg>
   );
 };
 
-// ─── 2. TESTIMONIAL CARD ──────────────────────────────────────────────────
-function TestimonialCard({
-  handleShuffle, testimonial, position, id, author,
-}: {
-  handleShuffle: () => void;
-  testimonial: string;
-  position: "front" | "middle" | "back";
-  id: string;
-  author: string;
-}) {
+// ─── TESTIMONIALS ───
+function TestimonialCard({ handleShuffle, testimonial, position, id, author }: { handleShuffle: () => void; testimonial: string; position: "front" | "middle" | "back"; id: string; author: string; }) {
   const dragRef = useRef(0);
   const isFront = position === "front";
 
@@ -226,16 +198,9 @@ function TestimonialCard({
         dragRef.current = 0;
       }}
       transition={{ duration: 0.35 }}
-      className={`absolute left-0 top-0 grid h-[350px] w-[300px] select-none place-content-center space-y-6 rounded-3xl border border-white/10 bg-black/40 p-8 shadow-2xl backdrop-blur-xl ${
-        isFront ? "cursor-grab active:cursor-grabbing" : ""
-      }`}
+      className={`absolute left-0 top-0 grid h-[350px] w-[300px] select-none place-content-center space-y-6 rounded-3xl border border-white/10 bg-black/40 p-8 shadow-2xl backdrop-blur-xl ${isFront ? "cursor-grab active:cursor-grabbing" : ""}`}
     >
-      <img
-        src={`https://i.pravatar.cc/128?img=${id}`}
-        alt={author}
-        loading="lazy"
-        className="pointer-events-none mx-auto h-20 w-20 rounded-full border-2 border-cyan-500/50 object-cover shadow-lg"
-      />
+      <img src={`https://i.pravatar.cc/128?img=${id}`} alt={author} loading="lazy" className="pointer-events-none mx-auto h-20 w-20 rounded-full border-2 border-cyan-500/50 object-cover shadow-lg" />
       <p className="text-center text-[16px] italic text-white/70 leading-relaxed">&ldquo;{testimonial}&rdquo;</p>
       <span className="text-center text-[16px] font-black tracking-widest uppercase text-cyan-400">{author}</span>
     </motion.div>
@@ -243,61 +208,15 @@ function TestimonialCard({
 }
 
 const initialTestimonials = [
-  {
-    id: "12",
-    author: "Marco G. (Modena)",
-    text: "Abbiamo venduto un immobile in 4 giorni dall'annuncio. Il Reel di HomeTour ha fatto 10k views organiche su Instagram.",
-  },
-  {
-    id: "15",
-    author: "Elena V. (Milano)",
-    text: "I miei clienti venditori rimangono colpiti quando mostro l'animazione 3D del loro appartamento. Un valore aggiunto concreto per acquisire mandati in esclusiva.",
-  },
-  {
-    id: "32",
-    author: "Sara L. (Roma)",
-    text: "L'assistente Concierge24 ha letteralmente azzerato le chiamate in reception per chiedere la password del WiFi e gli orari di colazione.",
-  },
-  {
-    id: "34",
-    author: "Giuseppe T. (Firenze)",
-    text: "I clienti internazionali apprezzano l'assistenza multilingua attiva anche di notte. Risponde all'istante su check-in tardivi e consigli logistici locali.",
-  },
-  {
-    id: "36",
-    author: "Alessia B. (Venezia)",
-    text: "Gestisco 8 appartamenti turistici. L'integrazione di Concierge24 ha ridotto del 70% i messaggi ripetitivi su WhatsApp, lasciandoci molto più tempo libero.",
-  },
-  {
-    id: "42",
-    author: "Claudio M. (Napoli)",
-    text: "Il jingle creato per la nostra campagna radiofonica locale è orecchiabile e professionale. Ottimo lavoro di sintonizzazione con l'identità del nostro brand.",
-  },
-  {
-    id: "45",
-    author: "Valentina R. (Bologna)",
-    text: "Colonne sonore ideali per i nostri spot di lancio sui social. FF Edizioni ci permette di ottenere sonorità originali senza preoccuparci delle licenze di copyright.",
-  },
-  {
-    id: "53",
-    author: "Fabio R. (Torino)",
-    text: "La rimozione dello sfondo e l'inserimento automatico nei saloni virtuali ha dato alle nostre vetture usate un aspetto ordinato e professionale sul portale.",
-  },
-  {
-    id: "58",
-    author: "Studio Associato B. (Milano)",
-    text: "Nexus AI gestisce i flussi di contatto sul nostro sito principale. Filtra le richieste degli indecisi e risponde ai dubbi tecnici anche durante il fine settimana.",
-  },
-  {
-    id: "62",
-    author: "Avv. De Luca (Napoli)",
-    text: "L'elaborazione dati completamente locale offline è l'unica soluzione compatibile con il segreto professionale del nostro studio legale. Analisi dei contratti sicura al 100%.",
-  },
+  { id: "12", author: "Marco G. (Modena)", text: "Abbiamo venduto un immobile in 4 giorni dall'annuncio. Il Reel di HomeTour ha fatto 10k views organiche su Instagram." },
+  { id: "15", author: "Elena V. (Milano)", text: "I miei clienti venditori rimangono colpiti quando mostro l'animazione 3D del loro appartamento. Un valore aggiunto concreto per acquisire mandati in esclusiva." },
+  { id: "32", author: "Sara L. (Roma)", text: "L'assistente Concierge24 ha letteralmente azzerato le chiamate in reception per chiedere la password del WiFi e gli orari di colazione." },
+  { id: "34", author: "Giuseppe T. (Firenze)", text: "I clienti internazionali apprezzano l'assistenza multilingua attiva anche di notte. Risponde all'istante su check-in tardivi e consigli logistici locali." },
+  { id: "36", author: "Alessia B. (Venezia)", text: "Gestisco 8 appartamenti turistici. L'integrazione di Concierge24 ha ridotto del 70% i messaggi ripetitivi su WhatsApp, lasciandoci molto più tempo libero." }
 ];
 
 function TestimonialSection() {
   const [testimonials, setTestimonials] = useState(initialTestimonials);
-
   const handleShuffle = useCallback(() => {
     setTestimonials((prev) => {
       const newArr = [...prev];
@@ -311,149 +230,267 @@ function TestimonialSection() {
     <div className="relative w-full max-w-4xl mx-auto h-[450px] flex justify-center items-center mt-12 overflow-hidden px-4">
       <div className="relative max-w-[300px] w-full h-[350px]">
         {testimonials.map((t, i) => (
-          <TestimonialCard
-            key={t.id}
-            id={t.id}
-            author={t.author}
-            testimonial={t.text}
-            position={i === 0 ? "front" : i === 1 ? "middle" : "back"}
-            handleShuffle={handleShuffle}
-          />
+          <TestimonialCard key={t.id} id={t.id} author={t.author} testimonial={t.text} position={i === 0 ? "front" : i === 1 ? "middle" : "back"} handleShuffle={handleShuffle} />
         ))}
       </div>
     </div>
   );
 }
 
-// ─── 3. CINEMATIC SCROLLER (3D Depth Journey) ──────────────────────────────
-function CinematicEcosystems() {
-  const targetRef = useRef<HTMLDivElement>(null);
+// ─── VIDEO RENDERER COMPONENT (CON FIX AUTOPLAY RIGIDO) ───
+function ActiveMedia({ src, alt }: { src: string; alt: string }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const isVideo = src.endsWith(".mp4");
+
+  useEffect(() => {
+    if (isVideo && videoRef.current) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      videoRef.current.play().catch((err) => {
+        console.log("Autoplay mitigato dal browser, riprovo al click o interazione", err);
+      });
+    }
+  }, [isVideo, src]);
+
+  if (isVideo) {
+    return (
+      <video
+        ref={videoRef}
+        src={src}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        className="w-full h-full object-cover opacity-90 transition-transform duration-700 hover:scale-105"
+      />
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      className="w-full h-full object-cover opacity-90 transition-transform duration-700 hover:scale-105"
+    />
+  );
+}
+
+// ─── 3. SPATIAL CAMERA RIG (IL VIAGGIO 3D REALE) ───────────────────────────
+function Spatial3DScroller() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Rileviamo lo scroll progressivo sull'intera altezza del contenitore "mondo" (800vh)
   const { scrollYProgress } = useScroll({
-    target: targetRef,
+    target: containerRef,
     offset: ["start start", "end end"]
   });
 
+  // Moltiplichiamo per un effetto "spring" ammorbidito per eliminare scatti nel movimento della camera
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 45,
+    damping: 15,
+    restDelta: 0.001
+  });
+
+  // Generiamo gli array di mappatura dello scroll per i 7 prodotti
+  const steps = THREE_D_ECOSYSTEM.length;
+  const scrollKeys = THREE_D_ECOSYSTEM.map((_, i) => i / (steps - 1));
+
+  // LA TELECAMERA SI MUOVE IN MODO OPPOSTO AI PRODOTTI PER PORTARLI AL CENTRO
+  // Se il Prodotto_A è a X=800, la telecamera deve spostare l'intero mondo a X=-800 per centrarlo
+  const cameraX = useTransform(smoothProgress, scrollKeys, THREE_D_ECOSYSTEM.map(p => -p.posX));
+  const cameraY = useTransform(smoothProgress, scrollKeys, THREE_D_ECOSYSTEM.map(p => -p.posY));
+  const cameraZ = useTransform(smoothProgress, scrollKeys, THREE_D_ECOSYSTEM.map(p => -p.posZ));
+  const cameraRotY = useTransform(smoothProgress, scrollKeys, THREE_D_ECOSYSTEM.map(p => -p.rotY));
+
+  // Effetto di oscillazione naturale aggiuntivo (simula il galleggiamento del drone/testa del visitatore)
+  const cameraRotX = useTransform(smoothProgress, [0, 0.5, 1], [0, 3, -2]);
+
+  // Stato dell'indice attivo per mostrare badge e controlli
+  const [activeIdx, setActiveIdx] = useState(0);
+  useEffect(() => {
+    return scrollYProgress.on("change", (latest) => {
+      const currentIdx = Math.min(
+        Math.round(latest * (steps - 1)),
+        steps - 1
+      );
+      setActiveIdx(currentIdx);
+    });
+  }, [scrollYProgress, steps]);
+
   return (
-    <section ref={targetRef} className="relative h-[700vh] w-full bg-transparent">
-      {/* Contenitore Sticky */}
-      <div className="sticky top-0 left-0 h-screen w-full overflow-hidden flex flex-col justify-center items-center z-20">
+    <div ref={containerRef} className="relative h-[800vh] w-full bg-[#030308]">
+      
+      {/* Visualizzatore 3D fisso sullo schermo */}
+      <div className="sticky top-0 left-0 h-screen w-full overflow-hidden flex items-center justify-center z-20">
         
-        {/* Titolo di Sezione Fisso in alto */}
-        <div className="absolute top-24 left-1/2 -translate-x-1/2 text-center z-30 pointer-events-none px-4">
-          <span className="text-[14px] uppercase tracking-[6px] font-black text-cyan-400">
-            Esplorazione Spaziale
+        {/* INTERFACCIA HUD IN PRIMO PIANO */}
+        <div className="absolute top-28 left-10 z-30 hidden md:flex flex-col gap-2 pointer-events-none">
+          <span className="text-[12px] font-black uppercase tracking-[4px] text-cyan-400">
+            STRATEGIC SPACE MAP
           </span>
-          <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight mt-1 text-white">
-            Ecosistemi Attivi
-          </h2>
-          <div className="flex items-center justify-center gap-2 mt-2 text-slate-500 text-[14px] font-semibold">
-            <span>Scorri per muoverti nella suite</span>
-            <ArrowDown size={14} className="animate-bounce" />
+          <div className="flex flex-col gap-1 text-slate-500 font-bold text-[14px]">
+            {THREE_D_ECOSYSTEM.map((p, i) => (
+              <div key={p.id} className="flex items-center gap-3 transition-colors duration-300">
+                <span className={`w-2 h-2 rounded-full ${i === activeIdx ? "bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,1)]" : "bg-white/10"}`} />
+                <span className={i === activeIdx ? "text-white" : ""}>{p.title}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Macchina da presa virtuale / Contenitore 3D */}
-        <div className="relative w-full max-w-6xl h-[65vh] md:h-[70vh] flex items-center justify-center px-4">
-          {ECOSYSTEM_PRODUCTS.map((prod, idx) => {
-            // Calcoliamo i range di scroll per ogni singola scena
-            const totalProducts = ECOSYSTEM_PRODUCTS.length;
-            const step = 1 / totalProducts;
-            const start = idx * step;
-            const peak = start + step / 2;
-            const end = (idx + 1) * step;
+        {/* CONTENITORE AMBIENTE 3D (La nostra "Camera Box") */}
+        <div 
+          className="relative w-full h-full flex items-center justify-center"
+          style={{ perspective: "1100px" }} // Imposta la profondità dell'ambiente 3D
+        >
+          {/* CAMERA RIG (Questo elemento trasla e ruota l'intero universo tridimensionale) */}
+          <motion.div
+            style={{
+              x: cameraX,
+              y: cameraY,
+              z: cameraZ,
+              rotateY: cameraRotY,
+              rotateX: cameraRotX,
+              transformStyle: "preserve-3d"
+            }}
+            className="w-full h-full absolute flex items-center justify-center gpu-accelerated"
+          >
+            
+            {/* ELEMENTI DI PARALLASSE AMBIENTALE (La "Vallata" tridimensionale di riferimento) */}
+            {/* 1. Il pavimento a griglia prospettica */}
+            <div 
+              className="absolute w-[10000px] h-[10000px] opacity-10 pointer-events-none border-t border-cyan-500/30"
+              style={{
+                transform: "rotateX(90deg) translateY(5000px)",
+                background: "radial-gradient(circle, rgba(6,182,212,0.15) 1px, transparent 1px)",
+                backgroundSize: "80px 80px",
+                transformStyle: "preserve-3d"
+              }}
+            />
 
-            // Mappiamo le trasformazioni cinematiche della telecamera
-            // Ingresso (piccolo e trasparente) -> Picco (in focus) -> Uscita (enorme/zoom-past-camera e trasparente)
-            const scale = useTransform(scrollYProgress, [start, peak, end], [0.5, 1, 1.8]);
-            const opacity = useTransform(scrollYProgress, [start, peak - 0.05, peak + 0.05, end], [0, 1, 1, 0]);
-            const y = useTransform(scrollYProgress, [start, peak, end], [80, 0, -80]);
-            const blurValue = useTransform(scrollYProgress, [start, peak, end], [12, 0, 15]);
-            const blurFilter = useTransform(blurValue, (v) => `blur(${v}px)`);
+            {/* 2. Il soffitto stellato */}
+            <div 
+              className="absolute w-[10000px] h-[10000px] opacity-20 pointer-events-none"
+              style={{
+                transform: "rotateX(-90deg) translateY(5000px)",
+                background: "radial-gradient(circle, #fff 1px, transparent 1.5px)",
+                backgroundSize: "150px 150px",
+                transformStyle: "preserve-3d"
+              }}
+            />
 
-            // Sfondo dinamico legato al progresso di ciascuna scena
-            const bgGlowOpacity = useTransform(scrollYProgress, [start, peak, end], [0, 0.4, 0]);
+            {/* 3. Marcatori di atmosfera ambientale per ogni applicazione (I mondi che cambiano) */}
+            {THREE_D_ECOSYSTEM.map((prod, idx) => {
+              // Posizioniamo l'indicatore ambientale fluttuante dietro ogni scheda
+              return (
+                <div
+                  key={`env-${prod.id}`}
+                  style={{
+                    transform: `translate3d(${prod.posX}px, ${prod.posY + 300}px, ${prod.posZ - 200}px) rotateY(${prod.rotY}deg)`,
+                    transformStyle: "preserve-3d"
+                  }}
+                  className="absolute pointer-events-none flex flex-col items-center justify-center"
+                >
+                  {/* Sfera di energia neon fluttuante */}
+                  <div 
+                    className="w-96 h-96 rounded-full filter blur-[120px] opacity-40 animate-pulse"
+                    style={{ background: prod.themeGlow }}
+                  />
+                  <span className="text-[12px] font-black uppercase tracking-[8px] text-white/10 mt-4 block">
+                    {prod.envMarker}
+                  </span>
+                </div>
+              );
+            })}
 
-            return (
-              <motion.div
-                key={prod.id}
-                style={{
-                  scale,
-                  opacity,
-                  y,
-                  filter: blurFilter,
-                  zIndex: totalProducts - idx,
-                }}
-                className="absolute w-full max-w-4xl bg-black/60 backdrop-blur-2xl border border-white/5 p-6 md:p-10 rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.8)] flex flex-col md:flex-row gap-8 items-center pointer-events-auto overflow-hidden gpu-accelerated"
-              >
-                {/* Glow di Sfondo personalizzato */}
+            {/* LE 7 SCHEDE APPLICAZIONE DISPOSTE NELLO SPAZIO */}
+            {THREE_D_ECOSYSTEM.map((prod, idx) => {
+              const isFocused = idx === activeIdx;
+
+              return (
                 <motion.div
-                  style={{ opacity: bgGlowOpacity }}
-                  className={`absolute inset-0 bg-gradient-to-br ${prod.glowColor} pointer-events-none z-0 transition-all`}
-                />
+                  key={prod.id}
+                  style={{
+                    // Assegnazione delle coordinate reali nello spazio 3D
+                    transform: `translate3d(${prod.posX}px, ${prod.posY}px, ${prod.posZ}px) rotateY(${prod.rotY}deg)`,
+                    transformStyle: "preserve-3d",
+                  }}
+                  animate={{
+                    opacity: isFocused ? 1 : 0.15,
+                    filter: isFocused ? "blur(0px)" : "blur(4px)",
+                    scale: isFocused ? 1 : 0.92,
+                  }}
+                  transition={{ duration: 0.6 }}
+                  className={`absolute w-[90%] max-w-4xl bg-black/60 backdrop-blur-3xl border ${isFocused ? "border-cyan-500/30" : "border-white/5"} p-6 md:p-10 rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.9)] flex flex-col md:flex-row gap-8 items-center ${isFocused ? "pointer-events-auto" : "pointer-events-none"} gpu-accelerated`}
+                >
+                  {/* Glow di Sfondo */}
+                  <div 
+                    className="absolute inset-0 opacity-10 pointer-events-none z-0 transition-opacity"
+                    style={{ background: `radial-gradient(circle at 50% 50%, ${prod.themeGlow}, transparent)` }}
+                  />
 
-                {/* Sotto-bordo animato colorato */}
-                <div 
-                  className="absolute bottom-0 left-0 right-0 h-1"
-                  style={{ backgroundColor: prod.accentBorder }}
-                />
+                  {/* Testo Descrittivo */}
+                  <div className="flex-1 z-10 text-left">
+                    <div className="flex items-center gap-4 mb-4">
+                      <img
+                        src={prod.logo}
+                        alt={prod.title}
+                        className="w-16 h-16 object-contain rounded-2xl bg-black/50 p-2 border border-white/10 shadow-lg"
+                      />
+                      <div>
+                        <span className="text-[13px] uppercase tracking-[4px] font-black text-cyan-400">
+                          {prod.tag}
+                        </span>
+                        <h3 className="text-3xl md:text-4xl font-extrabold text-white">{prod.title}</h3>
+                      </div>
+                    </div>
+                    <p className="text-white/60 text-[16px] md:text-[18px] leading-relaxed mb-6 font-light">
+                      {prod.desc}
+                    </p>
+                    <a
+                      href={prod.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 border border-white/10 hover:border-white/30 text-[15px] font-bold text-white hover:bg-white/10 transition-all group"
+                    >
+                      Accedi alla Piattaforma 
+                      <ExternalLink size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </a>
+                  </div>
 
-                {/* Contenuto Sinistro: Testo */}
-                <div className="flex-1 z-10 text-left">
-                  <div className="flex items-center gap-4 mb-4">
-                    <img
-                      src={prod.logo}
-                      alt={prod.title}
-                      className="w-14 h-14 object-contain rounded-2xl bg-black/40 p-1.5 border border-white/10"
-                    />
-                    <div>
-                      <span className="text-[13px] uppercase tracking-[4px] font-black text-cyan-400">
-                        {prod.tag}
-                      </span>
-                      <h3 className="text-3xl md:text-4xl font-extrabold text-white">{prod.title}</h3>
+                  {/* Video / Immagine di Anteprima */}
+                  <div className="w-full md:w-[340px] h-[220px] md:h-[260px] rounded-3xl bg-black/40 border border-white/5 relative overflow-hidden flex items-center justify-center shadow-inner z-10">
+                    <ActiveMedia src={prod.gif} alt={prod.title} />
+                    <div className="absolute top-3 right-4 text-[11px] font-black uppercase tracking-[2px] text-white/30 px-2 py-1 bg-black/40 backdrop-blur-md rounded-md">
+                      ECOSYSTEM PREVIEW
                     </div>
                   </div>
-                  <p className="text-white/60 text-[16px] md:text-[18px] leading-relaxed mb-6 font-light">
-                    {prod.desc}
-                  </p>
-                  <a
-                    href={prod.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 border border-white/10 hover:border-white/30 text-[15px] font-bold text-white hover:bg-white/10 transition-all group"
-                  >
-                    Accedi alla Piattaforma 
-                    <ExternalLink size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                  </a>
-                </div>
 
-                {/* Contenuto Destro: Video/Gif Preview */}
-                <div className="w-full md:w-[320px] h-[200px] md:h-[240px] rounded-2xl bg-black/40 border border-white/5 relative overflow-hidden flex items-center justify-center group shadow-inner z-10">
-                  {prod.gif.endsWith(".mp4") ? (
-                    <video
-                      src={prod.gif}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700"
-                    />
-                  ) : (
-                    <img
-                      src={prod.gif}
-                      alt={`${prod.title} demo`}
-                      className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700"
-                    />
-                  )}
-                  <div className="absolute top-3 right-4 text-[11px] font-black uppercase tracking-[2px] text-white/30 px-2 py-1 bg-black/40 backdrop-blur-md rounded-md">
-                    LIVE PREVIEW
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
+                </motion.div>
+              );
+            })}
+
+          </motion.div>
         </div>
+
+        {/* CONTROLLI DI DIREZIONE IN FONDO ALLA SCHERMATA */}
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1 pointer-events-none">
+          <span className="text-[11px] font-black uppercase tracking-[5px] text-white/20">
+            PROSSIMA DESTINAZIONE
+          </span>
+          <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/5">
+            <span className="text-[13px] font-bold text-cyan-400">
+              {activeIdx < steps - 1 ? THREE_D_ECOSYSTEM[activeIdx + 1].title : "Fine del Viaggio"}
+            </span>
+            <ArrowRight size={14} className="text-cyan-400 animate-pulse" />
+          </div>
+        </div>
+
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -891,9 +928,9 @@ export default function App() {
             </div>
           </section>
 
-          {/* ── PRODOTTI (NUOVA VERSIONE CINEMATICA CON SCI-FI SCROLLER) ── */}
+          {/* ── IL NUOVO SPATIAL CAMERA RIG 3D ── */}
           <div id="progetti">
-            <CinematicEcosystems />
+            <Spatial3DScroller />
           </div>
 
           {/* ── TESTIMONIALS ── */}
