@@ -10,7 +10,6 @@ import { motion, LazyMotion, domAnimation, useScroll, useTransform, useSpring } 
 const CURRENT_YEAR = new Date().getFullYear();
 
 // ─── COORDINATE DEI PRODOTTI NELLO SPAZIO 3D ───
-// Ogni prodotto ha una posizione fisica (X, Y, Z in pixel) e una rotazione (RY in gradi) nel "mondo".
 const THREE_D_ECOSYSTEM = [
   {
     id: "concierge24",
@@ -20,7 +19,6 @@ const THREE_D_ECOSYSTEM = [
     gif: "/c24_gif.gif",
     desc: "L'assistente vocale H24 multilingua che accoglie gli ospiti, risponde alle domande sulla struttura ed esegue l'up-selling dei servizi extra.",
     url: "https://concierge24.rmstudio.app/",
-    // Posizione nello spazio 3D
     posX: 0, posY: 0, posZ: 0, rotY: 0,
     themeGlow: "rgba(249, 115, 22, 0.15)",
     envMarker: "Prato fiorito & Lanterne calde"
@@ -33,7 +31,6 @@ const THREE_D_ECOSYSTEM = [
     gif: "/drivemotion_video.mp4",
     desc: "Sfondi fotorealistici e video virali generati in automatico. Trasforma le foto del piazzale in reel cinematografici che aumentano il valore delle vetture.",
     url: "https://drivemotion.rmstudio.app",
-    // Spostato a destra, più profondo e ruotato
     posX: 800, posY: -100, posZ: -1200, rotY: -45,
     themeGlow: "rgba(59, 130, 246, 0.15)",
     envMarker: "Città Cyber & Neon Riflessi"
@@ -46,7 +43,6 @@ const THREE_D_ECOSYSTEM = [
     gif: "/hometour_gif.gif",
     desc: "Reel immobiliari con voce narrante emozionale, generati in automatico da semplici fotografie di appartamenti per vendere l'esperienza prima della visita.",
     url: "https://hometour.rmstudio.app",
-    // Profondissimo a sinistra
     posX: -800, posY: 150, posZ: -2400, rotY: 40,
     themeGlow: "rgba(34, 197, 94, 0.15)",
     envMarker: "Bosco di betulle & Luce filtrante"
@@ -59,7 +55,6 @@ const THREE_D_ECOSYSTEM = [
     gif: "/dentis_video.mp4",
     desc: "La segretaria virtuale H24 per l'odontoiatria. Risponde con voce naturale, gestisce gli appuntamenti su Google Calendar e rileva le urgenze mediche.",
     url: "https://dentis.rmstudio.app",
-    // Molto in alto a destra
     posX: 900, posY: -300, posZ: -3600, rotY: -30,
     themeGlow: "rgba(20, 184, 166, 0.15)",
     envMarker: "Studio asettico & Cerchi di luce bianca"
@@ -72,7 +67,6 @@ const THREE_D_ECOSYSTEM = [
     gif: "/nexus_gif.gif",
     desc: "Inietta un assistente intelligente che accoglie, informa e converte i visitatori in tempo reale sul tuo sito attuale, senza modificare il codice o il CMS.",
     url: "https://nexus.rmstudio.app/",
-    // Profondo a sinistra, quasi ortogonale
     posX: -1000, posY: -50, posZ: -4800, rotY: 65,
     themeGlow: "rgba(6, 182, 212, 0.15)",
     envMarker: "Portale di codice & Flussi di dati"
@@ -83,9 +77,8 @@ const THREE_D_ECOSYSTEM = [
     tag: "Privacy AI Offline",
     logo: "/logo_OmniaStudio.png",
     gif: "/omniastudio_video.mp4",
-    desc: "La potenza dei modelli linguistici locali sul tuo computer. Analizza contratti, PDF e dati sensibili con elaborazione 100% offline a tutela del segreto.",
+    desc: "La potenza dei modelli linguistici locali sul tuo computer. Analizza contratti, PDF e dati sensibili con prima elaborazione 100% offline.",
     url: "https://omniastudio.rmstudio.app/",
-    // In basso, centrato e profondo
     posX: 0, posY: 400, posZ: -6000, rotY: 0,
     themeGlow: "rgba(168, 85, 247, 0.15)",
     envMarker: "Caveau blindato & Lastre di vetro viola"
@@ -98,7 +91,6 @@ const THREE_D_ECOSYSTEM = [
     gif: "/ff_gif.gif",
     desc: "Identità sonore e colonne sonore AI originali con la direzione artistica del M° Fausto Fusetti. Jingle commerciali pronti per le campagne del tuo brand.",
     url: "https://ff.rmstudio.app/",
-    // Svolta finale a destra, ad angolo acuto
     posX: 600, posY: 0, posZ: -7200, rotY: -75,
     themeGlow: "rgba(234, 179, 8, 0.15)",
     envMarker: "Onde sonore dorate & Particelle di ottone"
@@ -237,7 +229,7 @@ function TestimonialSection() {
   );
 }
 
-// ─── VIDEO RENDERER COMPONENT (CON FIX AUTOPLAY RIGIDO) ───
+// ─── VIDEO RENDERER COMPONENT ───
 function ActiveMedia({ src, alt }: { src: string; alt: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const isVideo = src.endsWith(".mp4");
@@ -247,7 +239,7 @@ function ActiveMedia({ src, alt }: { src: string; alt: string }) {
       videoRef.current.defaultMuted = true;
       videoRef.current.muted = true;
       videoRef.current.play().catch((err) => {
-        console.log("Autoplay mitigato dal browser, riprovo al click o interazione", err);
+        console.log("Autoplay mitigato", err);
       });
     }
   }, [isVideo, src]);
@@ -277,38 +269,30 @@ function ActiveMedia({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-// ─── 3. SPATIAL CAMERA RIG (IL VIAGGIO 3D REALE) ───────────────────────────
+// ─── 3. SPATIAL CAMERA RIG (IL VIAGGIO 3D REALE) ───
 function Spatial3DScroller() {
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Rileviamo lo scroll progressivo sull'intera altezza del contenitore "mondo" (800vh)
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"]
   });
 
-  // Moltiplichiamo per un effetto "spring" ammorbidito per eliminare scatti nel movimento della camera
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 45,
     damping: 15,
     restDelta: 0.001
   });
 
-  // Generiamo gli array di mappatura dello scroll per i 7 prodotti
   const steps = THREE_D_ECOSYSTEM.length;
   const scrollKeys = THREE_D_ECOSYSTEM.map((_, i) => i / (steps - 1));
 
-  // LA TELECAMERA SI MUOVE IN MODO OPPOSTO AI PRODOTTI PER PORTARLI AL CENTRO
-  // Se il Prodotto_A è a X=800, la telecamera deve spostare l'intero mondo a X=-800 per centrarlo
   const cameraX = useTransform(smoothProgress, scrollKeys, THREE_D_ECOSYSTEM.map(p => -p.posX));
   const cameraY = useTransform(smoothProgress, scrollKeys, THREE_D_ECOSYSTEM.map(p => -p.posY));
   const cameraZ = useTransform(smoothProgress, scrollKeys, THREE_D_ECOSYSTEM.map(p => -p.posZ));
   const cameraRotY = useTransform(smoothProgress, scrollKeys, THREE_D_ECOSYSTEM.map(p => -p.rotY));
-
-  // Effetto di oscillazione naturale aggiuntivo (simula il galleggiamento del drone/testa del visitatore)
   const cameraRotX = useTransform(smoothProgress, [0, 0.5, 1], [0, 3, -2]);
 
-  // Stato dell'indice attivo per mostrare badge e controlli
   const [activeIdx, setActiveIdx] = useState(0);
   useEffect(() => {
     return scrollYProgress.on("change", (latest) => {
@@ -322,11 +306,8 @@ function Spatial3DScroller() {
 
   return (
     <div ref={containerRef} className="relative h-[800vh] w-full bg-[#030308]">
-      
-      {/* Visualizzatore 3D fisso sullo schermo */}
       <div className="sticky top-0 left-0 h-screen w-full overflow-hidden flex items-center justify-center z-20">
         
-        {/* INTERFACCIA HUD IN PRIMO PIANO */}
         <div className="absolute top-28 left-10 z-30 hidden md:flex flex-col gap-2 pointer-events-none">
           <span className="text-[12px] font-black uppercase tracking-[4px] text-cyan-400">
             STRATEGIC SPACE MAP
@@ -341,12 +322,7 @@ function Spatial3DScroller() {
           </div>
         </div>
 
-        {/* CONTENITORE AMBIENTE 3D (La nostra "Camera Box") */}
-        <div 
-          className="relative w-full h-full flex items-center justify-center"
-          style={{ perspective: "1100px" }} // Imposta la profondità dell'ambiente 3D
-        >
-          {/* CAMERA RIG (Questo elemento trasla e ruota l'intero universo tridimensionale) */}
+        <div className="relative w-full h-full flex items-center justify-center" style={{ perspective: "1100px" }}>
           <motion.div
             style={{
               x: cameraX,
@@ -358,9 +334,6 @@ function Spatial3DScroller() {
             }}
             className="w-full h-full absolute flex items-center justify-center gpu-accelerated"
           >
-            
-            {/* ELEMENTI DI PARALLASSE AMBIENTALE (La "Vallata" tridimensionale di riferimento) */}
-            {/* 1. Il pavimento a griglia prospettica */}
             <div 
               className="absolute w-[10000px] h-[10000px] opacity-10 pointer-events-none border-t border-cyan-500/30"
               style={{
@@ -371,7 +344,6 @@ function Spatial3DScroller() {
               }}
             />
 
-            {/* 2. Il soffitto stellato */}
             <div 
               className="absolute w-[10000px] h-[10000px] opacity-20 pointer-events-none"
               style={{
@@ -382,9 +354,7 @@ function Spatial3DScroller() {
               }}
             />
 
-            {/* 3. Marcatori di atmosfera ambientale per ogni applicazione (I mondi che cambiano) */}
-            {THREE_D_ECOSYSTEM.map((prod, idx) => {
-              // Posizioniamo l'indicatore ambientale fluttuante dietro ogni scheda
+            {THREE_D_ECOSYSTEM.map((prod) => {
               return (
                 <div
                   key={`env-${prod.id}`}
@@ -394,7 +364,6 @@ function Spatial3DScroller() {
                   }}
                   className="absolute pointer-events-none flex flex-col items-center justify-center"
                 >
-                  {/* Sfera di energia neon fluttuante */}
                   <div 
                     className="w-96 h-96 rounded-full filter blur-[120px] opacity-40 animate-pulse"
                     style={{ background: prod.themeGlow }}
@@ -406,7 +375,6 @@ function Spatial3DScroller() {
               );
             })}
 
-            {/* LE 7 SCHEDE APPLICAZIONE DISPOSTE NELLO SPAZIO */}
             {THREE_D_ECOSYSTEM.map((prod, idx) => {
               const isFocused = idx === activeIdx;
 
@@ -414,7 +382,6 @@ function Spatial3DScroller() {
                 <motion.div
                   key={prod.id}
                   style={{
-                    // Assegnazione delle coordinate reali nello spazio 3D
                     transform: `translate3d(${prod.posX}px, ${prod.posY}px, ${prod.posZ}px) rotateY(${prod.rotY}deg)`,
                     transformStyle: "preserve-3d",
                   }}
@@ -426,13 +393,11 @@ function Spatial3DScroller() {
                   transition={{ duration: 0.6 }}
                   className={`absolute w-[90%] max-w-4xl bg-black/60 backdrop-blur-3xl border ${isFocused ? "border-cyan-500/30" : "border-white/5"} p-6 md:p-10 rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.9)] flex flex-col md:flex-row gap-8 items-center ${isFocused ? "pointer-events-auto" : "pointer-events-none"} gpu-accelerated`}
                 >
-                  {/* Glow di Sfondo */}
                   <div 
                     className="absolute inset-0 opacity-10 pointer-events-none z-0 transition-opacity"
                     style={{ background: `radial-gradient(circle at 50% 50%, ${prod.themeGlow}, transparent)` }}
                   />
 
-                  {/* Testo Descrittivo */}
                   <div className="flex-1 z-10 text-left">
                     <div className="flex items-center gap-4 mb-4">
                       <img
@@ -461,7 +426,6 @@ function Spatial3DScroller() {
                     </a>
                   </div>
 
-                  {/* Video / Immagine di Anteprima */}
                   <div className="w-full md:w-[340px] h-[220px] md:h-[260px] rounded-3xl bg-black/40 border border-white/5 relative overflow-hidden flex items-center justify-center shadow-inner z-10">
                     <ActiveMedia src={prod.gif} alt={prod.title} />
                     <div className="absolute top-3 right-4 text-[11px] font-black uppercase tracking-[2px] text-white/30 px-2 py-1 bg-black/40 backdrop-blur-md rounded-md">
@@ -476,7 +440,6 @@ function Spatial3DScroller() {
           </motion.div>
         </div>
 
-        {/* CONTROLLI DI DIREZIONE IN FONDO ALLA SCHERMATA */}
         <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1 pointer-events-none">
           <span className="text-[11px] font-black uppercase tracking-[5px] text-white/20">
             PROSSIMA DESTINAZIONE
@@ -499,7 +462,6 @@ export default function App() {
   const orbitContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // 1. Carica l'HTML dell'ecosistema orbitale dal file esterno in public/
     fetch("/orbit-template.html")
       .then((res) => res.text())
       .then((html) => {
@@ -509,7 +471,6 @@ export default function App() {
       })
       .catch((err) => console.error("Errore nel recupero del template orbitale:", err));
 
-    // 2. Crea lo script Schema.org per la SEO
     const script = document.createElement("script");
     script.type = "application/ld+json";
     script.innerHTML = JSON.stringify({
@@ -738,7 +699,6 @@ export default function App() {
             will-change: opacity;
             animation: netflix-glow-optimized 6s ease-in-out infinite;
           }
-          /* Forziamo gli stili nativi per prevenire la rimozione delle classi nel template asincrono esterno */
           .pulse-ring-element {
             position: absolute;
             width: 360px;
@@ -849,7 +809,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Orbit */}
             <div 
               ref={orbitContainerRef}
               className="flex-1 w-full max-w-[500px] flex justify-center items-center relative z-10 min-h-[500px] orbit-area"
