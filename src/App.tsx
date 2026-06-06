@@ -1,385 +1,178 @@
 "use client";
 
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { NovaChatbot } from "./components/NovaChatbot";
 import { FloatingDock } from "./components/FloatingDock";
 import { ExternalLink, Download, Send } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { motion, LazyMotion, domAnimation } from "framer-motion";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 // ─── COSTANTE ANNO ───
 const CURRENT_YEAR = new Date().getFullYear();
 
-// ─── 1. FOOTER: TextHoverEffect ───────────────────────────────────────────
-const TextHoverEffect = ({ text }: { text: string }) => {
-  const svgRef = useRef<SVGSVGElement>(null);
-  const [cursor, setCursor] = useState({ x: 0, y: 0 });
-  const [hovered, setHovered] = useState(false);
-  const [maskPosition, setMaskPosition] = useState({ cx: "50%", cy: "50%" });
-  const rafRef = useRef<number | null>(null);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
-    const clientX = e.clientX;
-    const clientY = e.clientY;
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    rafRef.current = requestAnimationFrame(() => {
-      setCursor({ x: clientX, y: clientY });
-    });
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (svgRef.current && cursor.x !== 0 && cursor.y !== 0) {
-      const svgRect = svgRef.current.getBoundingClientRect();
-      const cxPercentage = ((cursor.x - svgRect.left) / svgRect.width) * 100;
-      const cyPercentage = ((cursor.y - svgRect.top) / svgRect.height) * 100;
-      setMaskPosition({ cx: `${cxPercentage}%`, cy: `${cyPercentage}%` });
-    }
-  }, [cursor]);
-
-  return (
-    <svg
-      ref={svgRef}
-      width="100%"
-      height="100%"
-      viewBox="0 0 300 100"
-      xmlns="http://www.w3.org/2000/svg"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onMouseMove={handleMouseMove}
-      className="select-none uppercase cursor-pointer w-full h-full"
-    >
-      <defs>
-        <radialGradient
-          id="textGradient"
-          gradientUnits="userSpaceOnUse"
-          cx={maskPosition.cx}
-          cy={maskPosition.cy}
-          r="40%"
-        >
-          <stop offset="0%" stopColor="#06b6d4" />
-          <stop offset="50%" stopColor="#8b5cf6" />
-          <stop offset="100%" stopColor="#3b82f6" />
-        </radialGradient>
-
-        <radialGradient
-          id="revealMask"
-          gradientUnits="userSpaceOnUse"
-          cx={maskPosition.cx}
-          cy={maskPosition.cy}
-          r="20%"
-        >
-          <stop offset="0%" stopColor="white" />
-          <stop offset="100%" stopColor="black" />
-        </radialGradient>
-
-        <mask id="textMask">
-          <rect x="0" y="0" width="100%" height="100%" fill="url(#revealMask)" />
-        </mask>
-      </defs>
-
-      <text
-        x="50%" y="50%" textAnchor="middle" dominantBaseline="middle"
-        strokeWidth="0.3"
-        className="fill-transparent stroke-white/10 font-black text-6xl"
-        style={{ opacity: hovered ? 0.7 : 0 }}
-      >
-        {text}
-      </text>
-
-      <motion.text
-        x="50%" y="50%" textAnchor="middle" dominantBaseline="middle"
-        strokeWidth="0.3"
-        className="fill-transparent stroke-cyan-500/50 font-black text-6xl"
-        initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
-        animate={{ strokeDashoffset: 0, strokeDasharray: 1000 }}
-        transition={{ duration: 4, ease: "easeInOut" }}
-      >
-        {text}
-      </motion.text>
-
-      <text
-        x="50%" y="50%" textAnchor="middle" dominantBaseline="middle"
-        stroke="url(#textGradient)" strokeWidth="0.3"
-        mask="url(#textMask)"
-        className="fill-transparent font-black text-6xl"
-      >
-        {text}
-      </text>
-    </svg>
-  );
-};
-
-// ─── 2. TESTIMONIAL CARD ──────────────────────────────────────────────────
-function TestimonialCard({
-  handleShuffle, testimonial, position, id, author,
-}: {
-  handleShuffle: () => void;
-  testimonial: string;
-  position: "front" | "middle" | "back";
+// Interfaccia delle stazioni
+interface Scene {
   id: string;
-  author: string;
-}) {
-  const dragRef = useRef(0);
-  const isFront = position === "front";
-
-  return (
-    <motion.div
-      style={{ zIndex: position === "front" ? 2 : position === "middle" ? 1 : 0 }}
-      animate={{
-        rotate: position === "front" ? "-6deg" : position === "middle" ? "0deg" : "6deg",
-        x: position === "front" ? "0%" : position === "middle" ? "33%" : "66%",
-        scale: position === "front" ? 1 : position === "middle" ? 0.95 : 0.9,
-      }}
-      drag={isFront ? "x" : false}
-      dragElastic={0.35}
-      dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
-      onDragStart={(_e, info) => { dragRef.current = info.point.x; }}
-      onDragEnd={(_e, info) => {
-        if (Math.abs(dragRef.current - info.point.x) > 100) handleShuffle();
-        dragRef.current = 0;
-      }}
-      transition={{ duration: 0.35 }}
-      className={`absolute left-0 top-0 grid h-[350px] w-[300px] select-none place-content-center space-y-6 rounded-3xl border border-white/10 bg-black/40 p-8 shadow-2xl backdrop-blur-xl ${
-        isFront ? "cursor-grab active:cursor-grabbing" : ""
-      }`}
-    >
-      <img
-        src={`https://i.pravatar.cc/128?img=${id}`}
-        alt={author}
-        loading="lazy"
-        className="pointer-events-none mx-auto h-20 w-20 rounded-full border-2 border-cyan-500/50 object-cover shadow-lg"
-      />
-      <p className="text-center text-[16px] italic text-white/70 leading-relaxed">&ldquo;{testimonial}&rdquo;</p>
-      <span className="text-center text-[16px] font-black tracking-widest uppercase text-cyan-400">{author}</span>
-    </motion.div>
-  );
+  chapter: string;
+  title: string;
+  subtitle: string;
+  logo: string;
+  problem?: string;
+  solution?: string;
+  neuroCopy?: string;
+  url?: string;
+  isProduct: boolean;
+  isIntro?: boolean;
+  isTheUnion?: boolean;
+  isContact?: boolean;
 }
 
-const initialTestimonials = [
+// Configurazione delle 11 scene reali mappate sui tuoi file
+const SCENES: Scene[] = [
   {
-    id: "12",
-    author: "Marco G. (Modena)",
-    text: "Abbiamo venduto un immobile in 4 giorni dall'annuncio. Il Reel di HomeTour ha fatto 10k views organiche su Instagram.",
+    id: "hero-start",
+    chapter: "Ecosistema",
+    title: "RM Studio",
+    subtitle: "Risolviamo colli di bottiglia operativi sviluppando ecosistemi AI su misura. Riduciamo lo sforzo d'uso, azzeriamo l'errore umano ed espandiamo i tuoi canali commerciali. Scorri per iniziare.",
+    logo: "logo.png",
+    isProduct: false,
+    isIntro: true
   },
   {
-    id: "15",
-    author: "Elena V. (Milano)",
-    text: "I miei clienti venditori rimangono colpiti quando mostro l'animazione 3D del loro appartamento. Un valore aggiunto concreto per acquisire mandati in esclusiva.",
+    id: "nexus",
+    chapter: "Chapter I — Conversion AI",
+    title: "NexusAI",
+    subtitle: "Assunzioni e vendite H24 sul tuo sito attuale senza cambiare codice. NexusAI inietta un assistente intelligente che accoglie, informa e converte i visitatori in lead profilati.",
+    logo: "logo_nexus_bg.png",
+    problem: "I siti web aziendali statici registrano costantemente alti tassi di rimbalzo (bounce rate), fallendo nel convertire il traffico serale o festivo in clienti attivi.",
+    solution: "L'overlay invisibile si aggancia all'istante alla tua infrastruttura, scansiona in autonomia la conoscenza aziendale e acquisisce i dati di contatto dei visitatori in tempo reale.",
+    neuroCopy: "Il 96% degli utenti abbandona le pagine a causa del sovraccarico cognitivo. Nexus agisce sul principio biologico di fluidità, intercettando il dubbio del visitatore all'istante.",
+    isProduct: true,
+    url: "https://nexus.rmstudio.app"
   },
   {
-    id: "32",
-    author: "Sara L. (Roma)",
-    text: "L'assistente Concierge24 ha letteralmente azzerato le chiamate in reception per chiedere la password del WiFi e gli orari di colazione.",
+    id: "concierge24",
+    chapter: "Chapter II — Hospitality",
+    title: "Concierge24",
+    subtitle: "L'assistente vocale H24 multilingua che accoglie gli ospiti, risponde alle loro domande e fa up-selling dei tuoi servizi extra mentre il tuo staff riposa.",
+    logo: "logo_Concierge24.png",
+    problem: "La reception soffre di picchi di sovraccarico, con centralini intasati e turisti frustrati in attesa di risposte su Wi-Fi e check-in nelle ore notturne.",
+    solution: "Giulia risponde all'istante con un'espressività vocale calda e umana, parlando la lingua nativa dell'ospite, proponendo servizi e inviando conferme su WhatsApp.",
+    neuroCopy: "Il cervello rettiliano percepisce l'attesa come un disservizio immediato. Giulia azzera la frizione d'ingresso, elevando la percezione di status della struttura.",
+    isProduct: true,
+    url: "https://concierge24.rmstudio.app"
   },
   {
-    id: "34",
-    author: "Giuseppe T. (Firenze)",
-    text: "I clienti internazionali apprezzano l'assistenza multilingua attiva anche di notte. Risponde all'istante su check-in tardivi e consigli logistici locali.",
+    id: "dentis",
+    chapter: "Chapter III — Dental AI",
+    title: "Dentis",
+    subtitle: "Receptionist AI telefonica H24 su misura per l'odontoiatria. Sincronizza gli appuntamenti, gestisce il triage e azzera le poltrone vuote.",
+    logo: "logo_dentis.png",
+    problem: "Telefonate perse fuori orario, poltrone vuote non ottimizzate e segreteria medica intasata dalle urgenze improvvise dei pazienti.",
+    solution: "Serena risponde H24, esegue il triage empatico delle problematiche cliniche e prenota le visite direttamente sul calendario sincronizzato Google Calendar.",
+    neuroCopy: "Un paziente con dolore vive uno stato di urgenza limbica. Serena risponde al primo squillo, trasformando l'ansia del paziente in fiducia verso lo studio.",
+    isProduct: true,
+    url: "https://dentis.rmstudio.app"
   },
   {
-    id: "36",
-    author: "Alessia B. (Venezia)",
-    text: "Gestisco 8 appartamenti turistici. L'integrazione di Concierge24 ha ridotto del 70% i messaggi ripetitivi su WhatsApp, lasciandoci molto più tempo libero.",
+    id: "lexis",
+    chapter: "Chapter IV — Legal AI",
+    title: "Lexis AI",
+    subtitle: "Assistente telefonica AI formale ed empatica per studi legali. Gestisce prime consulenze e tutela il segreto professionale.",
+    logo: "logo_lexis.png",
+    problem: "Avvocati e studi legali che faticano a filtrare le richieste futili fuori orario nel rispetto del segreto professionale e del protocollo di studio.",
+    solution: "Chiara adotta un registro formale ('Lei'), risponde ai dubbi di base, prenota le prime consulenze sul calendario ed invia promemoria WhatsApp.",
+    neuroCopy: "Il cliente legale esige riservatezza e autorità fin dal primo contatto. Chiara adotta un tono distaccato ma empatico, riducendo l'attrito burocratico iniziale.",
+    isProduct: true,
+    url: "https://lexis.rmstudio.app"
   },
   {
-    id: "42",
-    author: "Claudio M. (Napoli)",
-    text: "Il jingle creato per la nostra campagna radiofonica locale è orecchiabile e professionale. Ottimo lavoro di sintonizzazione con l'identità del nostro brand.",
+    id: "drivemotion",
+    chapter: "Chapter V — Automotive",
+    title: "DriveMotion",
+    subtitle: "Sfondi fotorealistici e video virali generati in automatico. Trasforma le foto amatoriali del tuo piazzale in reel cinematografici che aumentano il valore delle vetture.",
+    logo: "logo_drivemotion.png",
+    problem: "Fotografie dei veicoli scattate in piazzali disordinati con sfondi disturbanti che abbassano drasticamente il valore percepito delle auto sui portali.",
+    solution: "Rimozione automatica del piazzale e inserimento immediato delle vetture all'interno di showroom digitali 3D di lusso, riallineando fari e riflessi fisici.",
+    neuroCopy: "La valutazione estetica avviene in meno di tre decimi di secondo. Elevando lo sfondo, inneschiamo l'euristica del prestigio riducendo la trattativa sul prezzo.",
+    isProduct: true,
+    url: "https://drivemotion.rmstudio.app"
   },
   {
-    id: "45",
-    author: "Valentina R. (Bologna)",
-    text: "Colonne sonore ideali per i nostri spot di lancio sui social. FF Edizioni ci permette di ottenere sonorità originali senza preoccuparci delle licenze di copyright.",
+    id: "hometour",
+    chapter: "Chapter VI — Real Estate",
+    title: "HomeTour AI",
+    subtitle: "Reel immobiliari con voce narrante emozionale, generati in automatico da semplici fotografie. Vendi l'esperienza della casa prima ancora della visita reale.",
+    logo: "logo_HomeTour.png",
+    problem: "Annunci immobiliari piatti sui portali che faticano a catturare l'interesse emotivo dell'acquirente ed ostacolano l'acquisizione di mandati in esclusiva.",
+    solution: "Generazione di video-visite emozionali con carrellate 3D di parallasse simulato dalle foto, musica d'atmosfera e narrazione vocale persuasiva.",
+    neuroCopy: "Non si acquistano mq, ma proiezioni del proprio futuro. Attraverso il movimento 3D simuliamo l'immersione spaziale prima ancora della visita fisica.",
+    isProduct: true,
+    url: "https://hometour.rmstudio.app"
   },
   {
-    id: "53",
-    author: "Fabio R. (Torino)",
-    text: "La rimozione dello sfondo e l'inserimento automatico nei saloni virtuali ha dato alle nostre vetture usate un aspetto ordinato e professionale sul portale.",
+    id: "omniastudio",
+    chapter: "Chapter VII — Privacy AI",
+    title: "OmniaStudio",
+    subtitle: "La potenza dell'AI generativa sul tuo PC, completamente offline. Analizza contratti, PDF e dati sensibili senza inviare dati al cloud, a tutela del segreto professionale.",
+    logo: "logo_OmniaStudio.png",
+    problem: "Restrizioni severe sul GDPR e rischio di fuga di dati sensibili inviando contratti e documenti privati ai server cloud delle intelligenze artificiali pubbliche.",
+    solution: "Un software monolitico installato localmente sul tuo hardware che analizza documenti, esegue OCR ed elabora report a connessione totalmente disattivata.",
+    neuroCopy: "La sicurezza risponde al bisogno biologico di controllo. OmniaStudio lavora isolato, offrendo zero latenza di rete e totale conformità legale.",
+    isProduct: true,
+    url: "https://omniastudio.rmstudio.app"
   },
   {
-    id: "58",
-    author: "Studio Associato B. (Milano)",
-    text: "Nexus AI gestisce i flussi di contatto sul nostro sito principale. Filtra le richieste degli indecisi e risponde ai dubbi tecnici anche durante il fine settimana.",
+    id: "ffedizioni",
+    chapter: "Chapter VIII — Audio & Music",
+    title: "FF Edizioni",
+    subtitle: "Identità sonora e colonne sonore AI originali. Jingle musicali pronti per il broadcast e le campagne social, creati per sintonizzarsi con l'identità del tuo brand.",
+    logo: "logo_ff.png",
+    problem: "Spot e video aziendali privi di carattere acustico identitario, con elevato rischio di violazione di copyright o royalty su tracce musicali terze.",
+    solution: "Creazione di jingle originali e tracce audio proprietarie registrate, progettati scientificamente per innescare l'ancoraggio uditivo del brand.",
+    neuroCopy: "L'udito è l'unico senso che non possiamo isolare. Applichiamo l'ancoraggio uditivo affinché il brand rimanga impresso nella memoria a lungo termine.",
+    isProduct: true,
+    url: "https://ff.rmstudio.app"
   },
   {
-    id: "62",
-    author: "Avv. De Luca (Napoli)",
-    text: "L'elaborazione dati completamente locale offline è l'unica soluzione compatibile con il segreto professionale del nostro studio legale. Analisi dei contratti sicura al 100%.",
+    id: "the-union",
+    chapter: "The Synthesis",
+    title: "Ecosistema Connesso",
+    subtitle: "La convergenza di otto canali autonomi integrati sotto un'unica direzione tecnica. Sincronizzazione automatica tramite database relazionali per azzerare ogni forma di frizione logica ed operativa.",
+    logo: "logo.png",
+    isProduct: false,
+    isTheUnion: true
   },
+  {
+    id: "contacts-end",
+    chapter: "The Connection",
+    title: "Parliamo del tuo Progetto",
+    subtitle: "Compila il modulo contatti per richiedere un'analisi di fattibilità e integrare la tua azienda nell'ecosistema autonomo di RM Studio.",
+    logo: "logo.png",
+    isProduct: false,
+    isContact: true
+  }
 ];
 
-function TestimonialSection() {
-  const [testimonials, setTestimonials] = useState(initialTestimonials);
-
-  const handleShuffle = useCallback(() => {
-    setTestimonials((prev) => {
-      const newArr = [...prev];
-      const first = newArr.shift();
-      if (first) newArr.push(first);
-      return newArr;
-    });
-  }, []);
-
-  return (
-    <div className="relative w-full max-w-4xl mx-auto h-[450px] flex justify-center items-center mt-12 overflow-hidden px-4">
-      <div className="relative max-w-[300px] w-full h-[350px]">
-        {testimonials.map((t, i) => (
-          <TestimonialCard
-            key={t.id}
-            id={t.id}
-            author={t.author}
-            testimonial={t.text}
-            position={i === 0 ? "front" : i === 1 ? "middle" : "back"}
-            handleShuffle={handleShuffle}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── 3. PROJECT CARD ──────────────────────────────────────────────────────
-function ProjectCard({
-  title,
-  tag,
-  desc,
-  url,
-  glowColor,
-  logo,
-  gif,
-  isReversed,
-}: {
-  title: string;
-  tag: string;
-  desc: string;
-  url: string;
-  glowColor: string;
-  logo: string;
-  gif?: string;
-  isReversed?: boolean;
-}) {
-  const hasGif = Boolean(gif && gif.trim() !== "");
-  const isVideo = hasGif && gif ? gif.endsWith(".mp4") : false;
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const cardRef = useRef<HTMLAnchorElement>(null);
-
-  useEffect(() => {
-    if (!isVideo) return;
-    const card = cardRef.current;
-    const video = videoRef.current;
-    if (!card || !video) return;
-
-    const handleEnter = () => {
-      video.currentTime = 0;
-      video.play().catch(() => {});
-    };
-    const handleLeave = () => {
-      video.pause();
-      video.currentTime = 0;
-    };
-
-    card.addEventListener("mouseenter", handleEnter);
-    card.addEventListener("mouseleave", handleLeave);
-
-    return () => {
-      card.removeEventListener("mouseenter", handleEnter);
-      card.removeEventListener("mouseleave", handleLeave);
-    };
-  }, [isVideo]);
-
-  return (
-    <a
-      ref={cardRef}
-      href={url}
-      target="_blank"
-      rel="noreferrer"
-      className={`group flex flex-col ${
-        isReversed ? "md:flex-row-reverse" : "md:flex-row"
-      } items-center gap-8 bg-white/[0.02] p-8 md:p-10 rounded-3xl border border-white/5 hover:border-white/20 transition-all duration-500 relative backdrop-blur-md overflow-hidden`}
-    >
-      <div className={`absolute inset-0 bg-gradient-to-br ${glowColor} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
-
-      <div className="w-full md:w-2/3 relative z-10">
-        <div className="flex items-center gap-4 mb-4">
-          <img
-            src={logo}
-            alt={title}
-            loading="lazy"
-            decoding="async"
-            className="w-12 h-12 object-contain rounded-xl shadow-lg bg-black/50 p-1"
-          />
-          <div>
-            <h3 className="text-3xl font-bold">{title}</h3>
-            <span className={`text-[16px] uppercase tracking-[3px] font-black bg-clip-text text-transparent bg-gradient-to-r ${glowColor}`}>
-              {tag}
-            </span>
-          </div>
-        </div>
-        <p className="text-white/60 leading-relaxed text-[16px] md:text-xl mb-6">{desc}</p>
-        <span className="inline-flex items-center gap-2 text-[16px] font-bold text-white group-hover:underline decoration-cyan-400 underline-offset-4 transition-all">
-          Accedi alla Piattaforma <ExternalLink size={16} />
-        </span>
-      </div>
-
-      <div className="w-full md:w-1/3 h-[220px] bg-white/5 rounded-2xl border border-white/5 flex items-center justify-center relative overflow-hidden shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]">
-        <img
-          src={logo}
-          alt={title}
-          loading="lazy"
-          decoding="async"
-          className={`w-20 h-20 object-contain transition-all duration-500 ${
-            hasGif
-              ? "opacity-60 group-hover:opacity-0 group-hover:scale-90"
-              : "opacity-40 group-hover:opacity-100 group-hover:scale-110"
-          }`}
-        />
-
-        {hasGif && !isVideo && (
-          <img
-            src={gif}
-            alt={`${title} demo`}
-            loading="lazy"
-            decoding="async"
-            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-          />
-        )}
-
-        {hasGif && isVideo && (
-          <video
-            ref={videoRef}
-            src={gif}
-            loop
-            muted
-            playsInline
-            preload="none"
-            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none gpu-accelerated"
-          />
-        )}
-
-        <div className={`absolute inset-0 bg-gradient-to-br ${glowColor} opacity-10 pointer-events-none`} />
-
-        {hasGif && (
-          <div className="absolute bottom-3 right-4 text-[16px] font-black uppercase tracking-[2px] text-white/30 group-hover:opacity-0 transition-opacity">
-            Preview
-          </div>
-        )}
-      </div>
-    </a>
-  );
-}
-
-// ─── 4. MAIN APP ──────────────────────────────────────────────────────────
 export default function App() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const orbitContainerRef = useRef<HTMLDivElement>(null);
+  
+  const [progress, setProgress] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const totalFrames = isMobile ? 660 : 1320;
+  const imagesRef = useRef<HTMLImageElement[]>([]);
+
+  // Caricamento del file esterno orbit-template.html asincrono nativo
   useEffect(() => {
-    // 1. Carica l'HTML dell'ecosistema orbitale dal file esterno in public/
+    if (isLoading) return;
     fetch("/orbit-template.html")
       .then((res) => res.text())
       .then((html) => {
@@ -388,44 +181,273 @@ export default function App() {
         }
       })
       .catch((err) => console.error("Errore nel recupero del template orbitale:", err));
+  }, [isLoading]);
 
-    // 2. Crea lo script Schema.org per la SEO
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.innerHTML = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "RM Studio AI Suite",
-      "operatingSystem": "All",
-      "applicationCategory": "BusinessApplication",
-      "description": "Lab di Ingegneria AI ad alte prestazioni che realizza ecosistemi intelligenti su misura per automatizzare ed espandere i canali commerciali aziendali.",
-      "offers": {
-        "@type": "Offer",
-        "price": "49.00",
-        "priceCurrency": "EUR",
-      },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.9",
-        "reviewCount": "128",
-      },
-      "author": {
-        "@type": "Person",
-        "name": "Riccardo Modena",
-        "url": "https://www.linkedin.com/in/riccardo-modena-13918a61/",
-      },
-    });
-    document.head.appendChild(script);
-    
-    return () => {
-      document.head.removeChild(script);
+  // Caricamento asincrono e ottimizzazione mobile al 50%
+  useEffect(() => {
+    let loadedCount = 0;
+    const images: HTMLImageElement[] = [];
+
+    const getFramePath = (index: number) => {
+      const targetIndex = isMobile ? (index * 2) - 1 : index;
+      return `/frames/frame_${String(targetIndex).padStart(4, "0")}.jpg`;
     };
+
+    for (let i = 1; i <= totalFrames; i++) {
+      const img = new Image();
+      img.src = getFramePath(i);
+      
+      const onLoadOrError = () => {
+        loadedCount++;
+        setProgress(Math.round((loadedCount / totalFrames) * 100));
+
+        if (loadedCount === totalFrames) {
+          setIsLoading(false);
+        }
+      };
+
+      img.onload = onLoadOrError;
+      img.onerror = onLoadOrError;
+      images.push(img);
+    }
+    imagesRef.current = images;
+  }, [isMobile, totalFrames]);
+
+  // Gestore del loop bidirezionale infinito
+  useEffect(() => {
+    const handleScroll = () => {
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      if (window.scrollY >= maxScroll - 4) {
+        window.scrollTo(0, 10);
+      } else if (window.scrollY <= 2) {
+        window.scrollTo(0, maxScroll - 10);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Inizializzazione GSAP e disegno dei frame sul Canvas
+  useEffect(() => {
+    if (isLoading || !canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    const scrollTracker = { frame: 0 };
+
+    const drawFrame = (index: number) => {
+      const img = imagesRef.current[index];
+      if (!img || !img.complete || img.naturalWidth === 0) return;
+
+      const imgRatio = img.width / img.height;
+      const canvasRatio = window.innerWidth / window.innerHeight;
+      let drawWidth = window.innerWidth;
+      let drawHeight = window.innerHeight;
+      let startX = 0;
+      let startY = 0;
+
+      if (imgRatio > canvasRatio) {
+        drawWidth = window.innerHeight * imgRatio;
+        startX = (window.innerWidth - drawWidth) / 2;
+      } else {
+        drawHeight = window.innerWidth / imgRatio;
+        startY = (window.innerHeight - drawHeight) / 2;
+      }
+
+      context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      context.drawImage(img, startX, startY, drawWidth, drawHeight);
+    };
+
+    const resizeCanvas = () => {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      context.scale(dpr, dpr);
+      drawFrame(getMappedFrame(scrollTracker.frame));
+    };
+
+    const getMappedFrame = (rawFrame: number) => {
+      const normalizedFrame = isMobile ? rawFrame * 2 : rawFrame;
+      const sectionLength = 1320 / 11;
+      const sectionIndex = Math.floor(normalizedFrame / sectionLength);
+      const sectionProgress = (normalizedFrame % sectionLength) / sectionLength;
+
+      if (sectionIndex === 0) {
+        return 1 + Math.floor(sectionProgress * 30);
+      }
+      if (sectionIndex === 1) {
+        const startFrame = 30;
+        const endFrame = 120;
+        return startFrame + Math.floor(sectionProgress * (endFrame - startFrame));
+      }
+      if (sectionIndex === 10) {
+        const startFrame = 1080;
+        const endFrame = 1320;
+        const targetFrame = startFrame + Math.floor(sectionProgress * (endFrame - startFrame));
+        return Math.min(targetFrame, 1320);
+      }
+
+      const startFrame = (sectionIndex - 1) * 120;
+      const targetFrame = startFrame + Math.floor(sectionProgress * 120);
+      return Math.max(1, Math.min(targetFrame, 1320));
+    };
+
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    gsap.to(scrollTracker, {
+      frame: totalFrames - 1,
+      snap: "frame",
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#app-container",
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 0.8
+      },
+      onUpdate: () => {
+        const mappedFrame = getMappedFrame(scrollTracker.frame);
+        drawFrame(mappedFrame);
+      }
+    });
+
+    // ─── TRANSIZIONI 3D UNICHE CON FORCE-EXIT (autoAlpha) ───
+    const getSceneProps = (idx: number) => {
+      switch (idx) {
+        case 0:
+          return {
+            init: { autoAlpha: 0, opacity: 0, scale: 0.7, z: -400, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, scale: 1.1, z: 100, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 1:
+          return {
+            init: { autoAlpha: 0, opacity: 0, rotateY: 90, x: 250, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, x: 0, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, rotateY: -90, x: -250, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 2:
+          return {
+            init: { autoAlpha: 0, opacity: 0, y: -300, rotateX: 45, scale: 1, z: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, y: 0, rotateX: 0, scale: 1, z: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, y: 150, rotateX: -15, scale: 1, z: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 3:
+          return {
+            init: { autoAlpha: 0, opacity: 0, scale: 0.3, z: -700, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, scale: 1.5, z: 250, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 4:
+          return {
+            init: { autoAlpha: 0, opacity: 0, rotateY: -60, rotateX: 20, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, rotateX: 0, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, rotateY: 60, rotateX: -20, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 5:
+          return {
+            init: { autoAlpha: 0, opacity: 0, scale: 0.1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, scale: 0.1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 6:
+          return {
+            init: { autoAlpha: 0, opacity: 0, x: 350, skewX: -12, scale: 1, z: 0, rotateX: 0, rotateY: 0, y: 0, rotateZ: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, x: 0, skewX: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, y: 0, rotateZ: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, x: -350, skewX: 12, scale: 1, z: 0, rotateX: 0, rotateY: 0, y: 0, rotateZ: 0, pointerEvents: "none" }
+          };
+        case 7:
+          return {
+            init: { autoAlpha: 0, opacity: 0, rotateZ: -180, scale: 0.5, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, rotateZ: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, rotateZ: 180, scale: 0.5, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 8:
+          return {
+            init: { autoAlpha: 0, opacity: 0, scale: 1.4, z: 200, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, scale: 0.7, z: -200, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 9:
+          return {
+            init: { autoAlpha: 0, opacity: 0, rotateY: -180, z: -500, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, z: 0, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, rotateY: 180, z: 500, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 10:
+          return {
+            init: { autoAlpha: 0, opacity: 0, y: 150, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, y: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, y: -150, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        default:
+          return {
+            init: { autoAlpha: 0, opacity: 0, z: -400, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, z: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, z: 200, pointerEvents: "none" }
+          };
+      }
+    };
+
+    const triggers = gsap.utils.toArray("#scroll-triggers section");
+    const cards = gsap.utils.toArray(".scene-card");
+
+    triggers.forEach((trigger: any, index: number) => {
+      const card = cards[index] as HTMLElement;
+      if (!card) return;
+
+      const props = getSceneProps(index);
+      gsap.set(card, props.init);
+
+      if (index === 0) {
+        gsap.set(card, props.mid);
+        gsap.timeline({
+          scrollTrigger: {
+            trigger: trigger,
+            start: "top top",
+            end: "bottom top",
+            scrub: 1
+          }
+        })
+        .to(card, { ...props.mid, duration: 0.8 })
+        .to(card, { ...props.exit, duration: 0.2, ease: "power3.in" });
+      } else if (index === triggers.length - 1) {
+        gsap.timeline({
+          scrollTrigger: {
+            trigger: trigger,
+            start: "top bottom",
+            end: "bottom bottom",
+            scrub: 1
+          }
+        })
+        .to(card, { ...props.mid, duration: 0.3, ease: "power3.out" })
+        .to(card, { ...props.mid, duration: 0.7 });
+      } else {
+        gsap.timeline({
+          scrollTrigger: {
+            trigger: trigger,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1
+          }
+        })
+        .to(card, { ...props.mid, duration: 0.15, ease: "power3.out" })
+        .to(card, { ...props.mid, duration: 0.70 })
+        .to(card, { ...props.exit, duration: 0.15, ease: "power3.in" });
+      }
+    });
+
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+    };
+  }, [isLoading, totalFrames, isMobile]);
+
   const handleVCardClick = () => {
-    toast.success("Contatto salvato nella rubrica.");
     const link = document.createElement("a");
-    link.href = "/contact.vcf";
+    link.href = "contact.vcf";
     link.download = "Riccardo_Modena_RMStudio.vcf";
     document.body.appendChild(link);
     link.click();
@@ -434,8 +456,13 @@ export default function App() {
 
   const handleContactSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    formData.append("access_key", "9013a8d5-0901-42a0-b9e6-4c45553f960d");
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const button = form.querySelector("button[type='submit']") as HTMLButtonElement;
+    if (!button) return;
+    const originalText = button.innerText;
+    button.innerText = "Invio in corso...";
+    button.disabled = true;
 
     try {
       const res = await fetch("https://api.web3forms.com/submit", {
@@ -443,30 +470,43 @@ export default function App() {
         body: formData,
       });
 
-      if (!res.ok) {
-        toast.error(`Errore HTTP: ${res.status}. Riprova più tardi.`);
-        return;
-      }
-
-      const data = await res.json();
-
-      if (data.success) {
-        toast.success("Messaggio inviato con successo! Ti risponderò entro 24 ore.");
-        (e.target as HTMLFormElement).reset();
+      if (res.ok) {
+        alert("Messaggio inviato con successo! Ti risponderò entro 24 ore.");
+        form.reset();
       } else {
-        toast.error("Errore nell'invio del messaggio. Verifica i dati e riprova.");
+        alert("Errore nell'invio. Riprova più tardi.");
       }
     } catch {
-      toast.error("Errore di rete. Controlla la connessione e riprova.");
+      alert("Errore di rete. Controlla la connessione.");
+    } finally {
+      button.innerText = originalText;
+      button.disabled = false;
     }
   };
 
   return (
     <LazyMotion features={domAnimation}>
-      <main className="relative min-h-screen bg-[#020205] text-white overflow-x-hidden scroll-smooth">
+      <main className="fixed inset-0 w-full h-screen bg-[#020205] text-white overflow-hidden select-none">
+        
+        {/* Toast Notifiche Custom */}
         <Toaster position="top-right" richColors />
 
+        {/* ── CSS ANTI-FLASH INIZIALE & STILI ORBITALI ── */}
         <style dangerouslySetInnerHTML={{ __html: `
+          ::-webkit-scrollbar {
+            display: none;
+          }
+          html {
+            scrollbar-width: none;
+          }
+          .preserve-3d {
+            transform-style: preserve-3d;
+          }
+          .scene-card {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+          }
           @keyframes orbit-rotation {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -475,38 +515,24 @@ export default function App() {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(-360deg); }
           }
-          @keyframes netflix-glow-optimized {
-            0%, 100% { opacity: 0.15; }
-            50% { opacity: 0.35; }
-          }
           @keyframes pulse-ring-optimized {
             0%, 100% { opacity: 0.2; transform: scale(0.95); }
             50% { opacity: 0.4; transform: scale(1.05); }
           }
-          @keyframes gold-pulse {
-            0%, 100% { box-shadow: 0 0 15px rgba(234, 179, 8, 0.25), inset 0 0 12px rgba(234, 179, 8, 0.15); border-color: rgba(234, 179, 8, 0.3); }
-            50% { box-shadow: 0 0 30px rgba(234, 179, 8, 0.65), inset 0 0 20px rgba(234, 179, 8, 0.4); border-color: rgba(234, 179, 8, 0.85); }
-          }
-          @keyframes animated-border-glow {
-            0%, 100% { border-color: rgba(6, 182, 212, 0.6); box-shadow: 0 0 15px rgba(6, 182, 212, 0.25); }
-            33% { border-color: rgba(139, 92, 246, 0.6); box-shadow: 0 0 15px rgba(139, 92, 246, 0.25); }
-            66% { border-color: rgba(236, 72, 153, 0.6); box-shadow: 0 0 15px rgba(236, 72, 153, 0.25); }
-          }
-          .gpu-accelerated {
-            transform: translate3d(0, 0, 0);
-            backface-visibility: hidden;
-            perspective: 1000px;
+          .pulse-ring-element {
+            position: absolute;
+            width: 380px;
+            height: 380px;
+            background-color: rgba(242, 210, 139, 0.05);
+            filter: blur(48px);
+            border-radius: 9999px;
             will-change: transform, opacity;
-          }
-          .animated-gradient-border {
-            animation: animated-border-glow 6s linear infinite;
-            border-width: 1.5px;
-            border-style: solid;
+            animation: pulse-ring-optimized 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
           }
           .orbit-ring {
             position: relative;
-            width: 380px;
-            height: 380px;
+            width: 400px;
+            height: 400px;
             border-radius: 50%;
             border: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
@@ -515,21 +541,10 @@ export default function App() {
             box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
             animation: orbit-rotation 40s linear infinite;
           }
-          .orbit-area {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 500px;
-          }
-          .orbit-area:hover .orbit-ring,
-          .orbit-area:hover .orbit-item {
-            animation-play-state: paused;
-          }
           .orbit-wrapper {
             position: absolute;
-            width: 72px;
-            height: 72px;
+            width: 64px;
+            height: 64px;
             transform: translate(-50%, -50%);
           }
           .orbit-item {
@@ -553,8 +568,8 @@ export default function App() {
             text-decoration: none;
           }
           .orbit-link:hover {
-            border-color: #06b6d4;
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+            border-color: #F2D28B;
+            box-shadow: 0 0 15px rgba(242, 210, 139, 0.4);
           }
           .orbit-img {
             width: 100%;
@@ -569,10 +584,10 @@ export default function App() {
           }
           .orbit-center-photo {
             position: absolute;
-            width: 220px;
-            height: 220px;
+            width: 180px;
+            height: 180px;
             border-radius: 50%;
-            border: 4px solid #f97316;
+            border: 4px solid #F2D28B;
             padding: 4px;
             background: #000;
             box-shadow: 0 10px 40px rgba(0,0,0,0.8);
@@ -587,14 +602,14 @@ export default function App() {
           }
           .orbit-tooltip {
             position: absolute;
-            bottom: 95px;
+            bottom: 85px;
             left: 50%;
             transform: translateX(-50%);
-            width: 200px;
+            width: 220px;
             background: #0a0a0c;
             border: 1px solid rgba(255,255,255,0.08);
             color: #94a3b8;
-            font-size: 16px;
+            font-size: 11px;
             border-radius: 8px;
             padding: 12px;
             opacity: 0;
@@ -613,409 +628,165 @@ export default function App() {
           .orbit-item:hover .orbit-tooltip {
             opacity: 1;
           }
-          .visual-hook-glow {
-            filter: blur(50px);
-            will-change: opacity;
-            animation: netflix-glow-optimized 6s ease-in-out infinite;
-          }
-          /* Forziamo gli stili nativi per prevenire la rimozione delle classi nel template asincrono esterno */
-          .pulse-ring-element {
-            position: absolute;
-            width: 360px;
-            height: 360px;
-            background-color: rgba(6, 182, 212, 0.05);
-            filter: blur(48px);
-            border-radius: 9999px;
-            will-change: transform, opacity;
-            animation: pulse-ring-optimized 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-          }
-          .gold-decoy-card {
-            animation: gold-pulse 3s infinite ease-in-out;
-          }
-          html { scroll-behavior: smooth; }
         ` }} />
 
-        {/* ── VIDEO BACKGROUND ── */}
-        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-[#020205]">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            className="w-full h-full object-cover opacity-20 gpu-accelerated"
-          >
-            <source src="/background.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-[#020205]/80 via-[#020205]/40 to-[#020205]/95 pointer-events-none" />
-        </div>
-
-        {/* ── HEADER ── */}
-        <header className="fixed top-0 left-0 w-full p-4 md:p-6 z-50 backdrop-blur-md bg-black/20 border-b border-white/5">
-          <div className="max-w-6xl mx-auto flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <img
-                src="/logo.png"
-                alt="RM Studio Logo"
-                className="w-8 h-8 object-contain rounded-md shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-              />
-              <span className="font-black tracking-[0.2em] text-[16px] uppercase">RM Studio</span>
+        {/* ─── PRELOADER ─── */}
+        {isLoading && (
+          <div id="loader" className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#050505]">
+            <div className="text-center">
+              <span className="text-[#F2D28B] text-xs tracking-[0.4em] uppercase block mb-3 font-semibold">RM Studio</span>
+              <h2 className="font-serif text-3xl md:text-5xl tracking-[0.2em] uppercase text-white mb-8">Ecosistema AI</h2>
+              <div className="w-64 h-[1px] bg-neutral-800 relative overflow-hidden mx-auto mb-4">
+                <div className="absolute h-full left-0 top-0 bg-[#F2D28B] transition-all duration-150" style={{ width: `${progress}%` }}></div>
+              </div>
+              <span className="text-[10px] tracking-[0.3em] text-neutral-400 uppercase">{progress}% Caricato</span>
             </div>
-            <a
-              href="#contatti"
-              className="text-[16px] font-black uppercase tracking-widest text-cyan-400 hover:text-cyan-300 transition-colors border border-cyan-500/30 px-5 py-2.5 rounded-full bg-cyan-500/5"
-            >
-              Contattaci
-            </a>
           </div>
-        </header>
+        )}
 
-        <div className="relative z-10 flex flex-col w-full">
+        {/* ─── HEADER MINIMALISTA ─── */}
+        <Header />
 
-          <div className="absolute top-1/4 left-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-cyan-500/5 via-purple-500/5 to-blue-500/10 rounded-full pointer-events-none visual-hook-glow z-0 -translate-x-1/2 -translate-y-1/2" />
+        {/* ─── CONTENITORE IMMERSIVO CANVAS ─── */}
+        <div id="app-container" ref={containerRef} className="relative w-full">
+          <div className="sticky top-0 h-screen w-full overflow-hidden z-0 bg-black">
+            <canvas ref={canvasRef} id="immersive-canvas" className="w-full h-full object-cover opacity-80"></canvas>
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/80 pointer-events-none"></div>
+          </div>
 
-          {/* ── HERO ── */}
-          <section className="min-h-screen flex flex-col lg:flex-row items-center justify-center max-w-7xl mx-auto px-6 pt-24 gap-12 lg:gap-16">
+          {/* Contenitore Fisso delle Schede (Centrate e allineate lateralmente) */}
+          <div id="text-overlays" className="fixed inset-0 z-10 pointer-events-none">
+            {SCENES.map((scene, index) => {
+              const isEven = index % 2 === 0;
+              const flexDirClass = isEven ? "md:flex-row" : "md:flex-row-reverse";
 
-            <div className="flex-1 text-center lg:text-left z-10">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="inline-block px-4 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/5 backdrop-blur-md mb-8 text-[16px] font-black tracking-[4px] text-cyan-400 uppercase"
-              >
-                AI Engineering Lab
-              </motion.div>
+              let alignmentClass = "justify-center md:justify-start text-left items-center md:pl-24";
+              if (scene.isIntro || scene.isTheUnion || scene.isContact) {
+                alignmentClass = "justify-center text-center mx-auto items-center";
+              }
 
-              <motion.h1
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tighter leading-[1.05] mb-6 drop-shadow-2xl text-white"
-              >
-                L&apos;Intelligenza Artificiale che <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
-                  Lavora per il tuo Business.
-                </span>
-              </motion.h1>
+              const cardSizeClass = (scene.isIntro || scene.isTheUnion) ? "max-w-6xl md:p-16" : scene.isContact ? "max-w-4xl md:p-14" : "max-w-3xl";
 
-              <motion.p
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-lg md:text-xl text-white/60 max-w-xl mx-auto lg:mx-0 mb-10 font-light tracking-wide leading-relaxed"
-              >
-                Sviluppiamo ecosistemi AI su misura per abbattere i costi operativi ed espandere il tuo mercato.
-                Zero codice complesso, solo risultati scalabili ed integrati.
-              </motion.p>
-
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-center lg:justify-start">
-                {/* Salva Contatto: vCard - Colori forzati per non scolorire mai in caso di focus o click */}
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.3 }}
-                  onClick={handleVCardClick}
-                  className="flex items-center justify-center gap-3 px-5 py-3 sm:px-8 sm:py-4 rounded-full bg-white text-black hover:text-black focus:text-black active:text-black font-extrabold hover:scale-105 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] sm:shadow-[0_0_30px_rgba(255,255,255,0.25)] text-[16px] tracking-wider w-full sm:w-auto focus:outline-none"
-                >
-                  <Download className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
-                  <span className="text-black font-extrabold">SALVA CONTATTO (vCard)</span>
-                </motion.button>
-
-                <a
-                  href="#progetti"
-                  className="bg-black/40 text-slate-300 border border-white/10 px-6 py-3.5 rounded-full font-bold hover:bg-white/10 transition-all text-[16px] text-center self-center"
-                >
-                  Esplora Ecosistemi
-                </a>
-              </div>
-            </div>
-
-            {/* Orbit (Caricato asincronamente dall'HTML statico esterno per preservare il layout nativo al 100%) */}
-            <div 
-              ref={orbitContainerRef}
-              className="flex-1 w-full max-w-[500px] flex justify-center items-center relative z-10 min-h-[500px] orbit-area"
-            >
-              {/* Iniettato dinamicamente */}
-            </div>
-
-          </section>
-
-          {/* ── AUTOREVOLEZZA ── */}
-          <section className="bg-slate-950/60 border-y border-white/5 py-12 px-6">
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-slate-500 text-[16px]">
-              <p className="text-center md:text-left text-slate-400 font-medium max-w-xl text-[16px]">
-                I nostri sistemi e le strutture conversazionali sono progettati in aderenza ai protocolli e agli standard internazionali sulla sicurezza delle informazioni e sulla comunicazione d&apos;impresa.
-              </p>
-              <div className="flex flex-wrap justify-center items-center gap-6 text-[16px] font-semibold">
-                <a
-                  href="https://www.nar.realtor"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-cyan-400 transition underline decoration-dotted underline-offset-4"
-                >
-                  National Association of Realtors
-                </a>
-                <span className="text-slate-800">|</span>
-                <a
-                  href="https://www.iso.org/standard/27001"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-cyan-400 transition underline decoration-dotted underline-offset-4"
-                >
-                  ISO/IEC 27001 Security Standard
-                </a>
-                <span className="text-slate-800">|</span>
-                <a
-                  href="https://www.health.harvard.edu"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-cyan-400 transition underline decoration-dotted underline-offset-4"
-                >
-                  Harvard Health Publishing
-                </a>
-              </div>
-            </div>
-          </section>
-
-          {/* ── PROFILO ── */}
-          <section className="py-24 px-6 max-w-6xl mx-auto border-b border-white/5">
-            <div className="flex flex-col lg:flex-row items-center gap-12">
-              <div className="w-full lg:w-1/3 flex justify-center">
-                <div className="relative p-2 bg-gradient-to-tr from-cyan-500 to-purple-600 rounded-3xl shadow-2xl">
-                  <img
-                    src="/riccardo_founder.jpeg"
-                    alt="Riccardo Modena"
-                    className="w-64 h-64 object-cover rounded-2xl"
-                  />
-                  <div className="absolute -bottom-4 -right-4 bg-[#0a0a0c] border border-white/10 px-4 py-2 rounded-xl text-[16px] text-slate-300 font-semibold shadow-xl">
-                    Riccardo Modena
+              // Corpo Editoriale Fluido
+              const editorialBody = scene.isProduct ? (
+                <div className="mt-6 space-y-4 border-t border-white/5 pt-6 text-base text-neutral-300 font-light leading-relaxed">
+                  <p>{scene.problem}</p>
+                  <p>{scene.solution}</p>
+                  <div className="relative bg-gradient-to-r from-[#F2D28B]/10 to-transparent p-5 rounded-2xl border-l-2 border-[#F2D28B] text-[15px] italic text-[#F2D28B]/95 font-light leading-relaxed">
+                    "{scene.neuroCopy}"
                   </div>
                 </div>
-              </div>
-              <div className="w-full lg:w-2/3">
-                <span className="text-[16px] uppercase tracking-widest font-black text-cyan-400 mb-3 block">Direzione Tecnica</span>
-                <h3 className="text-3xl font-bold mb-4">La tecnologia deve eliminare l&apos;attrito, non crearlo.</h3>
-                <p className="text-[16px] text-white/50 leading-relaxed font-light mb-6">
-                  &ldquo;Nello sviluppo dei nostri ecosistemi l&apos;obiettivo principale è rimuovere ogni forma di frizione operativa, riducendo lo sforzo d&apos;uso sia per le aziende che per i loro utenti finali. Integrare l&apos;intelligenza artificiale non significa aggiungere complessità, ma automatizzare canali per produrre risultati in modo fluido e protetto.&rdquo;
-                </p>
-                <p className="text-[16px] text-white/30">
-                  Come indicato nelle linee guida di conformità dell&apos;organizzazione internazionale{" "}
-                  <a href="https://www.w3.org/community/tourism/" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">
-                    W3C per i canali integrati
-                  </a>
-                  , l&apos;adozione di architetture logiche simmetriche riduce i tempi di interazione massimizzando la permanenza attiva.
-                </p>
-              </div>
-            </div>
-          </section>
+              ) : null;
 
-          {/* ── PRODOTTI ── */}
-          <section id="progetti" className="py-32 px-6 relative z-10">
-            <div className="max-w-6xl mx-auto flex flex-col gap-10">
-              <h2 className="text-4xl md:text-6xl font-black text-center tracking-tighter mb-20 uppercase">
-                I Nostri Ecosistemi
-              </h2>
-
-              <ProjectCard
-                title="Concierge24"
-                tag="Hospitality"
-                logo="/logo_Concierge24.png"
-                gif="/c24_gif.gif"
-                desc="L'assistente vocale H24 multilingua che accoglie i tuoi ospiti, risponde alle loro domande e fa up-selling dei tuoi servizi extra mentre il tuo staff riposa."
-                url="https://concierge24.rmstudio.app/"
-                glowColor="from-orange-400 to-red-500"
-              />
-
-              <ProjectCard
-                title="DriveMotion"
-                tag="Automotive AI"
-                logo="/logo_drivemotion.png"
-                gif="/drivemotion_video.mp4"
-                desc="Sfondi fotorealistici e video virali generati in automatico. Trasforma le foto amatoriali del tuo piazzale in reel cinematografici che aumentano il valore percepito delle tue auto."
-                url="https://drivemotion.rmstudio.app"
-                glowColor="from-blue-500 to-cyan-400"
-                isReversed
-              />
-
-              <ProjectCard
-                title="HomeTour AI"
-                tag="Real Estate"
-                logo="/logo_HomeTour.png"
-                gif="/hometour_gif.gif"
-                desc="Reel immobiliari con voce narrante emozionale, generati in automatico da semplici fotografie. Vendi l'esperienza della casa prima ancora della visita reale."
-                url="https://hometour.rmstudio.app"
-                glowColor="from-green-400 to-emerald-600"
-              />
-
-              <ProjectCard
-                title="NexusAI"
-                tag="AI Sales Overlay"
-                logo="/logo_nexus_bg.png"
-                gif="/nexus_gif.gif"
-                desc="Assunzioni e vendite H24, senza cambiare una riga del tuo sito. NexusAI inietta un assistente intelligente che accoglie, informa e converte i tuoi visitatori in tempo reale."
-                url="https://nexus.rmstudio.app/"
-                glowColor="from-cyan-400 to-blue-600"
-                isReversed
-              />
-
-              <ProjectCard
-                title="OmniaStudio"
-                tag="Privacy AI"
-                logo="/logo_OmniaStudio.png"
-                gif="/omniastudio_video.mp4"
-                desc="La potenza dell'AI generativa, completamente offline sul tuo PC. Analizza contratti, PDF e dati sensibili senza mai inviare un solo byte al cloud. Privacy al 100%."
-                url="https://omniastudio.rmstudio.app/"
-                glowColor="from-purple-500 to-pink-500"
-              />
-
-              <ProjectCard
-                title="FF Edizioni"
-                tag="Audio & Music"
-                logo="/logo_ff.png"
-                gif="/ff_gif.gif"
-                desc="Identità sonora e colonne sonore AI originali. Jingle musicali pronti per il broadcast e le campagne social, creati per non essere mai dimenticati dai tuoi clienti."
-                url="https://ff.rmstudio.app/"
-                glowColor="from-yellow-400 to-orange-600"
-                isReversed
-              />
-            </div>
-          </section>
-
-          {/* ── TESTIMONIALS ── */}
-          <section className="py-32 px-6">
-            <h2 className="text-3xl md:text-5xl font-black text-center tracking-tighter mb-4 uppercase">
-              Dicono di noi
-            </h2>
-            <p className="text-center text-white/30 mb-12 tracking-widest uppercase text-[16px] font-bold">
-              Slide per scoprire i feedback
-            </p>
-            <TestimonialSection />
-          </section>
-
-          {/* ── CONTATTI ── */}
-          <section id="contatti" className="py-32 px-6">
-            <div className="max-w-xl mx-auto bg-white/[0.03] border border-white/10 p-10 rounded-[2.5rem] backdrop-blur-3xl shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 blur-3xl rounded-full" />
-              <h2 className="text-4xl font-black mb-2 text-center tracking-tighter">
-                Parliamo del tuo Progetto
-              </h2>
-              <p className="text-white/40 text-center mb-10 font-light text-[16px]">
-                Compila il modulo, rispondo personalmente in meno di 24 ore.
-              </p>
-
-              <form onSubmit={handleContactSubmit} className="flex flex-col gap-5">
-                <input type="hidden" name="subject" value="Nuovo Lead da RMStudio.app" />
-
-                <div className="space-y-1">
-                  <label className="text-[16px] font-black uppercase tracking-[2px] text-white/30 ml-2">
-                    Nome Completo
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    required
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-cyan-500/50 transition-all placeholder:text-white/10 text-[16px]"
-                    placeholder="Esempio: Mario Rossi"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[16px] font-black uppercase tracking-[2px] text-white/30 ml-2">
-                    Email Aziendale
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-cyan-500/50 transition-all placeholder:text-white/10 text-[16px]"
-                    placeholder="nome@azienda.it"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[16px] font-black uppercase tracking-[2px] text-white/30 ml-2">
-                    Il tuo Obiettivo
-                  </label>
-                  <textarea
-                    name="message"
-                    required
-                    rows={4}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-cyan-500/50 transition-all resize-none placeholder:text-white/10 text-[16px]"
-                    placeholder="Quale processo vuoi automatizzare?"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="mt-4 flex items-center justify-center gap-3 bg-white text-black font-black py-6 rounded-2xl hover:bg-cyan-400 transition-all uppercase tracking-widest text-[16px] shadow-[0_0_30px_rgba(255,255,255,0.25)]"
-                >
-                  <Send size={18} /> Invia Messaggio
+              // VCard Button
+              const introButton = scene.isIntro ? (
+                <button onClick={handleVCardClick} className="inline-flex items-center justify-center gap-3 bg-white text-black text-sm tracking-wider font-extrabold uppercase px-8 py-5 rounded-full hover:scale-105 hover:bg-neutral-100 active:scale-95 transition-all duration-300 mt-8 cursor-pointer pointer-events-auto shadow-[0_0_30px_rgba(255,255,255,0.25)] focus:outline-none">
+                  <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  <span>SALVA CONTATTO (vCard)</span>
                 </button>
-              </form>
-            </div>
-          </section>
+              ) : null;
 
-          {/* ── FOOTER ── */}
-          <footer className="relative w-full pt-40 pb-56 bg-black border-t border-white/5 flex flex-col items-center overflow-hidden">
-            <div
-              className="absolute inset-0 z-0"
-              style={{ background: "radial-gradient(100% 100% at 50% 0%, rgba(6,182,212,0.1) 0%, transparent 100%)" }}
-            />
+              // Link al Sito Ufficiale (Informativo, ma ora tutta la scheda è cliccabile)
+              const siteLinkButton = (scene.isProduct && scene.url) ? (
+                <div className="mt-5 text-left text-sm text-[#F2D28B] font-mono font-bold tracking-wider underline decoration-dotted underline-offset-4 decoration-[#F2D28B]/60">
+                  VISITA IL SITO UFFICIALE
+                </div>
+              ) : null;
 
-            <div className="relative z-10 w-full max-w-5xl px-6 h-40 md:h-64 mb-16">
-              <TextHoverEffect text="RM STUDIO" />
-            </div>
+              // Form Contatti
+              const contactForm = scene.isContact ? (
+                <form className="flex flex-col gap-4 mt-6 text-left pointer-events-auto w-full max-w-lg" onSubmit={handleContactSubmit}>
+                  <input type="hidden" name="access_key" value="9013a8d5-0901-42a0-b9e6-4c45553f960d" />
+                  <input type="hidden" name="subject" value="Nuovo Lead da RMStudio Suite" />
+                  
+                  <input type="text" name="name" required placeholder="Nome Completo" className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-[#F2D28B]/50 text-base font-light" />
+                  <input type="email" name="email" required placeholder="Email Aziendale" className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-[#F2D28B]/50 text-base font-light" />
+                  <textarea name="message" required rows={3} placeholder="Quale processo vuoi automatizzare?" className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-[#F2D28B]/50 text-base font-light resize-none"></textarea>
+                  
+                  <button type="submit" className="bg-[#F2D28B] text-black text-xs tracking-widest font-black uppercase py-5 rounded-2xl hover:bg-white transition-all duration-300 cursor-pointer w-full">
+                    Invia Messaggio Aziendale
+                  </button>
+                </form>
+              ) : null;
 
-            <div className="relative z-10 flex flex-wrap justify-center gap-10 mb-12">
-              <a href="https://www.facebook.com/riccardo.modena.792" target="_blank" rel="noreferrer"
-                className="text-white/40 hover:text-white transition-all flex items-center gap-2 text-[16px] font-black uppercase tracking-widest">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-                </svg>
-                Facebook
-              </a>
-              <a href="https://instagram.com/riccardo_mode_" target="_blank" rel="noreferrer"
-                className="text-white/40 hover:text-white transition-all flex items-center gap-2 text-[16px] font-black uppercase tracking-widest">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-                </svg>
-                Instagram
-              </a>
-              <a href="https://www.linkedin.com/in/riccardo-modena-13918a61/" target="_blank" rel="noreferrer"
-                className="text-white/40 hover:text-white transition-all flex items-center gap-2 text-[16px] font-black uppercase tracking-widest">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                  <rect x="2" y="9" width="4" height="12" />
-                  <circle cx="4" cy="4" r="2" />
-                </svg>
-                LinkedIn
-              </a>
-              <a href="https://tiktok.com/@mr3d.riccardo" target="_blank" rel="noreferrer"
-                className="text-white/40 hover:text-white transition-all flex items-center gap-2 text-[16px] font-black uppercase tracking-widest">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
-                </svg>
-                TikTok
-              </a>
-            </div>
+              // Colonna Destra (Logo, Foto Riccardo, o Sistema Orbitale)
+              let rightColumnContent = (
+                <div className="flex-shrink-0 flex items-center justify-center bg-black/50 border border-white/10 rounded-[2rem] p-6 w-32 h-32 md:w-44 md:h-44 shadow-inner">
+                  <img src={`loghi/${scene.logo}`} alt={`${scene.title} Logo`} className="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]" />
+                </div>
+              );
 
-            <div className="relative z-10 text-white/20 text-[16px] font-bold tracking-[4px] text-center uppercase leading-relaxed pb-12">
-              © {CURRENT_YEAR} Riccardo Modena • RM STUDIO <br />
-              <span className="text-cyan-500/50">High-End AI Engineering</span> <br />
-              <div className="mt-3 flex items-center justify-center gap-3">
-                <a href="/privacy.html" target="_blank" className="text-white/30 hover:text-cyan-400 underline transition-colors inline-block lowercase font-sans normal-case text-[16px]">Privacy Policy</a>
-                <span className="text-white/20 font-sans">|</span>
-                <a href="/termini.html" target="_blank" className="text-white/30 hover:text-cyan-400 underline transition-colors inline-block lowercase font-sans normal-case text-[16px]">Termini e Condizioni</a>
-              </div>
-            </div>
-          </footer>
+              if (scene.isIntro) {
+                rightColumnContent = (
+                  <div className="flex-shrink-0 flex items-center justify-center border-2 border-[#F2D28B]/30 rounded-[2.5rem] p-1.5 w-44 h-44 md:w-80 md:h-80 bg-[#050505] shadow-[0_0_40px_rgba(242,210,139,0.25)]">
+                    <img src="riccardo_founder.jpeg" alt="Riccardo Modena" className="w-full h-full object-cover rounded-[2rem]" />
+                  </div>
+                );
+              } else if (scene.isTheUnion) {
+                rightColumnContent = (
+                  <div ref={orbitContainerRef} className="relative w-[400px] h-[400px] flex items-center justify-center scale-95 md:scale-110 mt-6 md:mt-0 pointer-events-auto">
+                    {/* Iniettato Dinamicamente tramite fetch da public/orbit-template.html */}
+                  </div>
+                );
+              }
 
+              const cardContent = (
+                <div className="flex-1 text-left w-full">
+                  <span className="text-[10px] uppercase tracking-[0.4em] text-[#F2D28B] block mb-2 font-semibold font-mono">{scene.chapter}</span>
+                  <h2 className="font-serif text-3xl md:text-5xl text-[#F6F3F0] tracking-wide leading-tight mb-4">{scene.title}</h2>
+                  <p className="text-base md:text-lg tracking-wide text-neutral-300 leading-relaxed font-light">{scene.subtitle}</p>
+                  {editorialBody}
+                  {introButton}
+                  {siteLinkButton}
+                  {contactForm}
+                </div>
+              );
+
+              // Per i prodotti, l'intera scheda è un link interattivo a
+              if (scene.isProduct) {
+                return (
+                  <div key={scene.id} className={`absolute inset-0 flex pointer-events-none p-6 md:p-12 ${alignmentClass}`}>
+                    <a href={scene.url} target="_blank" rel="noopener noreferrer" className={`scene-card w-full ${cardSizeClass} bg-[#07070a]/92 backdrop-blur-3xl p-8 md:p-14 border border-white/10 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.95)] preserve-3d opacity-0 pointer-events-none flex flex-col ${flexDirClass} gap-8 md:gap-12 items-center justify-between cursor-pointer hover:border-[#F2D28B]/30 hover:shadow-[0_40px_100px_rgba(242,210,139,0.05)] transition-all duration-300`}>
+                      {cardContent}
+                      {rightColumnContent}
+                    </a>
+                  </div>
+                );
+              }
+
+              return (
+                <div key={scene.id} className={`absolute inset-0 flex pointer-events-none p-6 md:p-12 ${alignmentClass}`}>
+                  <div className={`scene-card w-full ${cardSizeClass} bg-[#07070a]/92 backdrop-blur-3xl p-8 md:p-14 border border-white/10 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.95)] preserve-3d opacity-0 pointer-events-none flex flex-col ${flexDirClass} gap-8 md:gap-12 items-center justify-between`}>
+                    {cardContent}
+                    {rightColumnContent}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Triggers di Scorrimento */}
+          <div id="scroll-triggers" className="relative z-20 w-full pointer-events-none">
+            <section id="trigger-0" className="h-screen w-full"></section>
+            <section id="trigger-1" className="h-screen w-full"></section>
+            <section id="trigger-2" className="h-screen w-full"></section>
+            <section id="trigger-3" className="h-screen w-full"></section>
+            <section id="trigger-4" className="h-screen w-full"></section>
+            <section id="trigger-5" className="h-screen w-full"></section>
+            <section id="trigger-6" className="h-screen w-full"></section>
+            <section id="trigger-7" className="h-screen w-full"></section>
+            <section id="trigger-8" className="h-screen w-full"></section>
+            <section id="trigger-9" className="h-screen w-full"></section>
+            <section id="trigger-10" className="h-screen w-full"></section>
+          </div>
         </div>
 
+        {/* ─── CHATBOT & ACCESSORI DI NAVIGAZIONE COMPATIBILI ─── */}
         <NovaChatbot />
         <FloatingDock />
+
       </main>
     </LazyMotion>
   );
