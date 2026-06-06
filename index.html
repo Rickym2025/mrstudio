@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RM Studio - Creative AI Suite</title>
   
+  <!-- Favicon Standard e Vettoriale -->
+  <link rel="icon" href="public/favicon.ico" sizes="any">
+  <link rel="icon" href="public/favicon.svg" type="image/svg+xml">
+  
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   
@@ -42,7 +46,7 @@
       pointer-events: none;
     }
 
-    /* ─── ANIMAZIONI E STILI PER IL SISTEMA ORBITALE (SCENE 9) ─── */
+    /* ─── ANIMAZIONI E STILI PER IL SISTEMA ORBITALE (VENGONO APPLICATI DALL'HTML ESTERNO) ─── */
     @keyframes orbit-rotation {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
@@ -229,6 +233,17 @@
   <script src="scrubber.js"></script>
 
   <script>
+    // Caricamento dinamico, centralizzato e asincrono del sistema orbitale
+    let orbitHTML = "";
+    fetch("public/orbit-template.html")
+      .then(res => res.text())
+      .then(html => {
+        orbitHTML = html;
+        const target = document.getElementById("orbit-container-target");
+        if (target) target.innerHTML = html;
+      })
+      .catch(err => console.error("Errore nel caricamento del file orbitale:", err));
+
     const SCENES = [
       {
         id: "hero-start",
@@ -257,7 +272,7 @@
         title: "Concierge24",
         subtitle: "L'assistente vocale H24 multilingua che accoglie gli ospiti, risponde alle loro domande e fa up-selling dei tuoi servizi extra mentre il tuo staff riposa.",
         logo: "logo_concierge.png",
-        problem: "La reception soffre di picchi di sovraccarico, con centralini intasati e turisti frustrati in attesa di risposte su Wi-Fi e check-in nelle ore notturne.",
+        problem: "La reception offre di picchi di sovraccarico, con centralini intasati e turisti frustrati in attesa di risposte su Wi-Fi e check-in nelle ore notturne.",
         solution: "Giulia risponde all'istante con un'espressività vocale calda e umana, parlando la lingua nativa dell'ospite, proponendo servizi e inviando conferme su WhatsApp.",
         neuroCopy: "Il cervello rettiliano percepisce l'attesa come un disservizio immediato. Giulia azzera la frizione d'ingresso, elevando la percezione di status della struttura.",
         isProduct: true,
@@ -438,113 +453,22 @@
         `;
       }
 
-      // ─── INTEGRAZIONE SISTEMA ORBITALE REATTIVO PER LA SCHEDA "THE UNION" ───
+      // ─── COLONNA DESTRA (LOGO O FOTO RICCARDO) CON SUPPORTO PER IL CARICAMENTO ASINCRONO DI THE UNION ───
       let rightColumnContent = logoColumn;
       if (scene.isIntro) {
         rightColumnContent = rickyPhotoColumn;
       } else if (scene.isTheUnion) {
         rightColumnContent = `
-          <div class="relative w-[400px] h-[400px] flex items-center justify-center scale-95 md:scale-110 mt-6 md:mt-0 pointer-events-auto">
-            <div class="pulse-ring-element"></div>
-            <div class="orbit-ring">
-              <!-- 1. CONCIERGE24 -->
-              <div class="orbit-wrapper" style="top: 0%; left: 50%;">
-                <div class="orbit-item">
-                  <a href="https://concierge24.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #0a0a0c; padding: 10px;">
-                    <img src="loghi/logo_concierge.png" alt="Concierge24" class="orbit-img" />
-                  </a>
-                  <div class="orbit-tooltip">
-                    <b>Concierge24</b>
-                    Assistente vocale e testuale AI H24 per hotel e strutture extra-alberghiere.
-                  </div>
-                </div>
-              </div>
-              <!-- 2. DRIVEMOTION -->
-              <div class="orbit-wrapper" style="top: 18.8%; left: 89.1%;">
-                <div class="orbit-item">
-                  <a href="https://drivemotion.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #fff; padding: 6px;">
-                    <img src="loghi/logo_drivemotion.png" alt="DriveMotion" class="orbit-img cover rounded" />
-                  </a>
-                  <div class="orbit-tooltip">
-                    <b>DriveMotion AI</b>
-                    Generazione automatica di sfondi e video cinematici per saloni auto.
-                  </div>
-                </div>
-              </div>
-              <!-- 3. NEXUS AI -->
-              <div class="orbit-wrapper" style="top: 60.9%; left: 98.8%;">
-                <div class="orbit-item">
-                  <a href="https://nexus.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #0a0a0c; padding: 12px;">
-                    <img src="loghi/logo_nexus.png" alt="Nexus AI" class="orbit-img" />
-                  </a>
-                  <div class="orbit-tooltip">
-                    <b>Nexus AI</b>
-                    Widget chatbot intelligente per accoglienza e conversione automatica lead.
-                  </div>
-                </div>
-              </div>
-              <!-- 4. OMNIASTUDIO -->
-              <div class="orbit-wrapper" style="top: 95.1%; left: 71.6%;">
-                <div class="orbit-item">
-                  <a href="https://omniastudio.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #fff; padding: 4px;">
-                    <img src="loghi/logo_omniastudio.png" alt="OmniaStudio" class="orbit-img" />
-                  </a>
-                  <div class="orbit-tooltip">
-                    <b>OmniaStudio</b>
-                    La potenza dell'AI locale e protetta offline sul tuo PC, a vita.
-                  </div>
-                </div>
-              </div>
-              <!-- 5. DENTIS -->
-              <div class="orbit-wrapper" style="top: 95.1%; left: 28.4%;">
-                <div class="orbit-item">
-                  <a href="https://dentis.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #0a0a0c; padding: 10px;">
-                    <img src="loghi/logo_dentis.png" alt="Dentis AI" class="orbit-img" />
-                  </a>
-                  <div class="orbit-tooltip">
-                    <b>Dentis AI</b>
-                    Receptionist telefonica e assistente vocale AI H24 su misura per studi dentistici.
-                  </div>
-                </div>
-              </div>
-              <!-- 6. FF EDIZIONI -->
-              <div class="orbit-wrapper" style="top: 60.9%; left: 1.2%;">
-                <div class="orbit-item">
-                  <a href="https://ff.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #0a0a0c; padding: 2px;">
-                    <img src="loghi/logo_ff.png" alt="FF Edizioni" class="orbit-img cover rounded" />
-                  </a>
-                  <div class="orbit-tooltip">
-                    <b>FF Edizioni</b>
-                    Colonne sonore, jingle commerciali e sound design creati con l'AI.
-                  </div>
-                </div>
-              </div>
-              <!-- 7. HOMETOUR -->
-              <div class="orbit-wrapper" style="top: 18.8%; left: 10.9%;">
-                <div class="orbit-item">
-                  <a href="https://hometour.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #0a0a0c; padding: 4px;">
-                    <img src="loghi/logo_hometour.jpg" alt="HomeTour" class="orbit-img cover rounded" />
-                  </a>
-                  <div class="orbit-tooltip">
-                    <b>HomeTour AI</b>
-                    Reel immobiliari con voce narrante generati in automatico da foto.
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="orbit-center-photo">
-              <img src="loghi/foto_riccardo.jpeg" alt="Riccardo Modena - Fondatore" />
-            </div>
+          <div id="orbit-container-target" class="relative w-[400px] h-[400px] flex items-center justify-center scale-95 md:scale-110 mt-6 md:mt-0 pointer-events-auto">
+            ${orbitHTML ? orbitHTML : "Caricamento Ecosistema..."}
           </div>
         `;
       }
 
-      // Struttura dei tag per rendere la scheda intera un link per i prodotti (isProduct)
       const tagType = scene.isProduct ? "a" : "div";
       const hrefAttr = scene.isProduct ? `href="${scene.url}" target="_blank" rel="noopener noreferrer"` : "";
       const cursorClass = scene.isProduct ? "cursor-pointer hover:border-[#F2D28B]/30 hover:shadow-[0_40px_100px_rgba(242,210,139,0.05)] transition-all duration-300" : "";
 
-      // Dimensioni delle schede per massimo equilibrio visivo
       let cardSizeClass = "max-w-3xl";
       if (scene.isIntro || scene.isTheUnion) {
         cardSizeClass = "max-w-6xl md:p-16";
@@ -552,7 +476,6 @@
         cardSizeClass = "max-w-4xl md:p-14";
       }
 
-      // Costruzione finale della scheda
       cardWrapper.innerHTML = `
         <${tagType} ${hrefAttr} class="scene-card w-full ${cardSizeClass} bg-[#07070a]/92 backdrop-blur-3xl p-8 md:p-14 border border-white/10 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.95)] preserve-3d opacity-0 pointer-events-none flex flex-col ${flexDirClass} gap-8 md:gap-12 items-center justify-between ${cursorClass}">
           <div class="flex-1 text-left w-full">
@@ -574,7 +497,7 @@
     // ─── FUNZIONI INTERATTIVE (VCARD & CONTATTI) ───
     function handleVCardClick() {
       const link = document.createElement("a");
-      link.href = "public/contact.vcf"; // <── Modifica questa riga impostando "public/"
+      link.href = "public/contact.vcf";
       link.download = "Riccardo_Modena_RMStudio.vcf";
       document.body.appendChild(link);
       link.click();
