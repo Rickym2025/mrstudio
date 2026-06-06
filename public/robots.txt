@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-Allow: /mirrors.md
-Allow: /llms.txt
-
-# Mappa del sito e mirror testuale per crawler AI
-Sitemap: https://rmstudio.app/sitemap.xml

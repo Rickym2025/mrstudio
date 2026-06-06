@@ -1,39 +1,754 @@
-<!doctype html>
-<html lang="it" class="h-full antialiased">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RM Studio - Creative AI Suite</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Cormorant Garamond & Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- GSAP Core & ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1KKJSLWGC6"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-    
-      gtag('config', 'G-1KKJSLWGC6');
-    </script>
-    
-    <!-- Link Canonico aggiunto per risolvere l'errore di pagina duplicata -->
-    <link rel="canonical" href="https://www.rmstudio.app" />
-    
-    <!-- Correzione Brand name e ottimizzazioni Web App (Aggiungi a schermata Home) -->
-    <title>RM Studio - AI Engineering Lab</title>
-    <meta name="description" content="Ecosistemi di Intelligenza Artificiale progettati per espandere il tuo mercato" />
-    <meta name="apple-mobile-web-app-title" content="RM Studio" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <link rel="apple-touch-icon" href="/logo.png" />
-    <link rel="manifest" href="/manifest.json" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #050505;
+      color: #FFFFFF;
+      overflow-x: hidden;
+    }
+    .font-serif {
+      font-family: 'Cormorant Garamond', serif;
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    html {
+      scrollbar-width: none;
+    }
+    .preserve-3d {
+      transform-style: preserve-3d;
+    }
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-  </head>
-  <body class="min-h-full flex flex-col">
-    <div id="root" class="w-full flex-grow flex flex-col"></div>
-    <script type="module" src="/src/main.tsx"></script>
-    <script src="/cookie-banner.js" defer></script>
-  </body>
+    /* ─── PREVENZIONE FLASH DI CARICAMENTO INIZIALE ─── */
+    .scene-card {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* ─── ANIMAZIONI E STILI PER IL SISTEMA ORBITALE (SCENE 9) ─── */
+    @keyframes orbit-rotation {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes counter-rotation {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(-360deg); }
+    }
+    @keyframes pulse-ring-optimized {
+      0%, 100% { opacity: 0.2; transform: scale(0.95); }
+      50% { opacity: 0.4; transform: scale(1.05); }
+    }
+    .pulse-ring-element {
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      background-color: rgba(242, 210, 139, 0.05);
+      filter: blur(48px);
+      border-radius: 9999px;
+      will-change: transform, opacity;
+      animation: pulse-ring-optimized 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    .orbit-ring {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
+      animation: orbit-rotation 40s linear infinite;
+    }
+    .orbit-wrapper {
+      position: absolute;
+      width: 64px;
+      height: 64px;
+      transform: translate(-50%, -50%);
+    }
+    .orbit-item {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      animation: counter-rotation 40s linear infinite;
+      transform-origin: center;
+    }
+    .orbit-link {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-sizing: border-box;
+      transition: 0.3s;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      text-decoration: none;
+    }
+    .orbit-link:hover {
+      border-color: #F2D28B;
+      box-shadow: 0 0 15px rgba(242, 210, 139, 0.4);
+    }
+    .orbit-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .orbit-img.cover {
+      object-fit: cover;
+    }
+    .orbit-img.rounded {
+      border-radius: 9999px;
+    }
+    .orbit-center-photo {
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      border: 4px solid #F2D28B;
+      padding: 4px;
+      background: #000;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+      z-index: 10;
+      box-sizing: border-box;
+    }
+    .orbit-center-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    .orbit-tooltip {
+      position: absolute;
+      bottom: 85px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 220px;
+      background: #0a0a0c;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #94a3b8;
+      font-size: 11px;
+      border-radius: 8px;
+      padding: 12px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      text-align: center;
+      z-index: 100;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      line-height: 1.4;
+    }
+    .orbit-tooltip b {
+      color: white;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .orbit-item:hover .orbit-tooltip {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── PRELOADER ─── -->
+  <div id="loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#050505] transition-opacity duration-700">
+    <div class="text-center">
+      <span class="text-[#F2D28B] text-xs tracking-[0.4em] uppercase block mb-3 font-semibold">RM Studio</span>
+      <h2 class="font-serif text-3xl md:text-5xl tracking-[0.2em] uppercase text-white mb-8">Ecosistema AI</h2>
+      <div class="w-64 h-[1px] bg-neutral-800 relative overflow-hidden mx-auto mb-4">
+        <div id="loader-bar" class="absolute h-full left-0 top-0 bg-[#F2D28B] w-0 transition-all duration-150"></div>
+      </div>
+      <span id="loader-text" class="text-[10px] tracking-[0.3em] text-neutral-400 uppercase">Inizializzazione...</span>
+    </div>
+  </div>
+
+  <!-- ─── HEADER MINIMALISTA FISSO ─── -->
+  <header class="fixed top-0 left-0 w-full z-40 flex justify-between items-center px-6 md:px-12 py-6 border-b border-white/5 bg-black/10 backdrop-blur-md">
+    <div class="flex items-center gap-3">
+      <img src="loghi/logo_rm.png" alt="RM Studio Logo" class="w-6 h-6 object-contain" onerror="this.style.display='none'">
+      <span class="font-serif text-lg tracking-widest uppercase text-[#F2D28B]">RM Studio</span>
+    </div>
+    <a href="#trigger-10" class="border border-[#F2D28B]/40 text-[#F2D28B] hover:bg-[#F2D28B] hover:text-black transition-all duration-300 px-5 py-2 text-[10px] tracking-widest uppercase font-mono">
+      CONTATTI
+    </a>
+  </header>
+
+  <!-- ─── CONTENITORE IMMERSIVO CANVAS ─── -->
+  <div id="app-container" class="relative w-full">
+    <div class="sticky top-0 h-screen w-full overflow-hidden z-0 bg-black">
+      <canvas id="immersive-canvas" class="w-full h-full object-cover opacity-80"></canvas>
+      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/80 pointer-events-none"></div>
+    </div>
+
+    <!-- Contenitore Fisso delle Schede (Centrate) -->
+    <div id="text-overlays" class="fixed inset-0 z-10 pointer-events-none"></div>
+
+    <!-- Triggers Invisibili per lo Scroll (1100vh) -->
+    <div id="scroll-triggers" class="relative z-20 w-full pointer-events-none">
+      <section id="trigger-0" class="h-screen w-full"></section>
+      <section id="trigger-1" class="h-screen w-full"></section>
+      <section id="trigger-2" class="h-screen w-full"></section>
+      <section id="trigger-3" class="h-screen w-full"></section>
+      <section id="trigger-4" class="h-screen w-full"></section>
+      <section id="trigger-5" class="h-screen w-full"></section>
+      <section id="trigger-6" class="h-screen w-full"></section>
+      <section id="trigger-7" class="h-screen w-full"></section>
+      <section id="trigger-8" class="h-screen w-full"></section>
+      <section id="trigger-9" class="h-screen w-full"></section>
+      <section id="trigger-10" class="h-screen w-full"></section>
+    </div>
+  </div>
+
+  <!-- ─── FLOATING DOCK MINIMALISTA IN BASSO ─── -->
+  <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 bg-black/40 border border-white/10 px-6 py-4 rounded-full backdrop-blur-md pointer-events-auto shadow-2xl">
+    <a href="#trigger-0" class="text-[10px] font-mono text-[#F2D28B] hover:text-white uppercase tracking-widest transition-colors">Intro</a>
+    <span class="text-white/10 text-[10px]">|</span>
+    <a href="#trigger-1" class="text-[10px] font-mono text-white/40 hover:text-white uppercase tracking-widest transition-colors">Ecosistemi</a>
+    <span class="text-white/10 text-[10px]">|</span>
+    <a href="#trigger-10" class="text-[10px] font-mono text-white/40 hover:text-white uppercase tracking-widest transition-colors">Contatti</a>
+  </div>
+
+  <script src="scrubber.js"></script>
+
+  <script>
+    const SCENES = [
+      {
+        id: "hero-start",
+        chapter: "Ecosistema",
+        title: "RM Studio",
+        subtitle: "Risolviamo colli di bottiglia operativi sviluppando ecosistemi AI su misura. Riduciamo lo sforzo d'uso, azzeriamo l'errore umano ed espandiamo i tuoi canali commerciali. Scorri per iniziare.",
+        logo: "logo_rm.png",
+        isProduct: false,
+        isIntro: true
+      },
+      {
+        id: "nexus",
+        chapter: "Chapter I — Conversion AI",
+        title: "NexusAI",
+        subtitle: "Assunzioni e vendite H24 sul tuo sito attuale senza cambiare codice. NexusAI inietta un assistente intelligente che accoglie, informa e converte i visitatori in lead profilati.",
+        logo: "logo_nexus.png",
+        problem: "I siti web aziendali statici registrano costantemente alti tassi di rimbalzo (bounce rate), fallendo nel convertire il traffico serale o festivo in clienti attivi.",
+        solution: "L'overlay invisibile si aggancia all'istante alla tua infrastruttura, scansiona in autonomia la conoscenza aziendale e acquisisce i dati di contatto dei visitatori in tempo reale.",
+        neuroCopy: "Il 96% degli utenti abbandona le pagine a causa del sovraccarico cognitivo. Nexus agisce sul principio biologico di fluidità, intercettando il dubbio del visitatore all'istante.",
+        isProduct: true,
+        url: "https://nexus.rmstudio.app"
+      },
+      {
+        id: "concierge24",
+        chapter: "Chapter II — Hospitality",
+        title: "Concierge24",
+        subtitle: "L'assistente vocale H24 multilingua che accoglie gli ospiti, risponde alle loro domande e fa up-selling dei tuoi servizi extra mentre il tuo staff riposa.",
+        logo: "logo_concierge.png",
+        problem: "La reception soffre di picchi di sovraccarico, con centralini intasati e turisti frustrati in attesa di risposte su Wi-Fi e check-in nelle ore notturne.",
+        solution: "Giulia risponde all'istante con un'espressività vocale calda e umana, parlando la lingua nativa dell'ospite, proponendo servizi e inviando conferme su WhatsApp.",
+        neuroCopy: "Il cervello rettiliano percepisce l'attesa come un disservizio immediato. Giulia azzera la frizione d'ingresso, elevando la percezione di status della struttura.",
+        isProduct: true,
+        url: "https://concierge24.rmstudio.app"
+      },
+      {
+        id: "dentis",
+        chapter: "Chapter III — Dental AI",
+        title: "Dentis",
+        subtitle: "Receptionist AI telefonica H24 su misura per l'odontoiatria. Sincronizza gli appuntamenti, gestisce il triage e azzera le poltrone vuote.",
+        logo: "logo_dentis.png",
+        problem: "Telefonate perse fuori orario, poltrone vuote non ottimizzate e segreteria medica intasata dalle urgenze improvvise dei pazienti.",
+        solution: "Serena risponde H24, esegue il triage empatico delle problematiche cliniche e prenota le visite direttamente sul calendario sincronizzato Google Calendar.",
+        neuroCopy: "Un paziente con dolore vive uno stato di urgenza limbica. Serena risponde al primo squillo, trasformando l'ansia del paziente in fiducia verso lo studio.",
+        isProduct: true,
+        url: "https://dentis.rmstudio.app"
+      },
+      {
+        id: "lexis",
+        chapter: "Chapter IV — Legal AI",
+        title: "Lexis AI",
+        subtitle: "Assistente telefonica AI formale ed empatica per studi legali. Gestisce prime consulenze e tutela il segreto professionale.",
+        logo: "logo_lexis.png",
+        problem: "Avvocati e studi legali che faticano a filtrare le richieste futili fuori orario nel rispetto del segreto professionale e del protocollo di studio.",
+        solution: "Chiara adotta un registro formale ('Lei'), risponde ai dubbi di base, prenota le prime consulenze sul calendario ed invia promemoria WhatsApp.",
+        neuroCopy: "Il cliente legale esige riservatezza e autorità fin dal primo contatto. Chiara adotta un tono distaccato ma empatico, riducendo l'attrito burocratico iniziale.",
+        isProduct: true,
+        url: "https://lexis.rmstudio.app"
+      },
+      {
+        id: "drivemotion",
+        chapter: "Chapter V — Automotive",
+        title: "DriveMotion",
+        subtitle: "Sfondi fotorealistici e video virali generati in automatico. Trasforma le foto amatoriali del tuo piazzale in reel cinematografici che aumentano il valore delle vetture.",
+        logo: "logo_drivemotion.png",
+        problem: "Fotografie dei veicoli scattate in piazzali disordinati con sfondi disturbanti che abbassano drasticamente il valore percepito delle auto sui portali.",
+        solution: "Rimozione automatica del piazzale e inserimento immediato delle vetture all'interno di showroom digitali 3D di lusso, riallineando fari e riflessi fisici.",
+        neuroCopy: "La valutazione estetica avviene in meno di tre decimi di secondo. Elevando lo sfondo, inneschiamo l'euristica del prestigio riducendo la trattativa sul prezzo.",
+        isProduct: true,
+        url: "https://drivemotion.rmstudio.app"
+      },
+      {
+        id: "hometour",
+        chapter: "Chapter VI — Real Estate",
+        title: "HomeTour AI",
+        subtitle: "Reel immobiliari con voce narrante emozionale, generati in automatico da semplici fotografie. Vendi l'esperienza della casa prima ancora della visita reale.",
+        logo: "logo_hometour.jpg",
+        problem: "Annunci immobiliari piatti sui portali che faticano a catturare l'interesse emotivo dell'acquirente ed ostacolano l'acquisizione di mandati in esclusiva.",
+        solution: "Generazione di video-visite emozionali con carrellate 3D di parallasse simulato dalle foto, musica d'atmosfera e narrazione vocale persuasiva.",
+        neuroCopy: "Non si acquistano mq, ma proiezioni del proprio futuro. Attraverso il movimento 3D simuliamo l'immersione spaziale prima ancora della visita fisica.",
+        isProduct: true,
+        url: "https://hometour.rmstudio.app"
+      },
+      {
+        id: "omniastudio",
+        chapter: "Chapter VII — Privacy AI",
+        title: "OmniaStudio",
+        subtitle: "La potenza dell'AI generativa sul tuo PC, completamente offline. Analizza contratti, PDF e dati sensibili senza inviare dati al cloud, a tutela del segreto professionale.",
+        logo: "logo_omniastudio.png",
+        problem: "Restrizioni severe sul GDPR e rischio di fuga di dati sensibili inviando contratti e documenti privati ai server cloud delle intelligenze artificiali pubbliche.",
+        solution: "Un software monolitico installato localmente sul tuo hardware che analizza documenti, esegue OCR ed elabora report a connessione totalmente disattivata.",
+        neuroCopy: "La sicurezza risponde al bisogno biologico di controllo. OmniaStudio lavora isolato, offrendo zero latenza di rete e totale conformità legale.",
+        isProduct: true,
+        url: "https://omniastudio.rmstudio.app"
+      },
+      {
+        id: "ffedizioni",
+        chapter: "Chapter VIII — Audio & Music",
+        title: "FF Edizioni",
+        subtitle: "Identità sonora e colonne sonore AI originali. Jingle musicali pronti per il broadcast e le campagne social, creati per sintonizzarsi con l'identità del tuo brand.",
+        logo: "logo_ff.png",
+        problem: "Spot e video aziendali privi di carattere acustico identitario, con elevato rischio di violazione di copyright o royalty su tracce musicali terze.",
+        solution: "Creazione di jingle originali e tracce audio proprietarie registrate, progettati scientificamente per innescare l'ancoraggio uditivo del brand.",
+        neuroCopy: "L'udito è l'unico senso che non possiamo isolare. Applichiamo l'ancoraggio uditivo affinché il brand rimanga impresso nella memoria a lungo termine.",
+        isProduct: true,
+        url: "https://ff.rmstudio.app"
+      },
+      {
+        id: "the-union",
+        chapter: "The Synthesis",
+        title: "Ecosistema Connesso",
+        subtitle: "La convergenza di otto canali autonomi integrati sotto un'unica direzione tecnica. Sincronizzazione automatica tramite database relazionali per azzerare ogni forma di frizione logica ed operativa.",
+        logo: "logo_rm.png",
+        isProduct: false,
+        isTheUnion: true
+      },
+      {
+        id: "contacts-end",
+        chapter: "The Connection",
+        title: "Parliamo del tuo Progetto",
+        subtitle: "Compila il modulo contatti per richiedere un'analisi di fattibilità e integrare la tua azienda nell'ecosistema autonomo di RM Studio.",
+        logo: "logo_rm.png",
+        isProduct: false,
+        isContact: true
+      }
+    ];
+
+    // ─── GENERAZIONE DINAMICA SCHEDE EDITORIALI CON ALLINEAMENTO LATERALE SINISTRO ───
+    const overlayContainer = document.getElementById("text-overlays");
+
+    SCENES.forEach((scene, index) => {
+      const cardWrapper = document.createElement("div");
+      
+      let alignmentClass = "justify-center md:justify-start text-left items-center md:pl-24";
+      if (scene.isIntro || scene.isTheUnion || scene.isContact) {
+        alignmentClass = "justify-center text-center mx-auto items-center";
+      }
+
+      cardWrapper.className = `absolute inset-0 flex pointer-events-none p-6 md:p-12 ${alignmentClass}`;
+
+      const isEven = index % 2 === 0;
+      const flexDirClass = isEven ? "md:flex-row" : "md:flex-row-reverse";
+
+      const logoColumn = `
+        <div class="flex-shrink-0 flex items-center justify-center bg-black/50 border border-white/10 rounded-[2rem] p-6 w-32 h-32 md:w-44 md:h-44 shadow-inner">
+          <img src="loghi/${scene.logo}" alt="${scene.title} Logo" class="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]">
+        </div>
+      `;
+
+      let rickyPhotoColumn = "";
+      if (scene.isIntro) {
+        rickyPhotoColumn = `
+          <div class="flex-shrink-0 flex items-center justify-center border-2 border-[#F2D28B]/30 rounded-[2.5rem] p-1.5 w-44 h-44 md:w-80 md:h-80 bg-[#050505] shadow-[0_0_40px_rgba(242,210,139,0.25)]">
+            <img src="loghi/foto_riccardo.jpeg" alt="Riccardo Modena" class="w-full h-full object-cover rounded-[2rem]">
+          </div>
+        `;
+      }
+
+      let editorialBody = "";
+      if (scene.isProduct) {
+        editorialBody = `
+          <div class="mt-6 space-y-4 border-t border-white/5 pt-6 text-base text-neutral-300 font-light leading-relaxed">
+            <p>${scene.problem}</p>
+            <p>${scene.solution}</p>
+            <div class="relative bg-gradient-to-r from-[#F2D28B]/10 to-transparent p-5 rounded-2xl border-l-2 border-[#F2D28B] text-[15px] italic text-[#F2D28B]/95 font-light leading-relaxed">
+              "${scene.neuroCopy}"
+            </div>
+          </div>
+        `;
+      }
+
+      let introButton = "";
+      if (scene.isIntro) {
+        introButton = `
+          <button onclick="handleVCardClick()" class="inline-flex items-center justify-center gap-3 bg-white text-black text-sm tracking-wider font-extrabold uppercase px-8 py-5 rounded-full hover:scale-105 hover:bg-neutral-100 active:scale-95 transition-all duration-300 mt-8 cursor-pointer pointer-events-auto shadow-[0_0_30px_rgba(255,255,255,0.25)] focus:outline-none">
+            <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            <span>SALVA CONTATTO (vCard)</span>
+          </button>
+        `;
+      }
+
+      let siteLinkButton = "";
+      if (scene.isProduct && scene.url) {
+        siteLinkButton = `
+          <div class="mt-5 text-left text-sm text-[#F2D28B] font-mono font-bold tracking-wider underline decoration-dotted underline-offset-4 decoration-[#F2D28B]/60">
+            VISITA IL SITO UFFICIALE
+          </div>
+        `;
+      }
+
+      let contactForm = "";
+      if (scene.isContact) {
+        contactForm = `
+          <form class="flex flex-col gap-4 mt-6 text-left pointer-events-auto w-full max-w-lg" onsubmit="handleContactSubmit(event)">
+            <input type="hidden" name="access_key" value="9013a8d5-0901-42a0-b9e6-4c45553f960d">
+            <input type="hidden" name="subject" value="Nuovo Lead da RMStudio Suite">
+            
+            <input type="text" name="name" required placeholder="Nome Completo" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-[#F2D28B]/50 text-base font-light">
+            <input type="email" name="email" required placeholder="Email Aziendale" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-[#F2D28B]/50 text-base font-light">
+            <textarea name="message" required rows="3" placeholder="Quale processo vuoi automatizzare?" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-[#F2D28B]/50 text-base font-light resize-none"></textarea>
+            
+            <button type="submit" class="bg-[#F2D28B] text-black text-xs tracking-widest font-black uppercase py-5 rounded-2xl hover:bg-white transition-all duration-300 cursor-pointer w-full font-mono">
+              Invia Messaggio Aziendale
+            </button>
+          </form>
+        `;
+      }
+
+      // ─── INTEGRAZIONE SISTEMA ORBITALE REATTIVO PER LA SCHEDA "THE UNION" ───
+      let rightColumnContent = logoColumn;
+      if (scene.isIntro) {
+        rightColumnContent = rickyPhotoColumn;
+      } else if (scene.isTheUnion) {
+        rightColumnContent = `
+          <div class="relative w-[400px] h-[400px] flex items-center justify-center scale-95 md:scale-110 mt-6 md:mt-0 pointer-events-auto">
+            <div class="pulse-ring-element"></div>
+            <div class="orbit-ring">
+              <!-- 1. CONCIERGE24 -->
+              <div class="orbit-wrapper" style="top: 0%; left: 50%;">
+                <div class="orbit-item">
+                  <a href="https://concierge24.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #0a0a0c; padding: 10px;">
+                    <img src="loghi/logo_concierge.png" alt="Concierge24" class="orbit-img" />
+                  </a>
+                  <div class="orbit-tooltip">
+                    <b>Concierge24</b>
+                    Assistente vocale e testuale AI H24 per hotel e strutture extra-alberghiere.
+                  </div>
+                </div>
+              </div>
+              <!-- 2. DRIVEMOTION -->
+              <div class="orbit-wrapper" style="top: 18.8%; left: 89.1%;">
+                <div class="orbit-item">
+                  <a href="https://drivemotion.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #fff; padding: 6px;">
+                    <img src="loghi/logo_drivemotion.png" alt="DriveMotion" class="orbit-img cover rounded" />
+                  </a>
+                  <div class="orbit-tooltip">
+                    <b>DriveMotion AI</b>
+                    Generazione automatica di sfondi e video cinematici per saloni auto.
+                  </div>
+                </div>
+              </div>
+              <!-- 3. NEXUS AI -->
+              <div class="orbit-wrapper" style="top: 60.9%; left: 98.8%;">
+                <div class="orbit-item">
+                  <a href="https://nexus.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #0a0a0c; padding: 12px;">
+                    <img src="loghi/logo_nexus.png" alt="Nexus AI" class="orbit-img" />
+                  </a>
+                  <div class="orbit-tooltip">
+                    <b>Nexus AI</b>
+                    Widget chatbot intelligente per accoglienza e conversione automatica lead.
+                  </div>
+                </div>
+              </div>
+              <!-- 4. OMNIASTUDIO -->
+              <div class="orbit-wrapper" style="top: 95.1%; left: 71.6%;">
+                <div class="orbit-item">
+                  <a href="https://omniastudio.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #fff; padding: 4px;">
+                    <img src="loghi/logo_omniastudio.png" alt="OmniaStudio" class="orbit-img" />
+                  </a>
+                  <div class="orbit-tooltip">
+                    <b>OmniaStudio</b>
+                    La potenza dell'AI locale e protetta offline sul tuo PC, a vita.
+                  </div>
+                </div>
+              </div>
+              <!-- 5. DENTIS -->
+              <div class="orbit-wrapper" style="top: 95.1%; left: 28.4%;">
+                <div class="orbit-item">
+                  <a href="https://dentis.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #0a0a0c; padding: 10px;">
+                    <img src="loghi/logo_dentis.png" alt="Dentis AI" class="orbit-img" />
+                  </a>
+                  <div class="orbit-tooltip">
+                    <b>Dentis AI</b>
+                    Receptionist telefonica e assistente vocale AI H24 su misura per studi dentistici.
+                  </div>
+                </div>
+              </div>
+              <!-- 6. FF EDIZIONI -->
+              <div class="orbit-wrapper" style="top: 60.9%; left: 1.2%;">
+                <div class="orbit-item">
+                  <a href="https://ff.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #0a0a0c; padding: 2px;">
+                    <img src="loghi/logo_ff.png" alt="FF Edizioni" class="orbit-img cover rounded" />
+                  </a>
+                  <div class="orbit-tooltip">
+                    <b>FF Edizioni</b>
+                    Colonne sonore, jingle commerciali e sound design creati con l'AI.
+                  </div>
+                </div>
+              </div>
+              <!-- 7. HOMETOUR -->
+              <div class="orbit-wrapper" style="top: 18.8%; left: 10.9%;">
+                <div class="orbit-item">
+                  <a href="https://hometour.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #0a0a0c; padding: 4px;">
+                    <img src="loghi/logo_hometour.jpg" alt="HomeTour" class="orbit-img cover rounded" />
+                  </a>
+                  <div class="orbit-tooltip">
+                    <b>HomeTour AI</b>
+                    Reel immobiliari con voce narrante generati in automatico da foto.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="orbit-center-photo">
+              <img src="loghi/foto_riccardo.jpeg" alt="Riccardo Modena - Fondatore" />
+            </div>
+          </div>
+        `;
+      }
+
+      // Struttura dei tag per rendere la scheda intera un link per i prodotti (isProduct)
+      const tagType = scene.isProduct ? "a" : "div";
+      const hrefAttr = scene.isProduct ? `href="${scene.url}" target="_blank" rel="noopener noreferrer"` : "";
+      const cursorClass = scene.isProduct ? "cursor-pointer hover:border-[#F2D28B]/30 hover:shadow-[0_40px_100px_rgba(242,210,139,0.05)] transition-all duration-300" : "";
+
+      // Dimensioni delle schede per massimo equilibrio visivo
+      let cardSizeClass = "max-w-3xl";
+      if (scene.isIntro || scene.isTheUnion) {
+        cardSizeClass = "max-w-6xl md:p-16";
+      } else if (scene.isContact) {
+        cardSizeClass = "max-w-4xl md:p-14";
+      }
+
+      // Costruzione finale della scheda
+      cardWrapper.innerHTML = `
+        <${tagType} ${hrefAttr} class="scene-card w-full ${cardSizeClass} bg-[#07070a]/92 backdrop-blur-3xl p-8 md:p-14 border border-white/10 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.95)] preserve-3d opacity-0 pointer-events-none flex flex-col ${flexDirClass} gap-8 md:gap-12 items-center justify-between ${cursorClass}">
+          <div class="flex-1 text-left w-full">
+            <span class="text-[10px] uppercase tracking-[0.4em] text-[#F2D28B] block mb-2 font-semibold font-mono">${scene.chapter}</span>
+            <h2 class="font-serif text-3xl md:text-5xl text-[#F6F3F0] tracking-wide leading-tight mb-4">${scene.title}</h2>
+            <p class="text-base md:text-lg tracking-wide text-neutral-300 leading-relaxed font-light">${scene.subtitle}</p>
+            ${editorialBody}
+            ${introButton}
+            ${siteLinkButton}
+            ${contactForm}
+          </div>
+          ${rightColumnContent}
+        </${tagType}>
+      `;
+
+      overlayContainer.appendChild(cardWrapper);
+    });
+
+    // ─── FUNZIONI INTERATTIVE (VCARD & CONTATTI) ───
+    function handleVCardClick() {
+      const link = document.createElement("a");
+      link.href = "loghi/contact.vcf";
+      link.download = "Riccardo_Modena_RMStudio.vcf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    async function handleContactSubmit(e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const button = form.querySelector("button[type='submit']");
+      const originalText = button.innerText;
+      button.innerText = "Invio in corso...";
+      button.disabled = true;
+
+      try {
+        const res = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (res.ok) {
+          alert("Messaggio inviato con successo! Ti risponderò entro 24 ore.");
+          form.reset();
+        } else {
+          alert("Errore nell'invio. Riprova più tardi.");
+        }
+      } catch {
+        alert("Errore di rete. Controlla la connessione.");
+      } finally {
+        button.innerText = originalText;
+        button.disabled = false;
+      }
+    }
+
+    // ─── BILATERAL LOOP DETECTOR (LOOP INFINITO DEI FOTOGRAMMI E SCHEDE) ───
+    window.addEventListener('scroll', () => {
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      if (window.scrollY >= maxScroll - 4) {
+        window.scrollTo(0, 10); 
+      } else if (window.scrollY <= 2) {
+        window.scrollTo(0, maxScroll - 10); 
+      }
+    });
+
+    // ─── SCENOPHONIC 3D TRANSITIONS FORZATE CON INTEGRATIVO AUTOALPHA (VISIBILITY SECURE) ───
+    function getSceneProps(index) {
+      switch (index) {
+        case 0: // Intro / Hero
+          return {
+            init: { autoAlpha: 0, opacity: 0, scale: 0.7, z: -400, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, scale: 1.1, z: 100, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 1: // NexusAI
+          return {
+            init: { autoAlpha: 0, opacity: 0, rotateY: 90, x: 250, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, x: 0, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, rotateY: -90, x: -250, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 2: // Concierge24
+          return {
+            init: { autoAlpha: 0, opacity: 0, y: -300, rotateX: 45, scale: 1, z: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, y: 0, rotateX: 0, scale: 1, z: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, y: 150, rotateX: -15, scale: 1, z: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 3: // Dentis
+          return {
+            init: { autoAlpha: 0, opacity: 0, scale: 0.3, z: -700, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, scale: 1.5, z: 250, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 4: // Lexis AI
+          return {
+            init: { autoAlpha: 0, opacity: 0, rotateY: -60, rotateX: 20, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, rotateX: 0, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, rotateY: 60, rotateX: -20, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 5: // DriveMotion
+          return {
+            init: { autoAlpha: 0, opacity: 0, scale: 0.1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, scale: 0.1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 6: // HomeTour AI
+          return {
+            init: { autoAlpha: 0, opacity: 0, x: 350, skewX: -12, scale: 1, z: 0, rotateX: 0, rotateY: 0, y: 0, rotateZ: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, x: 0, skewX: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, y: 0, rotateZ: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, x: -350, skewX: 12, scale: 1, z: 0, rotateX: 0, rotateY: 0, y: 0, rotateZ: 0, pointerEvents: "none" }
+          };
+        case 7: // OmniaStudio
+          return {
+            init: { autoAlpha: 0, opacity: 0, rotateZ: -180, scale: 0.5, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, rotateZ: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, rotateZ: 180, scale: 0.5, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 8: // FF Edizioni
+          return {
+            init: { autoAlpha: 0, opacity: 0, scale: 1.4, z: 200, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, scale: 0.7, z: -200, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 9: // The Union (Synthesis)
+          return {
+            init: { autoAlpha: 0, opacity: 0, rotateY: -180, z: -500, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, z: 0, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, rotateY: 180, z: 500, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 10: // Contacts / Outro
+          return {
+            init: { autoAlpha: 0, opacity: 0, y: 150, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, y: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, y: -150, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+      }
+    }
+
+    // ─── INIZIALIZZAZIONE TIMELINE E SCROLL-BOUND TRANSITIONS (SHARP PLATEAU CON FORCE-EXIT AUTOALPHA) ───
+    function initCardAnimations() {
+      const triggers = gsap.utils.toArray("#scroll-triggers section");
+      const cards = gsap.utils.toArray(".scene-card");
+
+      triggers.forEach((trigger, index) => {
+        const card = cards[index];
+        if (!card) return;
+
+        const props = getSceneProps(index);
+
+        // Applichiamo lo stato iniziale fisso con autoAlpha (forza visibility hidden ed evita flash)
+        gsap.set(card, props.init);
+
+        // Timeline per la prima scheda (Intro - esce alla fine dello scroll-0 con autoAlpha completo)
+        if (index === 0) {
+          gsap.set(card, props.mid);
+          gsap.timeline({
+            scrollTrigger: {
+              trigger: trigger,
+              start: "top top",
+              end: "bottom top",
+              scrub: 1
+            }
+          })
+          .to(card, { ...props.mid, duration: 0.8 }) 
+          .to(card, { ...props.exit, duration: 0.2, ease: "power3.in" });
+        }
+        // Timeline per l'ultima scheda (CTA - entra rapidamente e rimane fissa)
+        else if (index === triggers.length - 1) {
+          gsap.timeline({
+            scrollTrigger: {
+              trigger: trigger,
+              start: "top bottom",
+              end: "bottom bottom",
+              scrub: 1
+            }
+          })
+          .to(card, { ...props.mid, duration: 0.3, ease: "power3.out" })
+          .to(card, { ...props.mid, duration: 0.7 }); 
+        }
+        // Timeline standard SHARP PLATEAU con autoAlpha: 0 ad ogni fine corsa (previene sovrapposizioni)
+        else {
+          gsap.timeline({
+            scrollTrigger: {
+              trigger: trigger,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 1
+            }
+          })
+          .to(card, { ...props.mid, duration: 0.15, ease: "power3.out" })
+          .to(card, { ...props.mid, duration: 0.70 }) 
+          .to(card, { ...props.exit, duration: 0.15, ease: "power3.in" });
+        }
+      });
+    }
+  </script>
+</body>
 </html>
