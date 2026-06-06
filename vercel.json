@@ -1,7 +1,7 @@
 {
   "headers": [
     {
-      "source": "/orbit-template(.*)",
+      "source": "/public/orbit-template.html",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
@@ -20,12 +20,12 @@
   ],
   "rewrites": [
     {
-      "source": "/orbit-template",
-      "destination": "/orbit-template.html"
+      "source": "/orbit-template.html",
+      "destination": "/public/orbit-template.html"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "source": "/orbit-template",
+      "destination": "/public/orbit-template.html"
     }
   ]
 }

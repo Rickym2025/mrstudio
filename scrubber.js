@@ -1,8 +1,11 @@
 const isMobile = window.innerWidth < 768;
 const totalFrames = isMobile ? 660 : 1320;
+
+// Carichiamo all'inizio solo la prima transizione per azzerare i tempi di attesa
+const primaryFramesCount = isMobile ? 60 : 120; 
+const images = [];
 const canvas = document.getElementById("immersive-canvas");
 const context = canvas.getContext("2d");
-const images = [];
 const scrollTracker = { frame: 0 };
 
 const getFramePath = index => {
@@ -10,37 +13,52 @@ const getFramePath = index => {
   return `frames/frame_${String(targetIndex).padStart(4, '0')}.jpg`;
 };
 
-let loadedCount = 0;
-const loader = document.getElementById("loader");
-const loaderBar = document.getElementById("loader-bar");
-const loaderText = document.getElementById("loader-text");
+let loadedPrimaryCount = 0;
+let isPrimaryLoaded = false;
 
-function preloadImages() {
+function preloadPrimaryImages() {
   for (let i = 1; i <= totalFrames; i++) {
     const img = new Image();
-    img.src = getFramePath(i);
     
-    const onLoadOrError = () => {
-      loadedCount++;
-      const progress = Math.round((loadedCount / totalFrames) * 100);
-      if (loaderBar) loaderBar.style.width = `${progress}%`;
-      if (loaderText) loaderText.innerText = `${progress}% Caricato`;
+    // Scarica immediatamente solo i frame della prima scena
+    if (i <= primaryFramesCount) {
+      img.src = getFramePath(i);
+      
+      const onLoadOrError = () => {
+        loadedPrimaryCount++;
+        const progress = Math.round((loadedPrimaryCount / primaryFramesCount) * 100);
+        if (loaderBar) loaderBar.style.width = `${progress}%`;
+        if (loaderText) loaderText.innerText = `${progress}% Caricato`;
 
-      if (loadedCount === totalFrames) {
-        if (loader) loader.style.opacity = "0";
-        setTimeout(() => {
-          if (loader) loader.style.display = "none";
-          initCanvasScrub();
-          if (typeof initCardAnimations === "function") {
-            initCardAnimations();
-          }
-        }, 600);
-      }
-    };
+        if (loadedPrimaryCount === primaryFramesCount && !isPrimaryLoaded) {
+          isPrimaryLoaded = true;
+          hideLoaderAndStart();
+        }
+      };
 
-    img.onload = onLoadOrError;
-    img.onerror = onLoadOrError; 
+      img.onload = onLoadOrError;
+      img.onerror = onLoadOrError;
+    }
     images.push(img);
+  }
+}
+
+function hideLoaderAndStart() {
+  if (loader) loader.style.opacity = "0";
+  setTimeout(() => {
+    if (loader) loader.style.display = "none";
+    initCanvasScrub();
+    if (typeof initCardAnimations === "function") {
+      initCardAnimations();
+    }
+    // Avvia il caricamento pigro dei restanti frame in background
+    preloadRemainingImages();
+  }, 600);
+}
+
+function preloadRemainingImages() {
+  for (let i = primaryFramesCount + 1; i <= totalFrames; i++) {
+    images[i - 1].src = getFramePath(i);
   }
 }
 
@@ -128,4 +146,4 @@ function initCanvasScrub() {
   });
 }
 
-preloadImages();
+preloadPrimaryImages();
