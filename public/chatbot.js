@@ -1,7 +1,25 @@
 (function() {
-  // 1. Iniezione degli stili CSS responsivi per il Chatbot (Basso-Destra su desktop, Basso-Sinistra su mobile)
+  // Generazione o recupero della sessione univoca (per la memoria di Nova su n8n)
+  let sessionId = localStorage.getItem('nova_chat_session');
+  if (!sessionId) {
+    sessionId = 'session_' + Math.random().toString(36).substring(2, 15);
+    localStorage.setItem('nova_chat_session', sessionId);
+  }
+
+  // 1. Iniezione degli stili CSS responsivi ed effetto "Respiro" cinetico
   const style = document.createElement('style');
   style.innerHTML = `
+    @keyframes bubble-breath {
+      0%, 100% { 
+        transform: scale(1); 
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(242, 210, 139, 0.15); 
+      }
+      50% { 
+        transform: scale(1.06); 
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(242, 210, 139, 0.4); 
+        border-color: rgba(242, 210, 139, 0.6);
+      }
+    }
     .chat-bubble {
       position: fixed;
       z-index: 50;
@@ -11,24 +29,24 @@
       background: rgba(8, 8, 12, 0.85);
       border: 1px solid rgba(242, 210, 139, 0.3);
       backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(242, 210, 139, 0.15);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      animation: bubble-breath 3s ease-in-out infinite;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .chat-bubble:hover {
+      animation: none;
       transform: scale(1.08) translateY(-2px);
       border-color: #F2D28B;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(242, 210, 139, 0.35);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(242, 210, 139, 0.5);
     }
 
-    /* ─── POSIZIONAMENTO ADATTIVO RICHIESTO ─── */
     @media (min-width: 768px) {
       .chat-bubble {
         bottom: 32px;
-        right: 32px; /* Basso-Destra su Desktop */
+        right: 32px;
       }
       .chat-window {
         bottom: 100px;
@@ -39,7 +57,7 @@
     @media (max-width: 767px) {
       .chat-bubble {
         bottom: 32px;
-        left: 32px; /* Basso-Sinistra su Mobile */
+        left: 32px;
       }
       .chat-window {
         bottom: 100px;
@@ -155,10 +173,10 @@
   `;
   document.head.appendChild(style);
 
-  // 2. Creazione elementi DOM
+  // 2. Creazione elementi DOM del Chatbot
   const chatContainer = document.createElement('div');
   chatContainer.innerHTML = `
-    <!-- Bolla Fluttuante -->
+    <!-- Bolla Fluttuante Cinetica -->
     <div id="chat-bubble" class="chat-bubble pointer-events-auto">
       <svg class="w-6 h-6 text-[#F2D28B]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -172,8 +190,8 @@
         <div class="flex items-center gap-3">
           <div class="chat-dot-pulse"></div>
           <div>
-            <h4 class="text-sm font-bold text-white font-serif tracking-wide">Giulia — AI Assistant</h4>
-            <span class="text-[10px] text-neutral-400 uppercase tracking-widest">RM Studio Concierge</span>
+            <h4 class="text-sm font-bold text-white font-serif tracking-wide">Nova — AI Assistant</h4>
+            <span class="text-[10px] text-neutral-400 uppercase tracking-widest">RM Studio Suite</span>
           </div>
         </div>
         <button id="chat-close" class="text-neutral-400 hover:text-white transition-colors cursor-pointer focus:outline-none">
@@ -186,7 +204,7 @@
       <!-- Corpo Messaggi -->
       <div id="chat-messages" class="chat-messages">
         <div class="message system">
-          Benvenuto in RM Studio. Sono Giulia, l'assistente virtuale integrata dell'ecosistema. Come posso aiutarti a ottimizzare o automatizzare i processi della tua azienda?
+          Benvenuto in RM Studio. Sono Nova, l'assistente virtuale dell'ecosistema. Come posso aiutarti ad automatizzare ed espandere i canali commerciali della tua azienda?
         </div>
       </div>
 
@@ -222,18 +240,13 @@
     bubble.style.pointerEvents = 'auto';
   });
 
-  const botResponses = [
-    "I nostri ecosistemi AI si collegano direttamente tramite API ai tuoi calendari (Google Calendar) per azzerare ogni forma di errore organizzativo.",
-    "Puoi integrare le nostre soluzioni sul tuo sito attuale senza cambiare riga di codice usando NexusAI, oppure richiedere una soluzione 100% offline protetta con OmniaStudio.",
-    "Compilando il modulo contatti nella sezione finale del sito, Riccardo riceverà una notifica immediata e ti risponderà con un'analisi di fattibilità entro 24 ore.",
-    "Ogni nostro sistema vocale (come Giulia o Serena) parla fluentemente nella lingua nativa dell'utente con un'espressività vocale calda e umana."
-  ];
-
-  chatForm.addEventListener('submit', (e) => {
+  // ─── CHIAMATA AL WEBHOOK REALE DI N8N (HETZNER VPS) ───
+  chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const text = chatInput.value.trim();
     if (!text) return;
 
+    // Messaggio Utente a schermo
     const userMsg = document.createElement('div');
     userMsg.className = 'message user';
     userMsg.innerText = text;
@@ -241,12 +254,47 @@
     chatInput.value = '';
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    setTimeout(() => {
-      const botMsg = document.createElement('div');
-      botMsg.className = 'message system';
-      botMsg.innerText = botResponses[Math.floor(Math.random() * botResponses.length)];
-      chatMessages.appendChild(botMsg);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }, 1000);
+    // Creazione del segnale di caricamento temporaneo (typing indicator)
+    const typingIndicator = document.createElement('div');
+    typingIndicator.className = 'message system italic opacity-50';
+    typingIndicator.innerText = 'Nova sta scrivendo...';
+    chatMessages.appendChild(typingIndicator);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    try {
+      // Esegue la chiamata asincrona POST su n8n
+      const response = await fetch("https://n8n.rmstudio.app/webhook/nova", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: text,
+          sessionId: sessionId
+        })
+      });
+
+      const data = await response.json();
+      chatMessages.removeChild(typingIndicator); // Rimuove indicatore di scrittura
+
+      if (data && data.response) {
+        const botMsg = document.createElement('div');
+        botMsg.className = 'message system';
+        botMsg.innerText = data.response;
+        chatMessages.appendChild(botMsg);
+      } else {
+        throw new Error("Risposta non valida");
+      }
+    } catch (err) {
+      console.error("Errore n8n:", err);
+      if (typingIndicator.parentNode) chatMessages.removeChild(typingIndicator);
+      
+      const errorMsg = document.createElement('div');
+      errorMsg.className = 'message system text-red-400';
+      errorMsg.innerText = "Connessione con l'agente interrotta. Riprova tra pochi istanti.";
+      chatMessages.appendChild(errorMsg);
+    }
+    
+    chatMessages.scrollTop = chatMessages.scrollHeight;
   });
 })();

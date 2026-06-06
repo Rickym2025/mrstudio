@@ -288,7 +288,7 @@
         subtitle: "L'assistente vocale H24 multilingua che accoglie gli ospiti, risponde alle loro domande e fa up-selling dei tuoi servizi extra mentre il tuo staff riposa.",
         logo: "logo_concierge.png",
         problem: "La reception offre di picchi di sovraccarico, con centralini intasati e turisti frustrati in attesa di risposte su Wi-Fi e check-in nelle ore notturne.",
-        solution: "Giulia risponde all'istante con un'espressività vocale calda e umana, parlando la lingua nativa dell'ospite, proponendo servizi e inviando conferme su WhatsApp.",
+        solution: "Giulia risponde all'istante con un'espressivita vocale calda e umana, parlando la lingua nativa dell'ospite, proponendo servizi e inviando conferme su WhatsApp.",
         neuroCopy: "Il cervello rettiliano percepisce l'attesa come un disservizio immediato. Giulia azzera la frizione d'ingresso, elevando la percezione di status della struttura.",
         isProduct: true,
         url: "https://concierge24.rmstudio.app"
@@ -360,7 +360,7 @@
         subtitle: "Identità sonora e colonne sonore AI originali. Jingle musicali pronti per il broadcast e le campagne social, creati per sintonizzarsi con l'identità del tuo brand.",
         logo: "logo_ff.png",
         problem: "Spot e video aziendali privi di carattere acustico identitario, con elevato rischio di violazione di copyright o royalty su tracce musicali terze.",
-        solution: "Creazione di jingle originali e tracce audio proprietarie registrate, progettati scientificamente per innescare l'ancoraggio uditivo del brand.",
+        solution: "Creazione di jingle originali e tracce audio proprietarie registrate, scientificamente per innescare l'ancoraggio uditivo del brand.",
         neuroCopy: "L'udito è l'unico senso che non possiamo isolare. Applichiamo l'ancoraggio uditivo affinché il brand rimanga impresso nella memoria a lungo termine.",
         isProduct: true,
         url: "https://ff.rmstudio.app"
@@ -468,7 +468,7 @@
         `;
       }
 
-      // ─── COLONNA DESTRA (LOGO O FOTO RICCARDO) CON SUPPORTO DEL GAPS DI SICUREZZA PER NON SOVRAPPORRE THE UNION ───
+      // ─── COLONNA DESTRA (CON SUPPORTO DEL GAPS DI SICUREZZA PER NON SOVRAPPORRE THE UNION) ───
       let rightColumnContent = logoColumn;
       if (scene.isIntro) {
         rightColumnContent = rickyPhotoColumn;
@@ -680,6 +680,8 @@
         });
       });
     }
+
+    preloadImages();
   </script>
 
   <!-- Collegamento nativo al chatbot e al cookie banner nella cartella public -->
