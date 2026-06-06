@@ -21,8 +21,8 @@ function preloadImages() {
   
   firstImg.onload = () => {
     images[0] = firstImg;
-    drawFrame(0); // Disegna subito il primo frame sul canvas
-    hideLoaderAndStart(); // Sblocca lo schermo all'istante!
+    drawFrame(0); // Disegna subito il primo frame sul canvas all'indice 0 (risolve sfondo nero)
+    hideLoaderAndStart(); 
   };
   
   firstImg.onerror = () => {
@@ -61,7 +61,10 @@ function resizeCanvas() {
   canvas.width = window.innerWidth * dpr;
   canvas.height = window.innerHeight * dpr;
   context.scale(dpr, dpr);
-  drawFrame(getMappedFrame(scrollTracker.frame));
+  
+  // Utilizza l'indice 0-based corretto per evitare schermi neri all'avvio
+  const mappedFrame = getMappedFrame(scrollTracker.frame);
+  drawFrame(mappedFrame - 1);
 }
 
 function getMappedFrame(rawFrame) {
@@ -131,8 +134,9 @@ function initCanvasScrub() {
       scrub: 0.8
     },
     onUpdate: () => {
+      // Disegna applicando la correzione base-0
       const mappedFrame = getMappedFrame(scrollTracker.frame);
-      drawFrame(mappedFrame);
+      drawFrame(mappedFrame - 1);
       if (typeof updateCardTimeline === "function") {
         updateCardTimeline(scrollTracker.frame);
       }

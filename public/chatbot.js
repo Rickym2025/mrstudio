@@ -1,32 +1,39 @@
 (function() {
-  // Generazione o recupero della sessione per la memoria di Nova su n8n
   let sessionId = localStorage.getItem('nova_chat_session');
   if (!sessionId) {
     sessionId = 'session_' + Math.random().toString(36).substring(2, 15);
     localStorage.setItem('nova_chat_session', sessionId);
   }
 
-  // Rileva se l'utente è registrato come aver già chiuso il fumetto in questa sessione
   const isTooltipClosed = sessionStorage.getItem('nova_tooltip_closed') === 'true';
 
-  // 1. Iniezione degli stili CSS responsivi, effetto "Respiro" e posizionamento del Fumetto
+  // 1. Iniezione degli stili responsivi, Effetto Respiro e Bordo Glow Dinamico Cromatizzato
   const style = document.createElement('style');
   style.innerHTML = `
-    @keyframes bubble-breath {
-      0%, 100% { 
-        transform: scale(1); 
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(242, 210, 139, 0.15); 
+    /* Animazione di cambio tonalità luminosa (Glow Shift) */
+    @keyframes glow-shift {
+      0%, 100% {
+        border-color: rgba(242, 210, 139, 0.5);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(242, 210, 139, 0.3);
       }
-      50% { 
-        transform: scale(1.05); 
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(242, 210, 139, 0.35); 
-        border-color: rgba(242, 210, 139, 0.6);
+      33% {
+        border-color: rgba(6, 182, 212, 0.5);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(6, 182, 212, 0.3);
+      }
+      66% {
+        border-color: rgba(139, 92, 246, 0.5);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(139, 92, 246, 0.3);
       }
     }
+    @keyframes bubble-breath {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
     .chat-bubble {
       position: fixed;
       z-index: 50;
-      width: 72px; /* Ingrandita su Desktop */
+      width: 72px; /* Ingrandita */
       height: 72px;
       border-radius: 50%;
       background: rgba(8, 8, 12, 0.85);
@@ -36,17 +43,16 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      animation: bubble-breath 3s ease-in-out infinite;
+      animation: bubble-breath 3s ease-in-out infinite, glow-shift 6s linear infinite;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .chat-bubble:hover {
       animation: none;
       transform: scale(1.08) translateY(-2px);
       border-color: #F2D28B;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(242, 210, 139, 0.5);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(242, 210, 139, 0.6);
     }
 
-    /* ─── STILE DEL FUMETTO PERSUASIVO DI NEUROMARKETING ─── */
     .chat-tooltip {
       position: fixed;
       z-index: 49;
@@ -58,13 +64,13 @@
       border-radius: 16px;
       font-size: 13px;
       font-weight: 500;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 15px rgba(242, 210, 139, 0.15);
       display: flex;
       align-items: center;
       gap: 12px;
       opacity: 0;
       visibility: hidden;
       transform: translateY(10px);
+      animation: glow-shift 6s linear infinite;
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .chat-tooltip.active {
@@ -73,19 +79,18 @@
       transform: translateY(0);
     }
 
-    /* ─── POSIZIONAMENTO ADATTIVO RESPONSIVO ─── */
     @media (min-width: 768px) {
       .chat-bubble {
         bottom: 32px;
         right: 32px;
       }
       .chat-window {
-        bottom: 110px;
+        bottom: 120px;
         right: 32px;
-        width: 410px; /* Ingrandita su Desktop */
+        width: 410px; /* Ingrandita */
       }
       .chat-tooltip {
-        right: 120px; /* Posizionato a sinistra della bolla su Desktop */
+        right: 120px;
         bottom: 44px;
       }
     }
@@ -95,12 +100,12 @@
         left: 32px;
       }
       .chat-window {
-        bottom: 110px;
+        bottom: 120px;
         left: 32px;
         width: calc(100% - 64px);
       }
       .chat-tooltip {
-        left: 120px; /* Posizionato a destra della bolla su Mobile */
+        left: 120px;
         bottom: 44px;
       }
     }
@@ -110,15 +115,15 @@
       z-index: 50;
       height: 480px;
       border-radius: 24px;
-      background: rgba(7, 7, 10, 0.95);
+      background: linear-gradient(135deg, rgba(12, 12, 18, 0.95) 0%, rgba(6, 6, 10, 0.98) 100%);
       border: 1px solid rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(24px);
-      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.8);
       display: flex;
       flex-direction: column;
       opacity: 0;
       visibility: hidden;
       transform: translateY(20px) scale(0.95);
+      animation: glow-shift 6s linear infinite;
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .chat-window.active {
@@ -199,15 +204,23 @@
       cursor: pointer;
       transition: opacity 0.2s;
     }
-    .chat-send:hover {
-      opacity: 0.9;
-    }
-    .chat-dot-pulse {
-      width: 8px;
-      height: 8px;
-      background: #22c55e;
+    .chat-avatar-frame {
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
-      box-shadow: 0 0 10px #22c55e;
+      border: 1.5px solid #F2D28B;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: black;
+      box-shadow: 0 0 10px rgba(242, 210, 139, 0.3);
+    }
+    #chat-logo-avatar {
+      width: 80%;
+      height: 80%;
+      object-fit: contain;
+      transition: opacity 0.25s ease-in-out;
     }
   `;
   document.head.appendChild(style);
@@ -217,13 +230,13 @@
   chatContainer.innerHTML = `
     <!-- Bolla Fluttuante Cinetica -->
     <div id="chat-bubble" class="chat-bubble pointer-events-auto">
-      <svg class="w-7 h-7 text-[#F2D28B]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <svg class="w-8 h-8 text-[#F2D28B]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
       </svg>
-      <span class="absolute top-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-black animate-pulse"></span>
+      <span class="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-black animate-pulse"></span>
     </div>
 
-    <!-- Fumetto di Neuromarketing (Creato solo se non chiuso in precedenza) -->
+    <!-- Fumetto di Neuromarketing (In quale settore operi?) -->
     ${!isTooltipClosed ? `
       <div id="chat-tooltip" class="chat-tooltip pointer-events-auto">
         <span class="tracking-wide">In quale settore operi? Scopri l'AI su misura per te 🎯</span>
@@ -239,10 +252,13 @@
     <div id="chat-window" class="chat-window pointer-events-auto">
       <div class="chat-header">
         <div class="flex items-center gap-3">
-          <div class="chat-dot-pulse"></div>
+          <!-- AVATAR DINAMICO CON LOGHI ALTERNATI -->
+          <div class="chat-avatar-frame">
+            <img id="chat-logo-avatar" src="public/loghi/logo_rm.png" alt="RM Logo">
+          </div>
           <div>
             <h4 class="text-sm font-bold text-white font-serif tracking-wide">Nova — AI Assistant</h4>
-            <span class="text-[10px] text-neutral-400 uppercase tracking-widest">RM Studio Suite</span>
+            <span class="text-[10px] text-[#F2D28B] uppercase tracking-widest font-mono font-black">Lab</span>
           </div>
         </div>
         <button id="chat-close" class="text-neutral-400 hover:text-white transition-colors cursor-pointer focus:outline-none">
@@ -255,7 +271,7 @@
       <!-- Corpo Messaggi -->
       <div id="chat-messages" class="chat-messages">
         <div class="message system">
-          Benvenuto in RM Studio. Sono Nova, l'assistente virtuale dell'ecosistema. Come posso aiutarti ad automatizzare ed espandere i canali commerciali della tua azienda?
+          Ciao! Sono Nova, l'AI di RM Studio. In quale settore opera la tua azienda? Ti mostro subito cosa possiamo automatizzare ⚡
         </div>
       </div>
 
@@ -280,19 +296,43 @@
   const chatForm = document.getElementById('chat-form');
   const chatInput = document.getElementById('chat-input');
   const chatMessages = document.getElementById('chat-messages');
+  const avatarImg = document.getElementById('chat-logo-avatar');
 
-  // Gestione comparsa del fumetto con delay di 2 secondi (per non interferire col caricamento)
+  // ─── LOGICA ROTAZIONE LOGHI NELL'AVATAR (DISSOLVENZA CON ALTERNANZA) ───
+  const avatarLogos = [
+    "public/loghi/logo_rm.png",
+    "public/loghi/logo_nexus.png",
+    "public/loghi/logo_concierge.png",
+    "public/loghi/logo_dentis.png",
+    "public/loghi/logo_lexis.png",
+    "public/loghi/logo_drivemotion.png",
+    "public/loghi/logo_hometour.jpg",
+    "public/loghi/logo_omniastudio.png",
+    "public/loghi/logo_ff.png"
+  ];
+  let currentAvatarIndex = 0;
+
+  if (avatarImg) {
+    setInterval(() => {
+      currentAvatarIndex = (currentAvatarIndex + 1) % avatarLogos.length;
+      avatarImg.style.opacity = '0'; // Dissolvenza in uscita
+      setTimeout(() => {
+        avatarImg.src = avatarLogos[currentAvatarIndex];
+        avatarImg.style.opacity = '1'; // Dissolvenza in entrata
+      }, 250);
+    }, 2500);
+  }
+
+  // Gestione comparsa del fumetto con delay di 2 secondi
   if (tooltip) {
     setTimeout(() => {
-      // Compare solo se la finestra della chat è chiusa
       if (!windowEl.classList.contains('active')) {
         tooltip.classList.add('active');
       }
     }, 2000);
 
-    // Chiusura del fumetto con X (salva in sessionStorage per non annoiare l'utente)
     tooltipClose.addEventListener('click', (e) => {
-      e.stopPropagation(); // Evita di aprire la chat cliccando sulla X
+      e.stopPropagation(); 
       sessionStorage.setItem('nova_tooltip_closed', 'true');
       tooltip.classList.remove('active');
     });
