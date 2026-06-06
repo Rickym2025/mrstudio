@@ -6,8 +6,8 @@
   <title>RM Studio - Creative AI Suite</title>
   
   <!-- Favicon Standard e Vettoriale -->
-  <link rel="icon" href="public/favicon.ico" sizes="any">
-  <link rel="icon" href="public/favicon.svg" type="image/svg+xml">
+  <link class="favicon" rel="icon" href="public/favicon.ico" sizes="any">
+  <link class="favicon" rel="icon" href="public/favicon.svg" type="image/svg+xml">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -391,7 +391,6 @@
     SCENES.forEach((scene, index) => {
       const cardWrapper = document.createElement("div");
       
-      // Allineamento a sinistra per i prodotti (lascia libero il centro/destra per il video)
       let alignmentClass = "justify-center md:justify-start text-left items-center md:pl-24";
       if (scene.isIntro || scene.isTheUnion || scene.isContact) {
         alignmentClass = "justify-center text-center mx-auto items-center";
@@ -469,7 +468,7 @@
         `;
       }
 
-      // ─── COLONNA DESTRA (CON SUPPORTO DEL GAPS DI SICUREZZA PER NON SOVRAPPORRE THE UNION) ───
+      // ─── COLONNA DESTRA (LOGO O FOTO RICCARDO) CON SUPPORTO DEL GAPS DI SICUREZZA PER NON SOVRAPPORRE THE UNION ───
       let rightColumnContent = logoColumn;
       if (scene.isIntro) {
         rightColumnContent = rickyPhotoColumn;
@@ -488,7 +487,7 @@
       // Gaps e larghezza ampi per prevenire sovrapposizioni visive
       let cardSizeClass = "max-w-3xl";
       if (scene.isIntro || scene.isTheUnion) {
-        cardSizeClass = "max-w-7xl md:p-16 gap-16 lg:gap-24";
+        cardSizeClass = "max-w-6xl md:p-16 gap-16 lg:gap-24";
       } else if (scene.isContact) {
         cardSizeClass = "max-w-4xl md:p-14";
       }
@@ -554,9 +553,9 @@
     window.addEventListener('scroll', () => {
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       if (window.scrollY >= maxScroll - 4) {
-        window.scrollTo(0, 15); // Loop all'inizio (intro)
+        window.scrollTo(0, 15); 
       } else if (window.scrollY <= 2) {
-        window.scrollTo(0, maxScroll - 20); // Loop alla fine (contatti)
+        window.scrollTo(0, maxScroll - 10); 
       }
     });
 
@@ -683,7 +682,8 @@
     }
   </script>
 
-  <!-- Collegamento nativo al cookie banner nella cartella public -->
+  <!-- Collegamento nativo al chatbot e al cookie banner nella cartella public -->
   <script src="public/cookie-banner.js"></script>
+  <script src="public/chatbot.js"></script>
 </body>
 </html>
