@@ -7,18 +7,14 @@ import { LazyMotion, domAnimation } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-// Import dei componenti locali
-import Header from "./components/Header";
-import ThreeDStage from "./components/ThreeDStage";
+// Import dei componenti reali presenti nel tuo repository GitHub
 import { NovaChatbot } from "./components/NovaChatbot";
 import { FloatingDock } from "./components/FloatingDock";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// ─── COSTANTE ANNO ───
 const CURRENT_YEAR = new Date().getFullYear();
 
-// Configurazione delle 11 scene
 interface Scene {
   id: string;
   chapter: string;
@@ -101,7 +97,7 @@ const SCENES: Scene[] = [
     logo: "logo_drivemotion.png",
     problem: "Fotografie dei veicoli scattate in piazzali disordinati con sfondi disturbanti che abbassano drasticamente il valore percepito delle auto sui portali.",
     solution: "Rimozione automatica del piazzale e inserimento immediato delle vetture all'interno di showroom digitali 3D di lusso, riallineando fari e riflessi fisici.",
-    neuroCopy: "La valutazione estetica avviene in meno di tre decimi di secondo. Elevando lo sfondo, inneschiamo l'euristica del prestigio ruducendo la trattativa sul prezzo.",
+    neuroCopy: "La valutazione estetica avviene in meno di tre decimi di secondo. Elevando lo sfondo, inneschiamo l'euristica del prestigio riducendo la trattativa sul prezzo.",
     isProduct: true,
     url: "https://drivemotion.rmstudio.app"
   },
@@ -173,7 +169,7 @@ export default function App() {
   const totalFrames = isMobile ? 660 : 1320;
   const imagesRef = useRef<HTMLImageElement[]>([]);
 
-  // Caricamento del file esterno orbit-template.html asincrono nativo
+  // Caricamento asincrono nativo del sistema orbitale
   useEffect(() => {
     if (isLoading) return;
     fetch("/orbit-template.html")
@@ -186,7 +182,7 @@ export default function App() {
       .catch((err) => console.error("Errore nel recupero del template orbitale:", err));
   }, [isLoading]);
 
-  // Caricamento asincrono e ottimizzazione mobile al 50%
+  // Precaricamento dei frame
   useEffect(() => {
     let loadedCount = 0;
     const images: HTMLImageElement[] = [];
@@ -216,7 +212,7 @@ export default function App() {
     imagesRef.current = images;
   }, [isMobile, totalFrames]);
 
-  // Gestore del loop bidirezionale infinito
+  // Gestione del loop bidirezionale infinito
   useEffect(() => {
     const handleScroll = () => {
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
@@ -231,7 +227,7 @@ export default function App() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Inizializzazione GSAP e disegno dei frame sul Canvas
+  // Inizializzazione di GSAP
   useEffect(() => {
     if (isLoading || !canvasRef.current) return;
 
@@ -382,7 +378,7 @@ export default function App() {
           };
         case 10:
           return {
-            init: { autoAlpha: 0, opacity: 0, y: 150, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            init: { autoAlpha: 0, opacity: 0, y: 150, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
             mid: { autoAlpha: 1, opacity: 1, y: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
             exit: { autoAlpha: 0, opacity: 0, y: -150, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
           };
@@ -715,7 +711,7 @@ export default function App() {
               // Colonna Destra (Logo, Foto Riccardo, o Sistema Orbitale)
               let rightColumnContent = (
                 <div className="flex-shrink-0 flex items-center justify-center bg-black/50 border border-white/10 rounded-[2rem] p-6 w-32 h-32 md:w-44 md:h-44 shadow-inner">
-                  <img src={`loghi/${scene.logo}`} alt={`${scene.title} Logo`} className="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]" />
+                  <img src={`${scene.logo}`} alt={`${scene.title} Logo`} className="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]" />
                 </div>
               );
 
