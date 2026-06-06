@@ -574,7 +574,7 @@
     // ─── FUNZIONI INTERATTIVE (VCARD & CONTATTI) ───
     function handleVCardClick() {
       const link = document.createElement("a");
-      link.href = "loghi/contact.vcf";
+      link.href = "public/contact.vcf"; // <── Modifica questa riga impostando "public/"
       link.download = "Riccardo_Modena_RMStudio.vcf";
       document.body.appendChild(link);
       link.click();
