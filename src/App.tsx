@@ -59,7 +59,7 @@ const SCENES: Scene[] = [
     title: "Concierge24",
     subtitle: "L'assistente vocale H24 multilingua che accoglie gli ospiti, risponde alle loro domande e fa up-selling dei tuoi servizi extra mentre il tuo staff riposa.",
     logo: "logo_concierge.png",
-    problem: "La reception soffre di picchi di sovraccarico, con centralini intasati e turisti frustrati in attesa di risposte su Wi-Fi e check-in nelle ore notturne.",
+    problem: "La reception offre di picchi di sovraccarico, con centralini intasati e turisti frustrati in attesa di risposte su Wi-Fi e check-in nelle ore notturne.",
     solution: "Giulia risponde all'istante con un'espressività vocale calda e umana, parlando la lingua nativa dell'ospite, proponendo servizi e inviando conferme su WhatsApp.",
     neuroCopy: "Il cervello rettiliano percepisce l'attesa come un disservizio immediato. Giulia azzera la frizione d'ingresso, elevando la percezione di status della struttura.",
     isProduct: true,
@@ -169,7 +169,7 @@ export default function App() {
   const totalFrames = isMobile ? 660 : 1320;
   const imagesRef = useRef<HTMLImageElement[]>([]);
 
-  // Caricamento asincrono nativo del sistema orbitale
+  // Caricamento del file esterno orbit-template.html asincrono nativo
   useEffect(() => {
     if (isLoading) return;
     fetch("/orbit-template.html")
@@ -182,7 +182,7 @@ export default function App() {
       .catch((err) => console.error("Errore nel recupero del template orbitale:", err));
   }, [isLoading]);
 
-  // Precaricamento dei frame
+  // Caricamento asincrono e ottimizzazione mobile al 50%
   useEffect(() => {
     let loadedCount = 0;
     const images: HTMLImageElement[] = [];
@@ -212,7 +212,7 @@ export default function App() {
     imagesRef.current = images;
   }, [isMobile, totalFrames]);
 
-  // Gestione del loop bidirezionale infinito
+  // Gestore del loop bidirezionale infinito
   useEffect(() => {
     const handleScroll = () => {
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
@@ -227,7 +227,7 @@ export default function App() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Inizializzazione di GSAP
+  // Inizializzazione GSAP e disegno dei frame sul Canvas
   useEffect(() => {
     if (isLoading || !canvasRef.current) return;
 
@@ -318,69 +318,69 @@ export default function App() {
       switch (idx) {
         case 0:
           return {
-            init: { autoAlpha: 0, opacity: 0, scale: 0.7, z: -400, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, scale: 1.1, z: 100, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, opacity: 0, scale: 0.7, z: -400, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, scale: 1.1, z: 100, pointerEvents: "none" }
           };
         case 1:
           return {
-            init: { autoAlpha: 0, opacity: 0, rotateY: 90, x: 250, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, x: 0, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, rotateY: -90, x: -250, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, opacity: 0, rotateY: 90, x: 250, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, x: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, rotateY: -90, x: -250, pointerEvents: "none" }
           };
         case 2:
           return {
-            init: { autoAlpha: 0, opacity: 0, y: -300, rotateX: 45, scale: 1, z: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, y: 0, rotateX: 0, scale: 1, z: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, y: 150, rotateX: -15, scale: 1, z: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, opacity: 0, y: -300, rotateX: 45, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, y: 0, rotateX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, y: 150, rotateX: -15, pointerEvents: "none" }
           };
         case 3:
           return {
-            init: { autoAlpha: 0, opacity: 0, scale: 0.3, z: -700, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, scale: 1.5, z: 250, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, opacity: 0, scale: 0.3, z: -700, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, scale: 1.5, z: 250, pointerEvents: "none" }
           };
         case 4:
           return {
-            init: { autoAlpha: 0, opacity: 0, rotateY: -60, rotateX: 20, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, rotateX: 0, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, rotateY: 60, rotateX: -20, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, opacity: 0, rotateY: -60, rotateX: 20, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, rotateX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, rotateY: 60, rotateX: -20, pointerEvents: "none" }
           };
         case 5:
           return {
-            init: { autoAlpha: 0, opacity: 0, scale: 0.1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, scale: 0.1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, opacity: 0, scale: 0.1, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, scale: 1, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, scale: 0.1, pointerEvents: "none" }
           };
         case 6:
           return {
-            init: { autoAlpha: 0, opacity: 0, x: 350, skewX: -12, scale: 1, z: 0, rotateX: 0, rotateY: 0, y: 0, rotateZ: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, x: 0, skewX: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, y: 0, rotateZ: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, x: -350, skewX: 12, scale: 1, z: 0, rotateX: 0, rotateY: 0, y: 0, rotateZ: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, opacity: 0, x: 350, skewX: -12, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, x: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, x: -350, skewX: 12, pointerEvents: "none" }
           };
         case 7:
           return {
-            init: { autoAlpha: 0, opacity: 0, rotateZ: -180, scale: 0.5, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, rotateZ: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, rotateZ: 180, scale: 0.5, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, opacity: 0, rotateZ: -180, scale: 0.5, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, rotateZ: 0, scale: 1, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, rotateZ: 180, scale: 0.5, pointerEvents: "none" }
           };
         case 8:
           return {
-            init: { autoAlpha: 0, opacity: 0, scale: 1.4, z: 200, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, scale: 0.7, z: -200, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, opacity: 0, scale: 1.4, z: 200, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, scale: 0.7, z: -200, pointerEvents: "none" }
           };
         case 9:
           return {
-            init: { autoAlpha: 0, opacity: 0, rotateY: -180, z: -500, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, z: 0, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, rotateY: 180, z: 500, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, opacity: 0, rotateY: -180, z: -500, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, z: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, rotateY: 180, z: 500, pointerEvents: "none" }
           };
         case 10:
           return {
-            init: { autoAlpha: 0, opacity: 0, y: 150, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, y: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, y: -150, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, opacity: 0, y: 150, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, y: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, y: -150, pointerEvents: "none" }
           };
         default:
           return {
@@ -644,7 +644,15 @@ export default function App() {
         )}
 
         {/* ─── HEADER MINIMALISTA ─── */}
-        <Header />
+        <header className="fixed top-0 left-0 w-full z-40 flex justify-between items-center px-6 md:px-12 py-6 border-b border-white/5 bg-black/10 backdrop-blur-md">
+          <div className="flex items-center gap-3">
+            <img src="logo_rm.png" alt="RM Studio Logo" className="w-6 h-6 object-contain" onerror="this.style.display='none'" />
+            <span className="font-serif text-lg tracking-widest uppercase text-[#F2D28B]">RM Studio</span>
+          </div>
+          <a href="#trigger-10" className="border border-[#F2D28B]/40 text-[#F2D28B] hover:bg-[#F2D28B] hover:text-black transition-all duration-300 px-5 py-2 text-[10px] tracking-widest uppercase font-mono">
+            CONTATTI
+          </a>
+        </header>
 
         {/* ─── CONTENITORE IMMERSIVO CANVAS ─── */}
         <div id="app-container" ref={containerRef} className="relative w-full">
