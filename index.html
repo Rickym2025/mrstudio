@@ -172,7 +172,7 @@
 </head>
 <body>
 
-  <!-- ─── PRELOADER (DIMEZZATO NELL'INTESTAZIONE) ─── -->
+  <!-- ─── PRELOADER ─── -->
   <div id="loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#050505] transition-opacity duration-700">
     <div class="text-center">
       <span class="text-[#F2D28B] text-xs tracking-[0.4em] uppercase block mb-3 font-semibold">Ecosistema AI</span>
@@ -205,7 +205,7 @@
     <!-- Contenitore Fisso delle Schede (Centrate) -->
     <div id="text-overlays" class="fixed inset-0 z-10 pointer-events-none"></div>
 
-    <!-- Triggers Invisibili per lo Scroll (1100vh) -->
+    <!-- Triggers Invisibili per lo Scroll (1130vh totali inclusa zona di buffer del loop) -->
     <div id="scroll-triggers" class="relative z-20 w-full pointer-events-none">
       <section id="trigger-0" class="h-screen w-full"></section>
       <section id="trigger-1" class="h-screen w-full"></section>
@@ -218,21 +218,36 @@
       <section id="trigger-8" class="h-screen w-full"></section>
       <section id="trigger-9" class="h-screen w-full"></section>
       <section id="trigger-10" class="h-screen w-full"></section>
+      <!-- Zona di buffer invisibile per il loop in fondo per non interferire con i Contatti -->
+      <section id="trigger-loop" class="h-[30vh] w-full"></section>
     </div>
   </div>
 
-  <!-- ─── FLOATING DOCK MINIMALISTA IN BASSO ─── -->
+  <!-- ─── FLOATING DOCK IN BASSO CON COLLEGAMENTO AD ECOSISTEMI SU TRIGGER-9 ─── -->
   <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 bg-black/40 border border-white/10 px-6 py-4 rounded-full backdrop-blur-md pointer-events-auto shadow-2xl">
     <a href="#trigger-0" class="text-[10px] font-mono text-[#F2D28B] hover:text-white uppercase tracking-widest transition-colors">Intro</a>
     <span class="text-white/10 text-[10px]">|</span>
-    <a href="#trigger-1" class="text-[10px] font-mono text-white/40 hover:text-white uppercase tracking-widest transition-colors">Ecosistemi</a>
+    <a href="#trigger-9" class="text-[10px] font-mono text-white/40 hover:text-white uppercase tracking-widest transition-colors">Ecosistemi</a>
     <span class="text-white/10 text-[10px]">|</span>
     <a href="#trigger-10" class="text-[10px] font-mono text-white/40 hover:text-white uppercase tracking-widest transition-colors">Contatti</a>
+  </div>
+
+  <!-- ─── PIÈ DI PAGINA FISSO CON PRIVACY E TERMINI DA PUBLIC ─── -->
+  <div class="fixed bottom-6 left-10 z-40 text-[10px] text-white/20 uppercase tracking-widest hidden md:block font-mono pointer-events-auto">
+    © <span id="current-year">2026</span> Riccardo Modena • RM STUDIO • Crafted with Intention
+    <span class="mx-2">|</span>
+    <a href="public/privacy.html" target="_blank" class="hover:text-white transition-colors">Privacy Policy</a>
+    <span class="mx-2">|</span>
+    <a href="public/termini.html" target="_blank" class="hover:text-white transition-colors">Termini e Condizioni</a>
   </div>
 
   <script src="scrubber.js"></script>
 
   <script>
+    // Forza la scrittura dell'anno corrente nel footer
+    const yr = document.getElementById("current-year");
+    if (yr) yr.innerText = new Date().getFullYear();
+
     // Caricamento dinamico, centralizzato e asincrono del sistema orbitale
     let orbitHTML = "";
     fetch("public/orbit-template.html")
@@ -370,12 +385,13 @@
       }
     ];
 
-    // ─── GENERAZIONE DINAMICA SCHEDE EDITORIALI CON ALLINEAMENTO LATERALE SINISTRO ───
+    // ─── GENERAZIONE DINAMICA SCHEDE EDITORIALI CON ALLINEAMENTO LATERALE SINISTRO RESPONSIVO ───
     const overlayContainer = document.getElementById("text-overlays");
 
     SCENES.forEach((scene, index) => {
       const cardWrapper = document.createElement("div");
       
+      // Allineamento a sinistra per i prodotti (lascia libero il centro/destra per il video)
       let alignmentClass = "justify-center md:justify-start text-left items-center md:pl-24";
       if (scene.isIntro || scene.isTheUnion || scene.isContact) {
         alignmentClass = "justify-center text-center mx-auto items-center";
@@ -453,7 +469,7 @@
         `;
       }
 
-      // ─── COLONNA DESTRA (LOGO O FOTO RICCARDO) CON SUPPORTO PER IL CARICAMENTO ASINCRONO DI THE UNION ───
+      // ─── COLONNA DESTRA (CON SUPPORTO DEL GAPS DI SICUREZZA PER NON SOVRAPPORRE THE UNION) ───
       let rightColumnContent = logoColumn;
       if (scene.isIntro) {
         rightColumnContent = rickyPhotoColumn;
@@ -469,16 +485,17 @@
       const hrefAttr = scene.isProduct ? `href="${scene.url}" target="_blank" rel="noopener noreferrer"` : "";
       const cursorClass = scene.isProduct ? "cursor-pointer hover:border-[#F2D28B]/30 hover:shadow-[0_40px_100px_rgba(242,210,139,0.05)] transition-all duration-300" : "";
 
+      // Gaps e larghezza ampi per prevenire sovrapposizioni visive
       let cardSizeClass = "max-w-3xl";
       if (scene.isIntro || scene.isTheUnion) {
-        cardSizeClass = "max-w-6xl md:p-16";
+        cardSizeClass = "max-w-7xl md:p-16 gap-16 lg:gap-24";
       } else if (scene.isContact) {
         cardSizeClass = "max-w-4xl md:p-14";
       }
 
       cardWrapper.innerHTML = `
         <${tagType} ${hrefAttr} class="scene-card w-full ${cardSizeClass} bg-[#07070a]/92 backdrop-blur-3xl p-8 md:p-14 border border-white/10 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.95)] preserve-3d opacity-0 pointer-events-none flex flex-col ${flexDirClass} gap-8 md:gap-12 items-center justify-between ${cursorClass}">
-          <div class="flex-1 text-left w-full">
+          <div class="flex-1 text-left w-full max-w-xl">
             <span class="text-[10px] uppercase tracking-[0.4em] text-[#F2D28B] block mb-2 font-semibold font-mono">${scene.chapter}</span>
             <h2 class="font-serif text-3xl md:text-5xl text-[#F6F3F0] tracking-wide leading-tight mb-4">${scene.title}</h2>
             <p class="text-base md:text-lg tracking-wide text-neutral-300 leading-relaxed font-light">${scene.subtitle}</p>
@@ -537,9 +554,9 @@
     window.addEventListener('scroll', () => {
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       if (window.scrollY >= maxScroll - 4) {
-        window.scrollTo(0, 10); 
+        window.scrollTo(0, 15); // Loop all'inizio (intro)
       } else if (window.scrollY <= 2) {
-        window.scrollTo(0, maxScroll - 10); 
+        window.scrollTo(0, maxScroll - 20); // Loop alla fine (contatti)
       }
     });
 
@@ -573,7 +590,7 @@
         case 4: // Lexis AI
           return {
             init: { autoAlpha: 0, opacity: 0, rotateY: -60, rotateX: 20, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, x: 0, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, rotateX: 0, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
             exit: { autoAlpha: 0, opacity: 0, rotateY: 60, rotateX: -20, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
           };
         case 5: // DriveMotion
@@ -615,7 +632,7 @@
       }
     }
 
-    // ─── INIZIALIZZAZIONE TIMELINE E SCROLL-BOUND TRANSITIONS (SHARP PLATEAU CON DISCRETE EVENT TRIGGERS) ───
+    // ─── INIZIALIZZAZIONE TIMELINE E SCROLL-BOUND TRANSITIONS (DISCRETE EVENT TRIGGERS) ───
     function initCardAnimations() {
       const triggers = gsap.utils.toArray("#scroll-triggers section");
       const cards = gsap.utils.toArray(".scene-card");
@@ -626,15 +643,15 @@
 
         const props = getSceneProps(index);
 
-        // Applichiamo lo stato iniziale (autoAlpha: 0 per eliminare i flash)
+        // Applichiamo lo stato iniziale fisso con autoAlpha (forza visibility hidden ed evita flash)
         gsap.set(card, props.init);
 
-        // Per il primo frame (Intro): inizia già visibile
+        // Timeline per la prima scheda (Intro - inizia visibile ed esce allo scorrimento)
         if (index === 0) {
           gsap.set(card, props.mid);
         }
 
-        // Creiamo il trigger discreto infallibile: elimina qualsiasi coesistenza di due schede contemporaneamente
+        // Creiamo il trigger discreto infallibile: elimina qualsiasi coesistenza o blocco tra schede
         ScrollTrigger.create({
           trigger: trigger,
           start: "top 50%",   // Entra quando la sezione taglia la metà dello schermo
@@ -649,7 +666,7 @@
           },
           onLeave: () => {
             gsap.killTweensOf(card);
-            // Non esegue l'uscita se è l'ultimo modulo (Contatti)
+            // Non esegue l'uscita se è l'ultimo modulo (Contatti) per non avere vuoto finale
             if (index !== triggers.length - 1) {
               gsap.to(card, { ...props.exit, duration: 0.25, ease: "power2.in" });
             }
@@ -664,8 +681,6 @@
         });
       });
     }
-
-    preloadImages();
   </script>
 
   <!-- Collegamento nativo al cookie banner nella cartella public -->
