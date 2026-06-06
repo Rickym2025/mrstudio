@@ -258,7 +258,7 @@
           </div>
           <div>
             <h4 class="text-sm font-bold text-white font-serif tracking-wide">Nova — AI Assistant</h4>
-            <span class="text-[10px] text-[#F2D28B] uppercase tracking-widest font-mono font-black">Lab</span>
+            <span class="text-[10px] text-[#F2D28B] uppercase tracking-widest font-mono font-black">RM Studio Lab</span>
           </div>
         </div>
         <button id="chat-close" class="text-neutral-400 hover:text-white transition-colors cursor-pointer focus:outline-none">
