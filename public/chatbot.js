@@ -1,12 +1,15 @@
 (function() {
-  // Generazione o recupero della sessione univoca (per la memoria di Nova su n8n)
+  // Generazione o recupero della sessione per la memoria di Nova su n8n
   let sessionId = localStorage.getItem('nova_chat_session');
   if (!sessionId) {
     sessionId = 'session_' + Math.random().toString(36).substring(2, 15);
     localStorage.setItem('nova_chat_session', sessionId);
   }
 
-  // 1. Iniezione degli stili CSS responsivi ed effetto "Respiro" cinetico
+  // Rileva se l'utente è registrato come aver già chiuso il fumetto in questa sessione
+  const isTooltipClosed = sessionStorage.getItem('nova_tooltip_closed') === 'true';
+
+  // 1. Iniezione degli stili CSS responsivi, effetto "Respiro" e posizionamento del Fumetto
   const style = document.createElement('style');
   style.innerHTML = `
     @keyframes bubble-breath {
@@ -15,16 +18,16 @@
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(242, 210, 139, 0.15); 
       }
       50% { 
-        transform: scale(1.06); 
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(242, 210, 139, 0.4); 
+        transform: scale(1.05); 
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(242, 210, 139, 0.35); 
         border-color: rgba(242, 210, 139, 0.6);
       }
     }
     .chat-bubble {
       position: fixed;
       z-index: 50;
-      width: 56px;
-      height: 56px;
+      width: 72px; /* Ingrandita su Desktop */
+      height: 72px;
       border-radius: 50%;
       background: rgba(8, 8, 12, 0.85);
       border: 1px solid rgba(242, 210, 139, 0.3);
@@ -43,15 +46,47 @@
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(242, 210, 139, 0.5);
     }
 
+    /* ─── STILE DEL FUMETTO PERSUASIVO DI NEUROMARKETING ─── */
+    .chat-tooltip {
+      position: fixed;
+      z-index: 49;
+      background: rgba(8, 8, 12, 0.95);
+      border: 1px solid rgba(242, 210, 139, 0.3);
+      backdrop-filter: blur(12px);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 15px rgba(242, 210, 139, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .chat-tooltip.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    /* ─── POSIZIONAMENTO ADATTIVO RESPONSIVO ─── */
     @media (min-width: 768px) {
       .chat-bubble {
         bottom: 32px;
         right: 32px;
       }
       .chat-window {
-        bottom: 100px;
+        bottom: 110px;
         right: 32px;
-        width: 380px;
+        width: 410px; /* Ingrandita su Desktop */
+      }
+      .chat-tooltip {
+        right: 120px; /* Posizionato a sinistra della bolla su Desktop */
+        bottom: 44px;
       }
     }
     @media (max-width: 767px) {
@@ -60,9 +95,13 @@
         left: 32px;
       }
       .chat-window {
-        bottom: 100px;
+        bottom: 110px;
         left: 32px;
         width: calc(100% - 64px);
+      }
+      .chat-tooltip {
+        left: 120px; /* Posizionato a destra della bolla su Mobile */
+        bottom: 44px;
       }
     }
 
@@ -178,11 +217,23 @@
   chatContainer.innerHTML = `
     <!-- Bolla Fluttuante Cinetica -->
     <div id="chat-bubble" class="chat-bubble pointer-events-auto">
-      <svg class="w-6 h-6 text-[#F2D28B]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <svg class="w-7 h-7 text-[#F2D28B]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
       </svg>
       <span class="absolute top-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-black animate-pulse"></span>
     </div>
+
+    <!-- Fumetto di Neuromarketing (Creato solo se non chiuso in precedenza) -->
+    ${!isTooltipClosed ? `
+      <div id="chat-tooltip" class="chat-tooltip pointer-events-auto">
+        <span class="tracking-wide">In quale settore operi? Scopri l'AI su misura per te 🎯</span>
+        <button id="tooltip-close" class="text-neutral-400 hover:text-white transition-colors focus:outline-none cursor-pointer">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    ` : ''}
 
     <!-- Finestra di Chat -->
     <div id="chat-window" class="chat-window pointer-events-auto">
@@ -224,14 +275,36 @@
   const bubble = document.getElementById('chat-bubble');
   const windowEl = document.getElementById('chat-window');
   const closeBtn = document.getElementById('chat-close');
+  const tooltip = document.getElementById('chat-tooltip');
+  const tooltipClose = document.getElementById('tooltip-close');
   const chatForm = document.getElementById('chat-form');
   const chatInput = document.getElementById('chat-input');
   const chatMessages = document.getElementById('chat-messages');
+
+  // Gestione comparsa del fumetto con delay di 2 secondi (per non interferire col caricamento)
+  if (tooltip) {
+    setTimeout(() => {
+      // Compare solo se la finestra della chat è chiusa
+      if (!windowEl.classList.contains('active')) {
+        tooltip.classList.add('active');
+      }
+    }, 2000);
+
+    // Chiusura del fumetto con X (salva in sessionStorage per non annoiare l'utente)
+    tooltipClose.addEventListener('click', (e) => {
+      e.stopPropagation(); // Evita di aprire la chat cliccando sulla X
+      sessionStorage.setItem('nova_tooltip_closed', 'true');
+      tooltip.classList.remove('active');
+    });
+  }
 
   bubble.addEventListener('click', () => {
     windowEl.classList.add('active');
     bubble.style.opacity = '0';
     bubble.style.pointerEvents = 'none';
+    if (tooltip) {
+      tooltip.classList.remove('active');
+    }
   });
 
   closeBtn.addEventListener('click', () => {
@@ -240,13 +313,12 @@
     bubble.style.pointerEvents = 'auto';
   });
 
-  // ─── CHIAMATA AL WEBHOOK REALE DI N8N (HETZNER VPS) ───
+  // Chiamata al webhook reale di n8n
   chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const text = chatInput.value.trim();
     if (!text) return;
 
-    // Messaggio Utente a schermo
     const userMsg = document.createElement('div');
     userMsg.className = 'message user';
     userMsg.innerText = text;
@@ -254,7 +326,6 @@
     chatInput.value = '';
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    // Creazione del segnale di caricamento temporaneo (typing indicator)
     const typingIndicator = document.createElement('div');
     typingIndicator.className = 'message system italic opacity-50';
     typingIndicator.innerText = 'Nova sta scrivendo...';
@@ -262,7 +333,6 @@
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
     try {
-      // Esegue la chiamata asincrona POST su n8n
       const response = await fetch("https://n8n.rmstudio.app/webhook/nova", {
         method: "POST",
         headers: {
@@ -275,7 +345,7 @@
       });
 
       const data = await response.json();
-      chatMessages.removeChild(typingIndicator); // Rimuove indicatore di scrittura
+      chatMessages.removeChild(typingIndicator);
 
       if (data && data.response) {
         const botMsg = document.createElement('div');
