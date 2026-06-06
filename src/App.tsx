@@ -1,20 +1,24 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import { NovaChatbot } from "./components/NovaChatbot";
-import { FloatingDock } from "./components/FloatingDock";
-import { ExternalLink, Download, Send } from "lucide-react";
+import { Download } from "lucide-react";
 import { Toaster, toast } from "sonner";
-import { motion, LazyMotion, domAnimation } from "framer-motion";
+import { LazyMotion, domAnimation } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+// Import dei componenti locali
+import Header from "./components/Header";
+import ThreeDStage from "./components/ThreeDStage";
+import { NovaChatbot } from "./components/NovaChatbot";
+import { FloatingDock } from "./components/FloatingDock";
 
 gsap.registerPlugin(ScrollTrigger);
 
 // ─── COSTANTE ANNO ───
 const CURRENT_YEAR = new Date().getFullYear();
 
-// Interfaccia delle stazioni
+// Configurazione delle 11 scene
 interface Scene {
   id: string;
   chapter: string;
@@ -31,14 +35,13 @@ interface Scene {
   isContact?: boolean;
 }
 
-// Configurazione delle 11 scene reali mappate sui tuoi file
 const SCENES: Scene[] = [
   {
     id: "hero-start",
     chapter: "Ecosistema",
     title: "RM Studio",
     subtitle: "Risolviamo colli di bottiglia operativi sviluppando ecosistemi AI su misura. Riduciamo lo sforzo d'uso, azzeriamo l'errore umano ed espandiamo i tuoi canali commerciali. Scorri per iniziare.",
-    logo: "logo.png",
+    logo: "logo_rm.png",
     isProduct: false,
     isIntro: true
   },
@@ -47,7 +50,7 @@ const SCENES: Scene[] = [
     chapter: "Chapter I — Conversion AI",
     title: "NexusAI",
     subtitle: "Assunzioni e vendite H24 sul tuo sito attuale senza cambiare codice. NexusAI inietta un assistente intelligente che accoglie, informa e converte i visitatori in lead profilati.",
-    logo: "logo_nexus_bg.png",
+    logo: "logo_nexus.png",
     problem: "I siti web aziendali statici registrano costantemente alti tassi di rimbalzo (bounce rate), fallendo nel convertire il traffico serale o festivo in clienti attivi.",
     solution: "L'overlay invisibile si aggancia all'istante alla tua infrastruttura, scansiona in autonomia la conoscenza aziendale e acquisisce i dati di contatto dei visitatori in tempo reale.",
     neuroCopy: "Il 96% degli utenti abbandona le pagine a causa del sovraccarico cognitivo. Nexus agisce sul principio biologico di fluidità, intercettando il dubbio del visitatore all'istante.",
@@ -59,7 +62,7 @@ const SCENES: Scene[] = [
     chapter: "Chapter II — Hospitality",
     title: "Concierge24",
     subtitle: "L'assistente vocale H24 multilingua che accoglie gli ospiti, risponde alle loro domande e fa up-selling dei tuoi servizi extra mentre il tuo staff riposa.",
-    logo: "logo_Concierge24.png",
+    logo: "logo_concierge.png",
     problem: "La reception soffre di picchi di sovraccarico, con centralini intasati e turisti frustrati in attesa di risposte su Wi-Fi e check-in nelle ore notturne.",
     solution: "Giulia risponde all'istante con un'espressività vocale calda e umana, parlando la lingua nativa dell'ospite, proponendo servizi e inviando conferme su WhatsApp.",
     neuroCopy: "Il cervello rettiliano percepisce l'attesa come un disservizio immediato. Giulia azzera la frizione d'ingresso, elevando la percezione di status della struttura.",
@@ -98,7 +101,7 @@ const SCENES: Scene[] = [
     logo: "logo_drivemotion.png",
     problem: "Fotografie dei veicoli scattate in piazzali disordinati con sfondi disturbanti che abbassano drasticamente il valore percepito delle auto sui portali.",
     solution: "Rimozione automatica del piazzale e inserimento immediato delle vetture all'interno di showroom digitali 3D di lusso, riallineando fari e riflessi fisici.",
-    neuroCopy: "La valutazione estetica avviene in meno di tre decimi di secondo. Elevando lo sfondo, inneschiamo l'euristica del prestigio riducendo la trattativa sul prezzo.",
+    neuroCopy: "La valutazione estetica avviene in meno di tre decimi di secondo. Elevando lo sfondo, inneschiamo l'euristica del prestigio ruducendo la trattativa sul prezzo.",
     isProduct: true,
     url: "https://drivemotion.rmstudio.app"
   },
@@ -107,7 +110,7 @@ const SCENES: Scene[] = [
     chapter: "Chapter VI — Real Estate",
     title: "HomeTour AI",
     subtitle: "Reel immobiliari con voce narrante emozionale, generati in automatico da semplici fotografie. Vendi l'esperienza della casa prima ancora della visita reale.",
-    logo: "logo_HomeTour.png",
+    logo: "logo_hometour.jpg",
     problem: "Annunci immobiliari piatti sui portali che faticano a catturare l'interesse emotivo dell'acquirente ed ostacolano l'acquisizione di mandati in esclusiva.",
     solution: "Generazione di video-visite emozionali con carrellate 3D di parallasse simulato dalle foto, musica d'atmosfera e narrazione vocale persuasiva.",
     neuroCopy: "Non si acquistano mq, ma proiezioni del proprio futuro. Attraverso il movimento 3D simuliamo l'immersione spaziale prima ancora della visita fisica.",
@@ -119,7 +122,7 @@ const SCENES: Scene[] = [
     chapter: "Chapter VII — Privacy AI",
     title: "OmniaStudio",
     subtitle: "La potenza dell'AI generativa sul tuo PC, completamente offline. Analizza contratti, PDF e dati sensibili senza inviare dati al cloud, a tutela del segreto professionale.",
-    logo: "logo_OmniaStudio.png",
+    logo: "logo_omniastudio.png",
     problem: "Restrizioni severe sul GDPR e rischio di fuga di dati sensibili inviando contratti e documenti privati ai server cloud delle intelligenze artificiali pubbliche.",
     solution: "Un software monolitico installato localmente sul tuo hardware che analizza documenti, esegue OCR ed elabora report a connessione totalmente disattivata.",
     neuroCopy: "La sicurezza risponde al bisogno biologico di controllo. OmniaStudio lavora isolato, offrendo zero latenza di rete e totale conformità legale.",
@@ -143,7 +146,7 @@ const SCENES: Scene[] = [
     chapter: "The Synthesis",
     title: "Ecosistema Connesso",
     subtitle: "La convergenza di otto canali autonomi integrati sotto un'unica direzione tecnica. Sincronizzazione automatica tramite database relazionali per azzerare ogni forma di frizione logica ed operativa.",
-    logo: "logo.png",
+    logo: "logo_rm.png",
     isProduct: false,
     isTheUnion: true
   },
@@ -152,7 +155,7 @@ const SCENES: Scene[] = [
     chapter: "The Connection",
     title: "Parliamo del tuo Progetto",
     subtitle: "Compila il modulo contatti per richiedere un'analisi di fattibilità e integrare la tua azienda nell'ecosistema autonomo di RM Studio.",
-    logo: "logo.png",
+    logo: "logo_rm.png",
     isProduct: false,
     isContact: true
   }
@@ -471,13 +474,13 @@ export default function App() {
       });
 
       if (res.ok) {
-        alert("Messaggio inviato con successo! Ti risponderò entro 24 ore.");
+        toast.success("Messaggio inviato con successo! Ti risponderò entro 24 ore.");
         form.reset();
       } else {
-        alert("Errore nell'invio. Riprova più tardi.");
+        toast.error("Errore nell'invio. Riprova più tardi.");
       }
     } catch {
-      alert("Errore di rete. Controlla la connessione.");
+      toast.error("Errore di rete. Controlla la connessione.");
     } finally {
       button.innerText = originalText;
       button.disabled = false;
@@ -681,9 +684,7 @@ export default function App() {
               // VCard Button
               const introButton = scene.isIntro ? (
                 <button onClick={handleVCardClick} className="inline-flex items-center justify-center gap-3 bg-white text-black text-sm tracking-wider font-extrabold uppercase px-8 py-5 rounded-full hover:scale-105 hover:bg-neutral-100 active:scale-95 transition-all duration-300 mt-8 cursor-pointer pointer-events-auto shadow-[0_0_30px_rgba(255,255,255,0.25)] focus:outline-none">
-                  <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                  </svg>
+                  <Download className="w-5 h-5 text-black" />
                   <span>SALVA CONTATTO (vCard)</span>
                 </button>
               ) : null;
@@ -703,7 +704,7 @@ export default function App() {
                   
                   <input type="text" name="name" required placeholder="Nome Completo" className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-[#F2D28B]/50 text-base font-light" />
                   <input type="email" name="email" required placeholder="Email Aziendale" className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-[#F2D28B]/50 text-base font-light" />
-                  <textarea name="message" required rows={3} placeholder="Quale processo vuoi automatizzare?" className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-[#F2D28B]/50 text-base font-light resize-none"></textarea>
+                  <textarea name="message" required rows="3" placeholder="Quale processo vuoi automatizzare?" className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-[#F2D28B]/50 text-base font-light resize-none"></textarea>
                   
                   <button type="submit" className="bg-[#F2D28B] text-black text-xs tracking-widest font-black uppercase py-5 rounded-2xl hover:bg-white transition-all duration-300 cursor-pointer w-full">
                     Invia Messaggio Aziendale
