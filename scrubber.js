@@ -1,8 +1,5 @@
 const isMobile = window.innerWidth < 768;
 const totalFrames = isMobile ? 660 : 1320;
-
-// Carichiamo all'inizio solo la prima transizione per azzerare i tempi di attesa
-const primaryFramesCount = isMobile ? 60 : 120; 
 const images = [];
 const canvas = document.getElementById("immersive-canvas");
 const context = canvas.getContext("2d");
@@ -13,32 +10,29 @@ const getFramePath = index => {
   return `frames/frame_${String(targetIndex).padStart(4, '0')}.jpg`;
 };
 
-let loadedPrimaryCount = 0;
-let isPrimaryLoaded = false;
+const loader = document.getElementById("loader");
+const loaderBar = document.getElementById("loader-bar");
+const loaderText = document.getElementById("loader-text");
 
-function preloadPrimaryImages() {
-  for (let i = 1; i <= totalFrames; i++) {
+function preloadImages() {
+  // 1. Carica immediatamente e in modo bloccante solo il PRIMISSIMO frame
+  const firstImg = new Image();
+  firstImg.src = getFramePath(1);
+  
+  firstImg.onload = () => {
+    images[0] = firstImg;
+    drawFrame(0); // Disegna subito il primo frame sul canvas
+    hideLoaderAndStart(); // Sblocca lo schermo all'istante!
+  };
+  
+  firstImg.onerror = () => {
+    hideLoaderAndStart();
+  };
+
+  // Prepariamo l'array delle restanti immagini fittizie
+  images.push(firstImg);
+  for (let i = 2; i <= totalFrames; i++) {
     const img = new Image();
-    
-    // Scarica immediatamente solo i frame della prima scena
-    if (i <= primaryFramesCount) {
-      img.src = getFramePath(i);
-      
-      const onLoadOrError = () => {
-        loadedPrimaryCount++;
-        const progress = Math.round((loadedPrimaryCount / primaryFramesCount) * 100);
-        if (loaderBar) loaderBar.style.width = `${progress}%`;
-        if (loaderText) loaderText.innerText = `${progress}% Caricato`;
-
-        if (loadedPrimaryCount === primaryFramesCount && !isPrimaryLoaded) {
-          isPrimaryLoaded = true;
-          hideLoaderAndStart();
-        }
-      };
-
-      img.onload = onLoadOrError;
-      img.onerror = onLoadOrError;
-    }
     images.push(img);
   }
 }
@@ -51,13 +45,13 @@ function hideLoaderAndStart() {
     if (typeof initCardAnimations === "function") {
       initCardAnimations();
     }
-    // Avvia il caricamento pigro dei restanti frame in background
+    // Avvia il caricamento asincrono di tutti i restanti frame in background
     preloadRemainingImages();
   }, 600);
 }
 
 function preloadRemainingImages() {
-  for (let i = primaryFramesCount + 1; i <= totalFrames; i++) {
+  for (let i = 2; i <= totalFrames; i++) {
     images[i - 1].src = getFramePath(i);
   }
 }
@@ -146,4 +140,4 @@ function initCanvasScrub() {
   });
 }
 
-preloadPrimaryImages();
+preloadImages();
