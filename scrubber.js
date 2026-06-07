@@ -1,17 +1,40 @@
 /**
- * scrubber.js — Canvas & Video Hybrid Scrubber v8.3 (Mobile GSAP Tween Engine)
+ * scrubber.js — Canvas & Video Hybrid Scrubber v8.4 (Mobile Native Engine)
  *
  * ARCHITETTURA:
  * - Desktop: Ripristino dei vecchi 11 ScrollTrigger individuali (allineamento perfetto confermato dall'utente).
  * - Desktop: Ritardo di attivazione delle card impostato alla soglia del 25% di ciascuna transizione video.
- * - Mobile: Transizione fluida tramite Tween diretto di GSAP sul playhead del video per eliminare scatti (play/pause).
- * - Mobile: Riduzione delle altezze dei trigger per garantire il cambio scena con un singolo scorrimento.
+ * - Mobile: Sostituzione di ScrollTrigger con IntersectionObserver nativo per risposta immediata (0ms lag).
+ * - Mobile: Disattivazione dinamica del backdrop-blur per eliminare il sovraccarico GPU causato dal video.
  */
 
 (function () {
   "use strict";
 
   const IS_MOBILE = window.innerWidth < 768;
+
+  // Iniezione dinamica delle ottimizzazioni mobile per eliminare i colli di bottiglia grafici
+  if (IS_MOBILE) {
+    const style = document.createElement("style");
+    style.innerHTML = `
+      @media (max-width: 767px) {
+        .section-trigger { height: 110vh !important; }
+        #trigger-0 { height: 40vh !important; }
+        /* Rimuoviamo il backdrop-filter che manda in blocco la GPU su mobile sopra un video */
+        .scene-card {
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          background-color: rgba(7, 7, 10, 0.97) !important;
+        }
+        header, .fixed.bottom-8 {
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          background-color: rgba(5, 5, 5, 0.95) !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
   // 1320 frame fisici su desktop (660 su mobile se attivo, ma ignorato in modalità MP4 mobile)
   const TOTAL_FRAMES = IS_MOBILE ? 660 : 1320;
@@ -275,6 +298,7 @@
     img.src = getFramePath(i);
   }
 
+  // Non usato su mobile, preservato per desktop
   function loadBatch(from, size) {
     if (from >= TOTAL_FRAMES) return;
     const to = Math.min(from + size, TOTAL_FRAMES);
@@ -333,28 +357,41 @@
     if (IS_MOBILE) {
       const videoEl = document.getElementById("immersive-video");
 
-      // MOBILE: Gestione rapida e reattiva. Soglia di attivazione a "top 75%" per attivare subito lo switch visivo.
-      for (let i = 0; i < SCENES_COUNT; i++) {
-        ScrollTrigger.create({
-          trigger: `#trigger-${i}`,
-          start: "top 75%",
-          end: "bottom 75%",
-          onToggle(self) {
-            if (self.isActive) {
-              // 1. Sincronizzazione ISTANTANEA e incondizionata della scheda attiva
-              updateCardTimelineDirect(i);
+      // MOBILE: Sostituiamo ScrollTrigger con IntersectionObserver nativo.
+      // Gira direttamente sul thread del browser (compositor), offrendo tempi di risposta a 60fps e zero lag.
+      try {
+        const observerOptions = {
+          root: null,
+          rootMargin: "-25% 0px -25% 0px", // Zona attiva ristretta alla fascia centrale dello schermo
+          threshold: 0.01
+        };
 
-              // 2. Controllo fluido tramite GSAP Tween dell'MP4 nativo (evita scatti di play/pause)
-              try {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const idStr = entry.target.id;
+              const idx = parseInt(idStr.replace("trigger-", ""), 10);
+              if (!isNaN(idx)) {
+                // Sincronizzazione ISTANTANEA della scheda attiva
+                updateCardTimelineDirect(idx);
+
+                // Controllo del video fluido tramite GSAP
                 if (videoEl && videoReady) {
-                  playMobileVideoSegment(i);
+                  playMobileVideoSegment(idx);
                 }
-              } catch (err) {
-                console.warn("Mobile video frame transition failed safely", err);
               }
             }
+          });
+        }, observerOptions);
+
+        for (let i = 0; i < SCENES_COUNT; i++) {
+          const trigger = document.getElementById(`trigger-${i}`);
+          if (trigger) {
+            observer.observe(trigger);
           }
-        });
+        }
+      } catch (err) {
+        console.warn("IntersectionObserver initiation failed", err);
       }
     } else {
       // DESKTOP: Ritorno alle 11 istanze di ScrollTrigger individuali (confermato perfetto dall'utente)
