@@ -1,10 +1,11 @@
 /**
- * scrubber.js — Canvas Frame Scrubber v4.1 (Desktop & Mobile Segmented Architecture)
+ * scrubber.js — Canvas & HTML5 Video Frame Scrubber v4.2 (Desktop & Mobile Unified Master)
  *
- * ARCHITETTURA SICURA:
- * - Esporta window.initScrubber() per eliminare ogni problema di race-condition all'avvio.
- * - Su Desktop: scrubbing di precisione su <canvas>, cambio scheda sincronizzato al fotogramma visualizzato reale.
- * - Su Mobile: disattivato il caricamento dei 660 frame JPEG. Riproduzione e tweening assistito nativo sul file video "frames/background.mp4" tramite GSAP currentTime.
+ * ARCHITETTURA:
+ * - Esporta window.initScrubber() per prevenire race-condition a monte in index.html.
+ * - Su Desktop: scrubbing lineare su <canvas> caricando JPEGs, cambio scheda sincronizzato al fotogramma visualizzato reale.
+ * - Su Mobile: disattivato il caricamento dei 660 frame JPEG. Riproduzione assistita nativa sul file video "frames/background.mp4" 
+ *   tramite GSAP currentTime, con sblocco forzato della GPU mobile (Warmup) all'interazione dell'utente.
  */
 
 (function () {
@@ -43,7 +44,7 @@
     };
   }
 
-  // Mappa i fotogrammi teorici (da 0 a 1320) in secondi reali basandosi sulla durata del video mobile
+  // Mappa i fotogrammi teorici (da 0 a 1320) in secondi reali basandosi sulla durata del video mobile (con fallback robusto a 44.0s)
   function getSceneTimeRange(index, duration) {
     const ranges = [
       [0, 30],       // Scena 0: RM Studio Intro
@@ -60,9 +61,10 @@
     ];
     const r = ranges[index];
     const totalFrames = 1320;
+    const dur = (duration && !isNaN(duration) && duration > 0) ? duration : 44.0;
     return {
-      start: (r[0] / totalFrames) * duration,
-      end: (r[1] / totalFrames) * duration
+      start: (r[0] / totalFrames) * dur,
+      end: (r[1] / totalFrames) * dur
     };
   }
 
@@ -90,7 +92,7 @@
   const ctx    = canvas.getContext("2d");
   const loader = document.getElementById("loader");
 
-  // ─── PROGRESSO LOADER IN TEMPO REALE ──────────────────────────────────────────
+  // ─── PROGRESSO LOADER ────────────────────────────────────────────────────────
   let loadedCount = 0;
   const loaderBar = document.getElementById("loader-bar");
   const loaderText = document.getElementById("loader-text");
@@ -216,63 +218,29 @@
   };
 
   // ─── PRELOAD ─────────────────────────────────────────────────────────────────
-  function loadFrame(i, cb) {
-    if (images[i] !== null) { cb && cb(); return; }
-    const img = new Image();
-    images[i] = img;
-    img.onload = img.onerror = () => {
-      updateLoaderProgress();
-      cb && cb();
-    };
-    img.src = getFramePath(i);
-  }
-
-  function loadBatch(from, size) {
-    if (from >= TOTAL_FRAMES) return;
-    const to = Math.min(from + size, TOTAL_FRAMES);
-    let done = 0, n = to - from;
-    for (let i = from; i < to; i++) {
-      loadFrame(i, () => { if (++done === n) setTimeout(() => loadBatch(to, size), 16); });
-    }
-  }
-
   function preloadImages() {
     if (IS_MOBILE) {
-      // MOBILE: Ignora i file JPEG individuali e carica il video background.mp4
+      // MOBILE: Ignora il precaricamento delle immagini JPEG ed imposta direttamente il video
       const video = document.getElementById("immersive-video");
       if (video) {
+        // Fallback robusto nel caso il percorso differisca tra ambienti di sviluppo/produzione
         video.src = "frames/background.mp4";
+        video.addEventListener("error", function() {
+          if (video.src.indexOf("public/") === -1) {
+            video.src = "public/frames/background.mp4";
+            video.load();
+          }
+        }, { once: true });
+
         video.load();
-
-        const onVideoReady = () => {
-          video.removeEventListener("loadedmetadata", onVideoReady);
-          video.removeEventListener("canplaythrough", onVideoReady);
-
-          // Completa visivamente la barra del loader
-          gsap.to(loaderBar, {
-            width: "100%",
-            duration: 0.4,
-            onUpdate() {
-              const pct = Math.round(parseFloat(loaderBar.style.width || 0));
-              if (loaderText) loaderText.innerText = `Inizializzazione... ${pct}%`;
-            },
-            onComplete() {
-              startApp();
-            }
-          });
-        };
-
-        if (video.readyState >= 1) {
-          onVideoReady();
-        } else {
-          video.addEventListener("loadedmetadata", onVideoReady);
-          video.addEventListener("canplaythrough", onVideoReady);
-          // Fallback di sicurezza in caso di mancato trigger
-          setTimeout(onVideoReady, 2000);
-        }
-      } else {
-        startApp();
       }
+
+      // Nascondi istantaneamente il loader per un ingresso fulmineo su mobile
+      if (loaderBar) loaderBar.style.width = "100%";
+      if (loaderText) loaderText.innerText = "Inizializzazione...";
+      setTimeout(() => {
+        startApp();
+      }, 300);
     } else {
       // DESKTOP: Carica la sequenza di immagini
       loadFrame(0, () => {
@@ -289,23 +257,42 @@
   // ─── INIZIALIZZAZIONE TRIGGERS INDIVIDUALI ─────────────────────────────────────
   function initTriggers() {
     if (IS_MOBILE) {
-      // MOBILE: Passaggio automatico fluido a 60fps controllando currentTime con GSAP
       const video = document.getElementById("immersive-video");
-      const duration = (video && video.duration) || 44.0;
 
+      // FUNZIONE WARMUP MOBILE: Sblocca istantaneamente la GPU e l'audio muto su iOS/Safari su interazione dell'utente
+      const warmupVideo = () => {
+        if (video) {
+          video.play().then(() => {
+            video.pause();
+            // Allinea la posizione del video alla scheda iniziale sbloccata
+            const duration = video.duration || 44.0;
+            const timeRange = getSceneTimeRange(activeCardIndex, duration);
+            video.currentTime = timeRange.end;
+          }).catch(err => {
+            console.log("Warmup retry su scroll...", err);
+          });
+        }
+        window.removeEventListener("touchstart", warmupVideo);
+        window.removeEventListener("scroll", warmupVideo);
+      };
+      window.addEventListener("touchstart", warmupVideo, { passive: true });
+      window.addEventListener("scroll", warmupVideo, { passive: true });
+
+      // MOBILE: Triggers con interpolazione GSAP a 60fps
       for (let i = 0; i < SCENES_COUNT; i++) {
-        const timeRange = getSceneTimeRange(i, duration);
-
         ScrollTrigger.create({
           trigger: `#trigger-${i}`,
-          start: "top 60%", // Attiva il capitolo quando la sezione entra nel mirino dello schermo
+          start: "top 60%", // Attiva la scena quando entra al 60% dello schermo
           end: "bottom 60%",
           onToggle(self) {
             if (self.isActive) {
               updateCardTimelineDirect(i);
 
               if (video) {
-                // Esegue una transizione assistita fluida verso la fine della transizione attiva
+                // Ricalcola dinamicamente la durata del video ad ogni scroll per evitare NaN
+                const duration = video.duration || 44.0;
+                const timeRange = getSceneTimeRange(i, duration);
+
                 gsap.to(video, {
                   currentTime: timeRange.end,
                   duration: 1.2,
@@ -318,7 +305,7 @@
         });
       }
     } else {
-      // DESKTOP: Scrubbing legato allo scroll
+      // DESKTOP: Scrubbing legato allo scroll su Canvas
       for (let i = 0; i < SCENES_COUNT; i++) {
         const range = getSceneFrameRange(i);
 
@@ -328,7 +315,6 @@
           end: "bottom top",
           scrub: 0.5,
           onUpdate(self) {
-            // Calcola il progresso della sezione per identificare il fotogramma corretto
             const currentFrame = range.start + self.progress * (range.end - range.start);
             scrollTracker.frame = currentFrame;
             drawFrame(Math.max(0, Math.min(Math.round(currentFrame), TOTAL_FRAMES - 1)));
@@ -366,7 +352,7 @@
     initTriggers();
   }
 
-  // Esporta la funzione di avvio per essere invocata in sicurezza alla fine di index.html
+  // Esporta la funzione di avvio sicuro invocata alla fine di index.html
   window.initScrubber = function () {
     preloadImages();
   };
