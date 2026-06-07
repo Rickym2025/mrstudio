@@ -1,10 +1,11 @@
 /**
- * scrubber.js — Canvas & Video Hybrid Scrubber v8.4 (Mobile Native Engine)
+ * scrubber.js — Canvas & Video Hybrid Scrubber v8.5 (Mobile Native Frame-rate Fix)
  *
  * ARCHITETTURA:
  * - Desktop: Ripristino dei vecchi 11 ScrollTrigger individuali (allineamento perfetto confermato dall'utente).
  * - Desktop: Ritardo di attivazione delle card impostato alla soglia del 25% di ciascuna transizione video.
  * - Mobile: Sostituzione di ScrollTrigger con IntersectionObserver nativo per risposta immediata (0ms lag).
+ * - Mobile: Riproduzione video accelerata nativamente, monitorata tramite requestAnimationFrame (evita il blocco di Safari).
  * - Mobile: Disattivazione dinamica del backdrop-blur per eliminare il sovraccarico GPU causato dal video.
  */
 
@@ -185,8 +186,10 @@
   }
 
   let videoReady = false;
+  let isLooping = false;
+  let currentTargetTime = 0;
 
-  // Funzione ultra-performante per gestire il playhead su mobile tramite GSAP Tween (Nessun lag di play/pause)
+  // Funzione ultra-performante per gestire la riproduzione nativa fluida (Bypass del seek lag)
   function playMobileVideoSegment(index) {
     const videoEl = document.getElementById("immersive-video");
     if (!videoEl || !videoReady) return;
@@ -194,20 +197,57 @@
     const times = getSceneTimeRange(index);
     
     try {
-      // Mettiamo in pausa il video per far gestire a GSAP il rendering dei frame in totale fluidità
+      // Se il video è già posizionato nel range e sta riproducendo, aggiorna solo la fine del segmento
+      if (videoEl.currentTime >= times.start && videoEl.currentTime < times.end && !videoEl.paused) {
+        currentTargetTime = times.end;
+        return;
+      }
+
       videoEl.pause();
 
-      // Animiamo fluidamente il playhead del video verso la fine della scena target.
-      // overwrite: "auto" cancella istantaneamente le transizioni precedenti se l'utente scorre velocemente.
-      gsap.to(videoEl, {
-        currentTime: times.end,
-        duration: 0.6,
-        ease: "power2.out",
-        overwrite: "auto"
-      });
+      // Evitiamo il seek pesante (currentTime = times.start) se siamo già vicini al punto di partenza.
+      // Questo elimina il freeze istantaneo di Safari/iOS.
+      const timeDiff = Math.abs(videoEl.currentTime - times.start);
+      if (timeDiff > 0.4) {
+        videoEl.currentTime = times.start;
+      }
+      
+      currentTargetTime = times.end;
+
+      // Avviamo la riproduzione accelerata nativa del telefono (gira fluidamente a 60fps)
+      const playPromise = videoEl.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          if (!isLooping) {
+            isLooping = true;
+            requestAnimationFrame(monitorVideoPlayback);
+          }
+        }).catch(() => {
+          // Fallback in caso di risparmio energetico estremo
+          try { videoEl.currentTime = times.end; } catch (e) {}
+        });
+      }
     } catch (err) {
-      console.warn("Smooth video transitions failed safely", err);
+      console.warn("Mobile play segment failed safely", err);
     }
+  }
+
+  // Monitoraggio ad altissima precisione tramite requestAnimationFrame (0% overhead rispetto a timeupdate)
+  function monitorVideoPlayback() {
+    if (!isLooping) return;
+    const videoEl = document.getElementById("immersive-video");
+    if (!videoEl) {
+      isLooping = false;
+      return;
+    }
+
+    if (videoEl.currentTime >= currentTargetTime) {
+      videoEl.pause();
+      isLooping = false;
+      return;
+    }
+
+    requestAnimationFrame(monitorVideoPlayback);
   }
 
   window.registerCards = function (cardElements) {
@@ -375,7 +415,7 @@
                 // Sincronizzazione ISTANTANEA della scheda attiva
                 updateCardTimelineDirect(idx);
 
-                // Controllo del video fluido tramite GSAP
+                // Controllo nativo del video tramite play/pause ottimizzato
                 if (videoEl && videoReady) {
                   playMobileVideoSegment(idx);
                 }
