@@ -198,14 +198,12 @@
   <!-- ─── CONTENITORE IMMERSIVO CANVAS ─── -->
   <div id="app-container" class="relative w-full bg-[#020205]">
     <div class="sticky top-0 h-screen w-full overflow-hidden z-0 bg-black">
-      <!-- Canvas: Schermo intero su Desktop, Bottom-Half (metà inferiore) su Mobile -->
-      <canvas id="immersive-canvas" class="absolute bottom-0 md:top-0 w-full h-1/2 md:h-full object-cover opacity-80"></canvas>
+      <!-- Canvas: Schermo intero su tutti i dispositivi -->
+      <canvas id="immersive-canvas" class="absolute inset-0 w-full h-full opacity-90" style="will-change: transform; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"></canvas>
       
-      <!-- Sfondo Mobile di emergenza ultra-fluido (glowing gradient) se il canvas è nascosto -->
-      <div class="absolute inset-0 bg-gradient-to-tr from-[#020205] via-[#050510] to-[#0c0c1a] block md:hidden"></div>
-      
-      <!-- Vignetta responsiva adattata allo split 50/50 -->
-      <div class="absolute bottom-0 md:inset-0 h-1/2 md:h-full w-full bg-gradient-to-t from-black via-black/40 to-transparent md:to-black/80 pointer-events-none"></div>
+      <!-- Vignetta: gradiente che copre la metà inferiore su mobile, tutto su desktop -->
+      <div class="absolute inset-0 pointer-events-none"
+           style="background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.6) 100%);"></div>
     </div>
 
     <!-- Contenitore Fisso delle Schede -->
@@ -247,7 +245,7 @@
     <a href="public/termini.html" target="_blank" class="hover:text-white transition-colors">Termini e Condizioni</a>
   </div>
 
-  <script src="scrubber.js"></script>
+  <script src="scrubber.js" defer></script>
 
   <script>
     const yr = document.getElementById("current-year");
@@ -395,10 +393,10 @@
     SCENES.forEach((scene, index) => {
       const cardWrapper = document.createElement("div");
       
-      // Allineamento: Su desktop pl-24 a sinistra (md:justify-start), su mobile in alto al centro (justify-center items-start pt-20) per lasciare la meta inferiore libera per il video
-      let alignmentClass = "justify-center items-start pt-20 md:justify-start md:items-center md:pl-24 md:pt-12 text-left";
+      // Allineamento: Su desktop pl-24 a sinistra, su mobile centrato verticalmente
+      let alignmentClass = "justify-center items-center md:justify-start md:items-center md:pl-24 text-left";
       if (scene.isIntro || scene.isTheUnion || scene.isContact) {
-        alignmentClass = "justify-center items-start pt-20 md:items-center md:justify-center mx-auto text-center";
+        alignmentClass = "justify-center items-center text-center";
       }
 
       cardWrapper.className = `absolute inset-0 flex pointer-events-none p-4 md:p-12 ${alignmentClass}`;
