@@ -1,12 +1,11 @@
 /**
- * scrubber.js — Canvas Frame Scrubber v4.1 (Dynamic Asset Streaming Architecture)
+ * scrubber.js — Canvas (Desktop) & Video Scrubber (Mobile) Architecture v5.0
  *
  * ARCHITETTURA CHIAVE:
- * - 11 Triggers individuali per allineamento millimetrico.
- * - Queue di caricamento prioritario (Streaming Loader): i frame della sezione attiva
- *   vengono messi in cima alla coda e scaricati istantaneamente in micro-batch (2 alla volta su mobile)
- *   evitando congestione di rete e sovraccarichi di CPU/GPU mobile.
- * - Triggers ridotti a 100vh su mobile per rendere lo scroll iper-reattivo.
+ * - Desktop: Ripristinato lo scrubbing lineare originale iper-reattivo basato su canvas con immagini.
+ * - Mobile: Usa direttamente il video background.mp4 accelerato via hardware.
+ * - Alla variazione della scheda, il player video si sposta istantaneamente e fluidamente sul secondo esatto della scena corrente.
+ * - Rilevamento automatico dell'indice di caricamento per eliminare il flash iniziale.
  */
 
 (function () {
@@ -14,41 +13,12 @@
 
   const IS_MOBILE = window.innerWidth < 768;
 
-  // 1320 frame fisici. Mobile usa 1 ogni 2 → 660 frame logici.
-  const TOTAL_FRAMES = IS_MOBILE ? 660 : 1320;
+  // 1320 frame fisici per desktop
+  const TOTAL_FRAMES = 1320;
   const SCENES_COUNT = 11; // trigger-0 … trigger-10
 
   function getFramePath(i) {
-    const n = IS_MOBILE ? (i * 2 + 1) : (i + 1);
-    return `frames/frame_${String(n).padStart(4, "0")}.jpg`;
-  }
-
-  // Helper per calcolare i frame esatti assegnati ad ogni scena
-  function getSceneFrameRange(index) {
-    const ranges = [
-      [0, 30],       // Scena 0: RM Studio Intro
-      [30, 120],     // Scena 1: NexusAI
-      [120, 240],    // Scena 2: Concierge24
-      [240, 360],    // Scena 3: Dentis
-      [360, 480],    // Scena 4: Lexis AI
-      [480, 600],    // Scena 5: DriveMotion
-      [600, 720],    // Scena 6: HomeTour AI
-      [720, 840],    // Scena 7: OmniaStudio
-      [840, 960],    // Scena 8: FF Edizioni
-      [960, 1080],   // Scena 9: Ecosistema Connesso
-      [1080, 1319]   // Scena 10: Contatti
-    ];
-    const r = ranges[index];
-    if (IS_MOBILE) {
-      return {
-        start: Math.round(r[0] / 2),
-        end: Math.round(r[1] / 2)
-      };
-    }
-    return {
-      start: r[0],
-      end: r[1]
-    };
+    return `frames/frame_${String(i + 1).padStart(4, "0")}.jpg`;
   }
 
   // ─── STATO ───────────────────────────────────────────────────────────────────
@@ -61,76 +31,29 @@
   const ctx    = canvas.getContext("2d");
   const loader = document.getElementById("loader");
 
-  // ─── STREAMING QUEUE DI CARICAMENTO AUTOMATICO ───────────────────────────────
-  let loadingQueue = [];
-  let isCurrentlyLoading = false;
-  const BATCH_SIZE = IS_MOBILE ? 2 : 5; // Limita i download in parallelo per preservare la CPU
-
-  let loadedCount = 0;
-  const loaderBar = document.getElementById("loader-bar");
-  const loaderText = document.getElementById("loader-text");
-
-  function updateLoaderProgress() {
-    loadedCount++;
-    const pct = Math.min(100, Math.round((loadedCount / TOTAL_FRAMES) * 100));
-    if (loaderBar) loaderBar.style.width = `${pct}%`;
-    if (loaderText) loaderText.innerText = `Inizializzazione... ${pct}%`;
-  }
-
-  // Aggiunge frame specifici in testa alla coda di caricamento (Priorità Massima)
-  function enqueueSceneFrames(sceneIdx) {
-    const range = getSceneFrameRange(sceneIdx);
-    const sceneFrames = [];
-    for (let f = range.start; f <= range.end; f++) {
-      if (!images[f] || !images[f].complete) {
-        sceneFrames.push(f);
-      }
-    }
-    // Mette i frame in cima eliminando eventuali duplicati
-    loadingQueue = [...sceneFrames, ...loadingQueue.filter(f => !sceneFrames.includes(f))];
-    triggerQueueLoad();
-  }
-
-  function triggerQueueLoad() {
-    if (isCurrentlyLoading || loadingQueue.length === 0) return;
-    isCurrentlyLoading = true;
-    
-    const batch = loadingQueue.splice(0, BATCH_SIZE);
-    let completed = 0;
-    
-    batch.forEach(frameIdx => {
-      loadFrame(frameIdx, () => {
-        completed++;
-        if (completed === batch.length) {
-          isCurrentlyLoading = false;
-          // Un piccolo ritardo lascia respirare il browser mobile durante lo scorrimento
-          setTimeout(triggerQueueLoad, IS_MOBILE ? 40 : 20);
-        }
-      });
-    });
-  }
-
-  // ─── CANVAS SIZING ───────────────────────────────────────────────────────────
+  // ─── CANVAS SIZING (DESKTOP) ───────────────────────────────────────────────────
   function updateCanvasSize() {
+    if (IS_MOBILE) return;
     const rect = canvas.getBoundingClientRect();
     canvasW = rect.width  || window.innerWidth;
     canvasH = rect.height || window.innerHeight;
-    dpr = Math.min(window.devicePixelRatio || 1, IS_MOBILE ? 1.5 : 2);
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width  = Math.round(canvasW * dpr);
     canvas.height = Math.round(canvasH * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
   function resizeCanvas() {
+    if (IS_MOBILE) return;
     updateCanvasSize();
-    drawFrame(Math.max(0, Math.min(Math.round(scrollTracker.frame), TOTAL_FRAMES - 1)));
+    const progress = scrollTracker.frame / (TOTAL_FRAMES - 1);
+    drawFrameFromProgress(progress);
   }
 
-  // ─── DRAW ────────────────────────────────────────────────────────────────────
+  // ─── DRAW CANVAS (DESKTOP) ───────────────────────────────────────────────────
   function drawFrame(idx) {
     let img = images[idx];
     if (!img || !img.complete || img.naturalWidth === 0) {
-      // Fallback sul frame caricato precedentemente più vicino per non mostrare buchi neri
       for (let b = idx - 1; b >= 0; b--) {
         const fb = images[b];
         if (fb && fb.complete && fb.naturalWidth > 0) { img = fb; break; }
@@ -149,23 +72,61 @@
     ctx.drawImage(img, dx, dy, dw, dh);
   }
 
+  // Mappatura non-lineare desktop originale
+  function drawFrameFromProgress(progress) {
+    const sceneIdx = Math.min(Math.floor(progress * SCENES_COUNT), SCENES_COUNT - 1);
+    const sceneProgress = (progress * SCENES_COUNT) - sceneIdx;
+    
+    let videoFrame = 1;
+    if (sceneIdx === 0) {
+      videoFrame = 1 + sceneProgress * 29;
+    } else if (sceneIdx === 1) {
+      videoFrame = 30 + sceneProgress * 90;
+    } else if (sceneIdx === 10) {
+      videoFrame = 1080 + sceneProgress * 240;
+    } else {
+      videoFrame = (sceneIdx - 1) * 120 + sceneProgress * 120;
+    }
+
+    const idx = Math.max(0, Math.min(Math.round(videoFrame - 1), TOTAL_FRAMES - 1));
+    drawFrame(idx);
+  }
+
+  // ─── TEMPORIZZAZIONE VIDEO IN SECONDI (MOBILE) ─────────────────────────────────
+  function getTargetTimeForScene(index) {
+    const frameRanges = [
+      0,     // Scena 0: RM Studio Intro (0.0s)
+      120,   // Scena 1: NexusAI (4.0s)
+      240,   // Scena 2: Concierge24 (8.0s)
+      360,   // Scena 3: Dentis (12.0s)
+      480,   // Scena 4: Lexis AI (16.0s)
+      600,   // Scena 5: DriveMotion (20.0s)
+      720,   // Scena 6: HomeTour AI (24.0s)
+      840,   // Scena 7: OmniaStudio (28.0s)
+      960,   // Scena 8: FF Edizioni (32.0s)
+      1080,  // Scena 9: Ecosistema Connesso (36.0s)
+      1319   // Scena 10: Contatti (43.9s)
+    ];
+    return frameRanges[index] / 30;
+  }
+
   // ─── CARD SYNC ───────────────────────────────────────────────────────────────
   let cards = null;
   let activeCardIndex = 0;
 
-  function updateCardTimelineDirect(sceneIdx) {
+  function updateCardTimeline(progress) {
     if (!cards || cards.length === 0) return;
+
+    const sceneIdx = Math.min(
+      Math.floor(progress * SCENES_COUNT),
+      SCENES_COUNT - 1
+    );
+
     if (sceneIdx === activeCardIndex) return;
-
-    // Dai priorità istantanea ai frame della nuova sezione che sta per entrare e a quella successiva
-    enqueueSceneFrames(sceneIdx);
-    if (sceneIdx + 1 < SCENES_COUNT) {
-      enqueueSceneFrames(sceneIdx + 1);
-    }
-
     const prevIdx = activeCardIndex;
     activeCardIndex = sceneIdx;
 
+    // Anima uscita scheda precedente
     if (prevIdx >= 0 && prevIdx < cards.length) {
       const prev = cards[prevIdx];
       const prevProps = window.getSceneProps && window.getSceneProps(prevIdx);
@@ -175,6 +136,7 @@
       }
     }
 
+    // Anima entrata scheda corrente
     if (sceneIdx >= 0 && sceneIdx < cards.length) {
       const card = cards[sceneIdx];
       const props = window.getSceneProps && window.getSceneProps(sceneIdx);
@@ -185,9 +147,11 @@
     }
   }
 
+  // Chiamata da initCardAnimations (in index.html) per registrare i riferimenti
   window.registerCards = function (cardElements) {
     cards = cardElements;
-
+    
+    // Individua l'indice iniziale esatto in base alla posizione reale al caricamento
     let initialActiveIndex = 0;
     for (let i = 0; i < SCENES_COUNT; i++) {
       const trigger = document.getElementById(`trigger-${i}`);
@@ -201,8 +165,13 @@
     }
     activeCardIndex = initialActiveIndex;
 
-    // Prioritizza i frame di partenza
-    enqueueSceneFrames(activeCardIndex);
+    // Se mobile, allinea subito il video al secondo corrispondente
+    if (IS_MOBILE) {
+      const video = document.getElementById("immersive-video");
+      if (video) {
+        video.currentTime = getTargetTimeForScene(activeCardIndex);
+      }
+    }
 
     cards.forEach((card, i) => {
       const props = window.getSceneProps && window.getSceneProps(i);
@@ -212,27 +181,22 @@
     });
   };
 
-  // ─── PRELOAD ─────────────────────────────────────────────────────────────────
+  // ─── PRELOAD CARICAMENTO IMMAGINI (SOLO DESKTOP) ──────────────────────────────
   function loadFrame(i, cb) {
-    if (images[i] !== null) {
-      if (images[i].complete) {
-        cb && cb();
-      } else {
-        const prevOnload = images[i].onload;
-        images[i].onload = images[i].onerror = () => {
-          if (prevOnload) prevOnload();
-          cb && cb();
-        };
-      }
-      return;
-    }
+    if (images[i] !== null) { cb && cb(); return; }
     const img = new Image();
     images[i] = img;
-    img.onload = img.onerror = () => {
-      updateLoaderProgress();
-      cb && cb();
-    };
+    img.onload = img.onerror = () => { cb && cb(); };
     img.src = getFramePath(i);
+  }
+
+  function loadBatch(from, size) {
+    if (from >= TOTAL_FRAMES) return;
+    const to = Math.min(from + size, TOTAL_FRAMES);
+    let done = 0, n = to - from;
+    for (let i = from; i < to; i++) {
+      loadFrame(i, () => { if (++done === n) setTimeout(() => loadBatch(to, size), 16); });
+    }
   }
 
   function preloadImages() {
@@ -240,79 +204,88 @@
       updateCanvasSize();
       drawFrame(0);
       startApp();
-      
-      // Carica il resto dei frame in background con priorità standard (in coda)
-      const allFrames = [];
-      for (let i = 1; i < TOTAL_FRAMES; i++) {
-        allFrames.push(i);
-      }
-      loadingQueue = [...loadingQueue, ...allFrames.filter(f => !loadingQueue.includes(f))];
-      triggerQueueLoad();
+      const PRI = Math.min(80, TOTAL_FRAMES);
+      for (let i = 1; i < PRI; i++) loadFrame(i, null);
+      setTimeout(() => loadBatch(PRI, 50), 200);
     });
   }
 
-  // ─── INIZIALIZZAZIONE TRIGGERS INDIVIDUALI ─────────────────────────────────────
-  function initTriggers() {
-    if (IS_MOBILE) {
-      // MOBILE: Passaggio automatico fluido assistito a 60fps basato sulle sezioni
-      for (let i = 0; i < SCENES_COUNT; i++) {
-        const range = getSceneFrameRange(i);
-
-        ScrollTrigger.create({
-          trigger: `#trigger-${i}`,
-          start: "top top", // Sequenzialità perfetta e lineare senza sovrapposizioni
-          end: "bottom top",
-          onToggle(self) {
-            if (self.isActive) {
-              updateCardTimelineDirect(i);
-
-              // Transizione automatica morbida dal frame in cui ci si trova fino all'end-frame della nuova sezione
-              gsap.to(scrollTracker, {
-                frame: range.end,
-                duration: 1.2,
-                ease: "power2.out",
-                overwrite: "auto",
-                onUpdate() {
-                  drawFrame(Math.max(0, Math.min(Math.round(scrollTracker.frame), TOTAL_FRAMES - 1)));
-                }
-              });
-            }
-          }
-        });
-      }
-    } else {
-      // DESKTOP: Scrubbing iper-preciso legato allo scorrimento fisico
-      for (let i = 0; i < SCENES_COUNT; i++) {
-        const range = getSceneFrameRange(i);
-
-        ScrollTrigger.create({
-          trigger: `#trigger-${i}`,
-          start: "top top",
-          end: "bottom top",
-          scrub: 0.5,
-          onUpdate(self) {
-            const currentFrame = range.start + self.progress * (range.end - range.start);
-            scrollTracker.frame = currentFrame;
-            drawFrame(Math.max(0, Math.min(Math.round(currentFrame), TOTAL_FRAMES - 1)));
-          },
-          onToggle(self) {
-            if (self.isActive) {
-              updateCardTimelineDirect(i);
-            }
-          }
-        });
-      }
+  // ─── START MOBILE (NATIVE VIDEO) ──────────────────────────────────────────────
+  function startAppMobile() {
+    if (loader) {
+      loader.style.opacity = "0";
+      setTimeout(() => { if (loader) loader.style.display = "none"; }, 700);
     }
 
-    if (typeof window.initCardAnimations === "function") {
-      window.initCardAnimations();
+    const video = document.getElementById("immersive-video");
+    if (video) {
+      // Warm-up per sbloccare l'audio/video decoder sui dispositivi iOS Safari
+      const warmUpVideo = () => {
+        video.play().then(() => {
+          video.pause();
+        }).catch(err => console.log("Video warm-up deferred:", err));
+        document.removeEventListener("touchstart", warmUpVideo);
+      };
+      document.addEventListener("touchstart", warmUpVideo);
+    }
+
+    // Gestione reattiva e lineare globale su Mobile
+    ScrollTrigger.create({
+      trigger: "#app-container",
+      start: "top top",
+      end: "bottom bottom",
+      onUpdate(self) {
+        const progress = self.progress;
+        const sceneIdx = Math.min(
+          Math.floor(progress * SCENES_COUNT),
+          SCENES_COUNT - 1
+        );
+
+        if (sceneIdx === activeCardIndex) return;
+        const prevIdx = activeCardIndex;
+        activeCardIndex = sceneIdx;
+
+        // Anima uscita scheda precedente
+        if (prevIdx >= 0 && prevIdx < cards.length) {
+          const prev = cards[prevIdx];
+          const prevProps = window.getSceneProps && window.getSceneProps(prevIdx);
+          if (prevProps) {
+            gsap.killTweensOf(prev);
+            gsap.to(prev, { ...prevProps.exit, duration: 0.4, ease: "power2.in" });
+          }
+        }
+
+        // Anima entrata scheda corrente
+        if (sceneIdx >= 0 && sceneIdx < cards.length) {
+          const card = cards[sceneIdx];
+          const props = window.getSceneProps && window.getSceneProps(sceneIdx);
+          if (props) {
+            gsap.killTweensOf(card);
+            gsap.fromTo(card, props.init, { ...props.mid, duration: 0.5, ease: "power3.out" });
+          }
+        }
+
+        // Spostamento fluido accelerato hardware della riproduzione MP4
+        if (video) {
+          const targetTime = getTargetTimeForScene(sceneIdx);
+          gsap.to(video, {
+            currentTime: targetTime,
+            duration: 1.2,
+            ease: "power1.out",
+            overwrite: "auto"
+          });
+        }
+      }
+    });
+
+    if (typeof initCardAnimations === "function") {
+      initCardAnimations();
     }
   }
 
-  // ─── START ───────────────────────────────────────────────────────────────────
+  // ─── START DESKTOP (CANVAS IMAGES) ───────────────────────────────────────────
   function startApp() {
     if (loader) {
-      loader.style.transition = "opacity 0.6s";
       loader.style.opacity = "0";
       setTimeout(() => { if (loader) loader.style.display = "none"; }, 700);
     }
@@ -324,9 +297,33 @@
       rsTimer = setTimeout(resizeCanvas, 80);
     });
 
-    initTriggers();
+    // Unico trigger globale lineare come richiesto
+    gsap.to(scrollTracker, {
+      frame: TOTAL_FRAMES - 1,
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#app-container",
+        start: "top top",
+        end:   "bottom bottom",
+        scrub: 0.5,
+      },
+      onUpdate() {
+        const progress = scrollTracker.frame / (TOTAL_FRAMES - 1);
+        drawFrameFromProgress(progress);
+        updateCardTimeline(progress);
+      },
+    });
+
+    if (typeof initCardAnimations === "function") {
+      initCardAnimations();
+    }
   }
 
-  preloadImages();
+  // ─── ENTRY POINT INIZIALE ───
+  if (IS_MOBILE) {
+    startAppMobile();
+  } else {
+    preloadImages();
+  }
 
 })();

@@ -130,7 +130,7 @@
       border: 4px solid #F2D28B;
       padding: 4px;
       background: #000;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.85);
       z-index: 10;
       box-sizing: border-box;
     }
@@ -172,7 +172,7 @@
 </head>
 <body>
 
-  <!-- ─── PRELOADER CON PROGRESSO IN TEMPO REALE ─── -->
+  <!-- ─── PRELOADER ─── -->
   <div id="loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#050505] transition-opacity duration-700">
     <div class="text-center">
       <span class="text-[#F2D28B] text-xs tracking-[0.4em] uppercase block mb-3 font-semibold">Ecosistema AI</span>
@@ -195,11 +195,14 @@
     </a>
   </header>
 
-  <!-- ─── CONTENITORE IMMERSIVO CANVAS ─── -->
+  <!-- ─── CONTENITORE IMMERSIVO CANVAS & VIDEO ─── -->
   <div id="app-container" class="relative w-full bg-[#020205]">
     <div class="sticky top-0 h-screen w-full overflow-hidden z-0 bg-black">
-      <!-- Canvas: Schermo intero su tutti i dispositivi -->
-      <canvas id="immersive-canvas" class="absolute inset-0 w-full h-full opacity-90" style="will-change: transform; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"></canvas>
+      <!-- Canvas: Attivo solo su Desktop -->
+      <canvas id="immersive-canvas" class="absolute inset-0 w-full h-full opacity-90 hidden md:block" style="will-change: transform; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"></canvas>
+      
+      <!-- Video: Attivo solo su Mobile (hardware-accelerated, senza download di immagini) -->
+      <video id="immersive-video" class="absolute inset-0 w-full h-full object-cover opacity-90 block md:hidden" muted playsinline preload="auto" src="frames/background.mp4" style="will-change: transform;"></video>
       
       <!-- Vignetta: gradiente che copre la metà inferiore su mobile, tutto su desktop -->
       <div class="absolute inset-0 pointer-events-none"
@@ -212,11 +215,7 @@
     <!-- Triggers Invisibili per lo Scroll -->
     <style>
       .section-trigger { height: 200vh; }
-      #trigger-0 { height: 60vh; }
-      @media (max-width: 767px) { 
-        .section-trigger { height: 100vh; } /* 100vh su mobile rende ogni swipe reattivo al cambio scheda */
-        #trigger-0 { height: 60vh; } /* Intro cortissima per reattività immediata */
-      }
+      #trigger-0 { height: 100vh; } /* Primo scroll ridotto a 100vh per far apparire immediatamente NexusAI */
     </style>
     <div id="scroll-triggers" class="relative z-20 w-full pointer-events-none">
       <section id="trigger-0"  class="section-trigger w-full"></section>
@@ -393,7 +392,7 @@
       }
     ];
 
-    // ─── GENERAZIONE DINAMICA SCHEDE EDITORIALI CON ALLINEAMENTO RESPONSIVO ───
+    // ─── GENERAZIONE DINAMICA SCHEDE EDITORIALI ───
     const overlayContainer = document.getElementById("text-overlays");
 
     SCENES.forEach((scene, index) => {
