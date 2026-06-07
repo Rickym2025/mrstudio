@@ -210,10 +210,10 @@
     <div id="text-overlays" class="fixed inset-0 z-10 pointer-events-none"></div>
 
     <!-- Triggers Invisibili per lo Scroll — ogni sezione ha spazio generoso per mostrare il video -->
-    <!-- Desktop: 200vh × 11 = 2200vh | Mobile: 250vh × 11 = 2750vh -->
+    <!-- Desktop: 200vh × 11 = 2200vh | Mobile: 400vh × 11 = 4400vh -->
     <style>
       .section-trigger { height: 200vh; }
-      @media (max-width: 767px) { .section-trigger { height: 250vh; } }
+      @media (max-width: 767px) { .section-trigger { height: 400vh; } }
     </style>
     <div id="scroll-triggers" class="relative z-20 w-full pointer-events-none">
       <section id="trigger-0"  class="section-trigger w-full"></section>
@@ -569,7 +569,7 @@
     window.addEventListener('scroll', () => {
       if (loopLocked) return;
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      if (window.scrollY >= maxScroll - 40) {
+      if (window.scrollY >= maxScroll - 2) {
         loopLocked = true;
         window.scrollTo({ top: 1, behavior: 'instant' });
         ScrollTrigger.refresh();
@@ -649,52 +649,28 @@
       }
     }
 
-    // ─── CARD ANIMATIONS: ogni scheda entra e rimane visibile per tutta la sua sezione ───
+    // ─── CARD ANIMATIONS ────────────────────────────────────────────────────────
+    // Le card NON usano ScrollTrigger separati.
+    // Vengono attivate direttamente da updateCardTimeline() in scrubber.js
+    // che legge scrollTracker.frame — stessa fonte del canvas → zero sfasamento.
+    //
+    // getSceneProps() è esposta globalmente affinché scrubber.js possa usarla.
+    window.getSceneProps = getSceneProps;
+
     function initCardAnimations() {
-      const triggers = gsap.utils.toArray("#scroll-triggers section");
-      const cards    = gsap.utils.toArray(".scene-card");
+      const cards = gsap.utils.toArray(".scene-card");
 
-      triggers.forEach((trigger, index) => {
-        const card = cards[index];
-        if (!card) return;
-
-        const props = getSceneProps(index);
-        const isFirst = index === 0;
-        const isLast  = index === triggers.length - 1;
-
-        // Stato iniziale
-        gsap.set(card, isFirst ? props.mid : props.init);
-
-        ScrollTrigger.create({
-          trigger: trigger,
-          // Entra appena la sezione raggiunge il 70% basso dello schermo (per non anticipare)
-          start: "top 70%",
-          // Esce quando la sezione ha lasciato il 30% dello schermo (transizione pulita)
-          end: "bottom 30%",
-          onEnter: () => {
-            gsap.killTweensOf(card);
-            gsap.fromTo(card, props.init, {
-              ...props.mid, duration: 0.5, ease: "power3.out"
-            });
-          },
-          onEnterBack: () => {
-            gsap.killTweensOf(card);
-            gsap.fromTo(card, props.exit, {
-              ...props.mid, duration: 0.5, ease: "power3.out"
-            });
-          },
-          onLeave: () => {
-            if (isLast) return; // Ultima scheda rimane visibile
-            gsap.killTweensOf(card);
-            gsap.to(card, { ...props.exit, duration: 0.35, ease: "power2.in" });
-          },
-          onLeaveBack: () => {
-            if (isFirst) return; // Prima scheda rimane visibile se si torna su
-            gsap.killTweensOf(card);
-            gsap.to(card, { ...props.init, duration: 0.35, ease: "power2.in" });
-          }
-        });
+      // Imposta stato iniziale: card 0 visibile, tutte le altre nascoste
+      cards.forEach((card, i) => {
+        const props = getSceneProps(i);
+        if (!props) return;
+        gsap.set(card, i === 0 ? props.mid : props.init);
       });
+
+      // Registra i riferimenti nel scrubber per le transizioni frame-based
+      if (typeof window.registerCards === "function") {
+        window.registerCards(cards);
+      }
     }
 
   </script>
