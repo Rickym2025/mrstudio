@@ -1,11 +1,11 @@
 /**
- * scrubber.js — Canvas & Video Hybrid Scrubber v8.2 (Mobile Ultra-Responsive Fix)
+ * scrubber.js — Canvas & Video Hybrid Scrubber v8.3 (Mobile GSAP Tween Engine)
  *
  * ARCHITETTURA:
  * - Desktop: Ripristino dei vecchi 11 ScrollTrigger individuali (allineamento perfetto confermato dall'utente).
  * - Desktop: Ritardo di attivazione delle card impostato alla soglia del 25% di ciascuna transizione video.
- * - Mobile: Disaccoppiamento totale delle schede (cambiano all'istante su scroll per garantire che funzionino SEMPRE).
- * - Mobile: Protezione blindata con try-catch e check preventiva di readyState sui controlli dell'MP4 per impedire i blocchi a schermo nero su Safari.
+ * - Mobile: Transizione fluida tramite Tween diretto di GSAP sul playhead del video per eliminare scatti (play/pause).
+ * - Mobile: Riduzione delle altezze dei trigger per garantire il cambio scena con un singolo scorrimento.
  */
 
 (function () {
@@ -136,7 +136,7 @@
     const prevIdx = activeCardIndex;
     activeCardIndex = sceneIdx;
 
-    // Velocizzazione transizioni visive su mobile per massima reattività al tocco
+    // Transizioni veloci ed estremamente snelle su mobile per massimizzare la reattività
     const exitDur = IS_MOBILE ? 0.2 : 0.4;
     const enterDur = IS_MOBILE ? 0.25 : 0.5;
 
@@ -162,10 +162,8 @@
   }
 
   let videoReady = false;
-  let currentTargetTime = 0;
-  let isPlayingToTarget = false;
 
-  // Funzione ottimizzata per avviare il segmento video su mobile (Play nativo protetto e bypass seek lag)
+  // Funzione ultra-performante per gestire il playhead su mobile tramite GSAP Tween (Nessun lag di play/pause)
   function playMobileVideoSegment(index) {
     const videoEl = document.getElementById("immersive-video");
     if (!videoEl || !videoReady) return;
@@ -173,27 +171,19 @@
     const times = getSceneTimeRange(index);
     
     try {
+      // Mettiamo in pausa il video per far gestire a GSAP il rendering dei frame in totale fluidità
       videoEl.pause();
-      
-      // OTTIMIZZAZIONE CHIAVE: se lo scroll è sequenziale, evitiamo il seek forzato (currentTime = times.start)
-      // che costringe il chip hardware mobile a ricalcolare i frame, azzerando il lag di 500-800ms.
-      const timeDiff = Math.abs(videoEl.currentTime - times.start);
-      if (timeDiff > 0.3) {
-        videoEl.currentTime = times.start;
-      }
-      
-      currentTargetTime = times.end;
 
-      const playPromise = videoEl.play();
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          isPlayingToTarget = true;
-        }).catch(() => {
-          try { videoEl.currentTime = times.end; } catch (e) {}
-        });
-      }
+      // Animiamo fluidamente il playhead del video verso la fine della scena target.
+      // overwrite: "auto" cancella istantaneamente le transizioni precedenti se l'utente scorre velocemente.
+      gsap.to(videoEl, {
+        currentTime: times.end,
+        duration: 0.6,
+        ease: "power2.out",
+        overwrite: "auto"
+      });
     } catch (err) {
-      console.warn("Play execution failed gracefully", err);
+      console.warn("Smooth video transitions failed safely", err);
     }
   }
 
@@ -343,32 +333,18 @@
     if (IS_MOBILE) {
       const videoEl = document.getElementById("immersive-video");
 
-      // Monitoraggio costante dei tempi di riproduzione per bloccare il segmento prima del trigger successivo
-      if (videoEl) {
-        videoEl.addEventListener("timeupdate", () => {
-          if (isPlayingToTarget && videoEl.currentTime >= currentTargetTime) {
-            try {
-              videoEl.pause();
-              videoEl.currentTime = currentTargetTime;
-            } catch (e) {}
-            isPlayingToTarget = false;
-          }
-        });
-      }
-
-      // MOBILE: Gestione delle schede scollegata in sicurezza dal video per evitare freeze.
-      // Sganciamento anticipato all'85% dell'altezza dello schermo per un feedback istantaneo allo scroll.
+      // MOBILE: Gestione rapida e reattiva. Soglia di attivazione a "top 75%" per attivare subito lo switch visivo.
       for (let i = 0; i < SCENES_COUNT; i++) {
         ScrollTrigger.create({
           trigger: `#trigger-${i}`,
-          start: "top 85%",
-          end: "bottom 85%",
+          start: "top 75%",
+          end: "bottom 75%",
           onToggle(self) {
             if (self.isActive) {
               // 1. Sincronizzazione ISTANTANEA e incondizionata della scheda attiva
               updateCardTimelineDirect(i);
 
-              // 2. Controllo asincrono e sicuro dell'MP4 nativo (try-catch)
+              // 2. Controllo fluido tramite GSAP Tween dell'MP4 nativo (evita scatti di play/pause)
               try {
                 if (videoEl && videoReady) {
                   playMobileVideoSegment(i);
