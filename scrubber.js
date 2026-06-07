@@ -1,5 +1,5 @@
 /**
- * scrubber.js — Canvas & Video Hybrid Scrubber v8.0
+ * scrubber.js — Canvas & Video Hybrid Scrubber v8.1 (Mobile Fix)
  *
  * ARCHITETTURA:
  * - Desktop: Ripristino dei vecchi 11 ScrollTrigger individuali (allineamento perfetto confermato dall'utente).
@@ -215,20 +215,49 @@
     if (IS_MOBILE) {
       const videoEl = document.getElementById("immersive-video");
       if (videoEl) {
+        let setupDone = false;
         const setupMobileVideo = () => {
+          if (setupDone) return;
+          setupDone = true;
           videoReady = true;
           playMobileVideoSegment(activeCardIndex);
         };
 
+        // Fallback di sicurezza: se nessun evento spara entro 300ms, forziamo videoReady per evitare blocchi
+        const fallbackTimer = setTimeout(() => {
+          setupMobileVideo();
+        }, 300);
+
         try {
           if (videoEl.readyState >= 1) {
+            clearTimeout(fallbackTimer);
             setupMobileVideo();
           } else {
-            videoEl.addEventListener("loadedmetadata", setupMobileVideo, { once: true });
+            const events = ["loadedmetadata", "loadeddata", "canplay", "play"];
+            events.forEach(evt => {
+              videoEl.addEventListener(evt, () => {
+                clearTimeout(fallbackTimer);
+                setupMobileVideo();
+              }, { once: true });
+            });
           }
         } catch (err) {
           console.warn("Dynamic video metadata check failed safely", err);
+          setupMobileVideo();
         }
+
+        // Sblocco proattivo del video al primo tocco o scroll (necessario per iOS/Safari in modalità risparmio energetico)
+        const unblockVideo = () => {
+          try {
+            videoEl.play().then(() => {
+              videoEl.pause();
+            }).catch(() => {});
+          } catch (e) {}
+          window.removeEventListener("touchstart", unblockVideo);
+          window.removeEventListener("scroll", unblockVideo);
+        };
+        window.addEventListener("touchstart", unblockVideo, { passive: true });
+        window.addEventListener("scroll", unblockVideo, { passive: true });
       }
     }
   };
@@ -277,9 +306,16 @@
           console.warn("Video initial setups failed safely", e);
         }
       }
-      startApp();
+
+      // Risoluzione della race condition: attendiamo che il DOM sia completamente pronto
+      // prima di eseguire startApp(), in modo che le schede in index.html vengano generate e trovate
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", startApp);
+      } else {
+        setTimeout(startApp, 50);
+      }
     } else {
-      // Desktop preloading dei frame
+      // Desktop (Invariato per non toccare le prestazioni ottimali già confermate)
       loadFrame(0, () => {
         updateCanvasSize();
         drawFrame(0);
@@ -309,7 +345,7 @@
         });
       }
 
-      // MOBILE: Gestione delle schede del tutto scollegata dal video per evitare freeze
+      // MOBILE: Gestione delle schede scollegata in sicurezza dal video per evitare freeze
       for (let i = 0; i < SCENES_COUNT; i++) {
         ScrollTrigger.create({
           trigger: `#trigger-${i}`,
