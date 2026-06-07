@@ -202,7 +202,7 @@
       <canvas id="immersive-canvas" class="absolute inset-0 w-full h-full opacity-90 md:block hidden" style="will-change: transform; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"></canvas>
       
       <!-- Video: Schermo intero su mobile per massime performance (Solo Mobile) -->
-      <video id="immersive-video" class="absolute inset-0 w-full h-full object-cover opacity-90 md:hidden block" playsinline muted loop preload="auto" style="pointer-events: none;">
+      <video id="immersive-video" class="absolute inset-0 w-full h-full object-cover opacity-90 md:hidden block" playsinline webkit-playsinline muted loop preload="auto" style="pointer-events: none;">
         <source src="frames/background.mp4" type="video/mp4">
       </video>
       
@@ -548,7 +548,7 @@
       const formData = new FormData(form);
       const button = form.querySelector("button[type='submit']");
       const originalText = button.innerText;
-      button.innerText = "Invio in corso...";
+      button.innerText = "Invia in corso...";
       button.disabled = true;
 
       try {
@@ -620,7 +620,7 @@
         case 4: // Lexis AI
           return {
             init: { autoAlpha: 0, opacity: 0, rotateY: -60, rotateX: 20, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, rotateX: 0, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, x: 0, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
             exit: { autoAlpha: 0, opacity: 0, rotateY: 60, rotateX: -20, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
           };
         case 5: // DriveMotion
@@ -668,7 +668,7 @@
     function initCardAnimations() {
       const cards = gsap.utils.toArray(".scene-card");
 
-      // Imposta stato iniziale nascosto (verrà forzato dinamicamente su scrubber in base alla posizione reale)
+      // Imposta lo stato iniziale nascosto (verrà forzato dinamicamente in registerCards)
       cards.forEach((card, i) => {
         const props = getSceneProps(i);
         if (!props) return;

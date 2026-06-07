@@ -1,12 +1,11 @@
 /**
- * scrubber.js — Canvas & Video Hybrid Scrubber v7.0 (Native Mobile Video Loop Engine)
+ * scrubber.js — Canvas & Video Hybrid Scrubber v8.0
  *
- * ARCHITETTURA CHIAVE:
- * - Desktop: Ritorno a un singolo ScrollTrigger globale per un rendering Canvas incredibilmente fluido (buttery-smooth).
- * - Desktop: Calcolo matematico preciso dei sotto-segmenti (per gestire il trigger-0 corto a 60vh e gli altri a 200vh).
+ * ARCHITETTURA:
+ * - Desktop: Ripristino dei vecchi 11 ScrollTrigger individuali (allineamento perfetto confermato dall'utente).
  * - Desktop: Ritardo di attivazione delle card impostato alla soglia del 25% di ciascuna transizione video.
- * - Mobile: Riproduzione nativa controllata (.play()) all'avvio della transizione di sezione per bypassare
- *           le severe limitazioni di iOS Safari sul rendering manuale dei frame a video fermo.
+ * - Mobile: Disaccoppiamento totale delle schede (cambiano all'istante su scroll per garantire che funzionino SEMPRE).
+ * - Mobile: Protezione blindata con try-catch e check preventiva di readyState sui controlli dell'MP4 per impedire i blocchi a schermo nero su Safari.
  */
 
 (function () {
@@ -158,30 +157,32 @@
     }
   }
 
-  // Gestione dinamica dei metadati del video mobile per prevenire lo schermo nero
   let videoReady = false;
   let currentTargetTime = 0;
   let isPlayingToTarget = false;
 
-  // Funzione sicura per avviare il segmento video su mobile (Play nativo per forzare la decodifica dei frame)
+  // Funzione sicura per avviare il segmento video su mobile (Play nativo protetto)
   function playMobileVideoSegment(index) {
     const videoEl = document.getElementById("immersive-video");
     if (!videoEl || !videoReady) return;
 
     const times = getSceneTimeRange(index);
     
-    videoEl.pause();
-    videoEl.currentTime = times.start;
-    currentTargetTime = times.end;
+    try {
+      videoEl.pause();
+      videoEl.currentTime = times.start;
+      currentTargetTime = times.end;
 
-    const playPromise = videoEl.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        isPlayingToTarget = true;
-      }).catch((err) => {
-        // Fallback immediato se l'autoplay automatico viene limitato dalle policy del browser
-        videoEl.currentTime = times.end;
-      });
+      const playPromise = videoEl.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          isPlayingToTarget = true;
+        }).catch(() => {
+          try { videoEl.currentTime = times.end; } catch (e) {}
+        });
+      }
+    } catch (err) {
+      console.warn("Play execution failed gracefully", err);
     }
   }
 
@@ -210,7 +211,7 @@
       }
     });
 
-    // Se mobile, configura la riproduzione iniziale ad avvenuto aggancio dei metadati
+    // Se mobile, prepara e allinea l'avvio asincrono del video nativo
     if (IS_MOBILE) {
       const videoEl = document.getElementById("immersive-video");
       if (videoEl) {
@@ -219,10 +220,14 @@
           playMobileVideoSegment(activeCardIndex);
         };
 
-        if (videoEl.readyState >= 1) {
-          setupMobileVideo();
-        } else {
-          videoEl.addEventListener("loadedmetadata", setupMobileVideo);
+        try {
+          if (videoEl.readyState >= 1) {
+            setupMobileVideo();
+          } else {
+            videoEl.addEventListener("loadedmetadata", setupMobileVideo, { once: true });
+          }
+        } catch (err) {
+          console.warn("Dynamic video metadata check failed safely", err);
         }
       }
     }
@@ -254,20 +259,23 @@
       // Setup video nativo su mobile (Saltiamo preloading delle immagini per avvio istantaneo)
       const videoEl = document.getElementById("immersive-video");
       if (videoEl) {
-        videoEl.setAttribute("playsinline", "");
-        videoEl.setAttribute("webkit-playsinline", "");
-        videoEl.setAttribute("muted", "");
-        videoEl.setAttribute("preload", "auto");
-        videoEl.muted = true;
-        videoEl.playsInline = true;
-        videoEl.load();
-        
-        // Risveglia il decoder hardware con un play immediato e lo mette in pausa per memorizzare il frame
-        videoEl.play().then(() => {
-          videoEl.pause();
-        }).catch(() => {
-          // Autoplay bloccato da policy browser, si attiverà al tocco / scroll
-        });
+        try {
+          videoEl.setAttribute("playsinline", "");
+          videoEl.setAttribute("webkit-playsinline", "");
+          videoEl.setAttribute("muted", "");
+          videoEl.setAttribute("preload", "auto");
+          videoEl.muted = true;
+          videoEl.playsInline = true;
+          videoEl.load();
+          
+          videoEl.play().then(() => {
+            videoEl.pause();
+          }).catch(() => {
+            // Silenziato in caso di blocco dell'autoplay
+          });
+        } catch (e) {
+          console.warn("Video initial setups failed safely", e);
+        }
       }
       startApp();
     } else {
@@ -283,43 +291,7 @@
     }
   }
 
-  // ─── CALCOLO MATEMATICO PROGRESSO DI SEZIONE (Desktop) ─────────────────────────
-  // Mappa il progresso globale (0-1) allo SceneIdx e SceneProgress considerando le altezze non-uniformi:
-  // - trigger-0: altezza 60vh
-  // - trigger-1 ... 10: altezza 200vh
-  // Altezza complessiva: 60 + (10 * 200) = 2060vh
-  function mapProgressToSceneAndFrame(progress) {
-    const totalH = 2060;
-    const x = progress * totalH;
-    let sceneIdx = 0;
-    let sceneProgress = 0;
-
-    if (x < 60) {
-      sceneIdx = 0;
-      sceneProgress = x / 60;
-    } else {
-      sceneIdx = 1 + Math.floor((x - 60) / 200);
-      sceneIdx = Math.min(sceneIdx, SCENES_COUNT - 1);
-      sceneProgress = ((x - 60) % 200) / 200;
-    }
-
-    // Associa la scena corrente e il progresso al relativo frame video
-    let videoFrame = 1;
-    if (sceneIdx === 0) {
-      videoFrame = 1 + sceneProgress * 29; // frame 1 a 30
-    } else if (sceneIdx === 1) {
-      videoFrame = 30 + sceneProgress * 90; // frame 30 a 120
-    } else if (sceneIdx === 10) {
-      videoFrame = 1080 + sceneProgress * 240; // frame 1080 a 1320
-    } else {
-      videoFrame = (sceneIdx - 1) * 120 + sceneProgress * 120;
-    }
-
-    const idx = Math.max(0, Math.min(Math.round(videoFrame - 1), TOTAL_FRAMES - 1));
-    return { sceneIdx, sceneProgress, idx };
-  }
-
-  // ─── INIZIALIZZAZIONE TRIGGERS (IBRIDO DESKTOP/MOBILE) ───────────────────────
+  // ─── INIZIALIZZAZIONE TRIGGERS INDIVIDUALI (ALLINEAMENTO PERFETTO) ────────────
   function initTriggers() {
     if (IS_MOBILE) {
       const videoEl = document.getElementById("immersive-video");
@@ -328,14 +300,16 @@
       if (videoEl) {
         videoEl.addEventListener("timeupdate", () => {
           if (isPlayingToTarget && videoEl.currentTime >= currentTargetTime) {
-            videoEl.pause();
-            videoEl.currentTime = currentTargetTime;
+            try {
+              videoEl.pause();
+              videoEl.currentTime = currentTargetTime;
+            } catch (e) {}
             isPlayingToTarget = false;
           }
         });
       }
 
-      // MOBILE: Gestione controllata e asincrona dell'MP4 nativo (Nessun freeze a schermo nero)
+      // MOBILE: Gestione delle schede del tutto scollegata dal video per evitare freeze
       for (let i = 0; i < SCENES_COUNT; i++) {
         ScrollTrigger.create({
           trigger: `#trigger-${i}`,
@@ -343,46 +317,52 @@
           end: "bottom 60%",
           onToggle(self) {
             if (self.isActive) {
-              // Ritardo pianificato per mostrare la scheda a metà della transizione video mobile
-              setTimeout(() => {
-                if (cards && activeCardIndex !== i) {
-                  updateCardTimelineDirect(i);
-                }
-              }, 350);
+              // 1. Sincronizzazione ISTANTANEA e incondizionata della scheda attiva
+              updateCardTimelineDirect(i);
 
-              // Avvia la transizione del segmento video mobile in modalità sicura
-              playMobileVideoSegment(i);
+              // 2. Controllo asincrono e sicuro dell'MP4 nativo (try-catch)
+              try {
+                if (videoEl && videoReady) {
+                  playMobileVideoSegment(i);
+                }
+              } catch (err) {
+                console.warn("Mobile video frame transition failed safely", err);
+              }
             }
           }
         });
       }
     } else {
-      // DESKTOP: Ritorno al singolo ScrollTrigger globale per un rendering di assoluta fluidità
-      gsap.to(scrollTracker, {
-        frame: TOTAL_FRAMES - 1,
-        ease: "none",
-        scrollTrigger: {
-          trigger: "#app-container",
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 0.5,
-        },
-        onUpdate() {
-          const progress = scrollTracker.frame / (TOTAL_FRAMES - 1);
-          const result = mapProgressToSceneAndFrame(progress);
-          
-          // Disegna il frame sul canvas
-          drawFrame(result.idx);
+      // DESKTOP: Ritorno alle 11 istanze di ScrollTrigger individuali (confermato perfetto dall'utente)
+      for (let i = 0; i < SCENES_COUNT; i++) {
+        const range = getSceneFrameRange(i);
 
-          // Gestione del ritardo dell'attivazione della scheda:
-          // Attiva la card solo se la transizione video è progredita almeno del 25% (0.25)
-          let targetCardIdx = result.sceneIdx;
-          if (result.sceneProgress < 0.25 && result.sceneIdx > 0) {
-            targetCardIdx = result.sceneIdx - 1;
+        ScrollTrigger.create({
+          trigger: `#trigger-${i}`,
+          start: "top top",
+          end: "bottom top",
+          scrub: 0.5,
+          onUpdate(self) {
+            const currentFrame = range.start + self.progress * (range.end - range.start);
+            scrollTracker.frame = currentFrame;
+            drawFrame(Math.max(0, Math.min(Math.round(currentFrame), TOTAL_FRAMES - 1)));
+
+            // Sincronizzazione controllata della scheda: compare solo dopo il 25% della transizione video
+            if (self.isActive) {
+              if (self.progress >= 0.25) {
+                updateCardTimelineDirect(i);
+              } else if (self.progress < 0.25 && i > 0) {
+                updateCardTimelineDirect(i - 1);
+              }
+            }
+          },
+          onToggle(self) {
+            if (self.isActive && i === 0) {
+              updateCardTimelineDirect(0);
+            }
           }
-          updateCardTimelineDirect(targetCardIdx);
-        },
-      });
+        });
+      }
     }
 
     if (typeof window.initCardAnimations === "function") {
