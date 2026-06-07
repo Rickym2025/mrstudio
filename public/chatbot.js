@@ -7,10 +7,8 @@
 
   const isTooltipClosed = sessionStorage.getItem('nova_tooltip_closed') === 'true';
 
-  // 1. Iniezione degli stili responsivi, Effetto Respiro e Bordo Glow Dinamico Cromatizzato
   const style = document.createElement('style');
   style.innerHTML = `
-    /* Animazione di cambio tonalità luminosa (Glow Shift) */
     @keyframes glow-shift {
       0%, 100% {
         border-color: rgba(242, 210, 139, 0.5);
@@ -33,7 +31,7 @@
     .chat-bubble {
       position: fixed;
       z-index: 50;
-      width: 72px; /* Ingrandita */
+      width: 72px;
       height: 72px;
       border-radius: 50%;
       background: rgba(8, 8, 12, 0.85);
@@ -77,37 +75,6 @@
       opacity: 1;
       visibility: visible;
       transform: translateY(0);
-    }
-
-    @media (min-width: 768px) {
-      .chat-bubble {
-        bottom: 32px;
-        right: 32px;
-      }
-      .chat-window {
-        bottom: 120px;
-        right: 32px;
-        width: 410px; /* Ingrandita */
-      }
-      .chat-tooltip {
-        right: 120px;
-        bottom: 44px;
-      }
-    }
-    @media (max-width: 767px) {
-      .chat-bubble {
-        bottom: 32px;
-        left: 32px;
-      }
-      .chat-window {
-        bottom: 120px;
-        left: 32px;
-        width: calc(100% - 64px);
-      }
-      .chat-tooltip {
-        left: 120px;
-        bottom: 44px;
-      }
     }
 
     .chat-window {
@@ -222,6 +189,40 @@
       object-fit: contain;
       transition: opacity 0.25s ease-in-out;
     }
+
+    /* ─── POSIZIONAMENTO ADATTIVO RICHIESTO SU MOBILE ─── */
+    @media (min-width: 768px) {
+      .chat-bubble {
+        bottom: 32px;
+        right: 32px;
+      }
+      .chat-window {
+        bottom: 120px;
+        right: 32px;
+        width: 410px;
+      }
+      .chat-tooltip {
+        right: 120px;
+        bottom: 44px;
+      }
+    }
+    @media (max-width: 767px) {
+      .chat-bubble {
+        top: 96px; /* Spostata in alto a destra sotto l'Header */
+        right: 16px;
+      }
+      .chat-window {
+        top: 180px;
+        right: 16px;
+        width: calc(100% - 32px);
+        height: 400px;
+      }
+      .chat-tooltip {
+        right: 96px;
+        top: 104px;
+        bottom: auto; /* Annulla il bottom desktop */
+      }
+    }
   `;
   document.head.appendChild(style);
 
@@ -258,7 +259,7 @@
           </div>
           <div>
             <h4 class="text-sm font-bold text-white font-serif tracking-wide">Nova — AI Assistant</h4>
-            <span class="text-[10px] text-[#F2D28B] uppercase tracking-widest font-mono font-black">RM Studio Lab</span>
+            <span class="text-[10px] text-[#F2D28B] uppercase tracking-widest font-mono font-black">Lab</span>
           </div>
         </div>
         <button id="chat-close" class="text-neutral-400 hover:text-white transition-colors cursor-pointer focus:outline-none">
