@@ -209,21 +209,24 @@
     <!-- Contenitore Fisso delle Schede -->
     <div id="text-overlays" class="fixed inset-0 z-10 pointer-events-none"></div>
 
-    <!-- Triggers Invisibili per lo Scroll (1130vh totali) -->
+    <!-- Triggers Invisibili per lo Scroll — ogni sezione ha spazio generoso per mostrare il video -->
+    <!-- Desktop: 200vh × 11 = 2200vh | Mobile: 250vh × 11 = 2750vh -->
+    <style>
+      .section-trigger { height: 200vh; }
+      @media (max-width: 767px) { .section-trigger { height: 250vh; } }
+    </style>
     <div id="scroll-triggers" class="relative z-20 w-full pointer-events-none">
-      <section id="trigger-0" class="h-screen w-full"></section>
-      <section id="trigger-1" class="h-screen w-full"></section>
-      <section id="trigger-2" class="h-screen w-full"></section>
-      <section id="trigger-3" class="h-screen w-full"></section>
-      <section id="trigger-4" class="h-screen w-full"></section>
-      <section id="trigger-5" class="h-screen w-full"></section>
-      <section id="trigger-6" class="h-screen w-full"></section>
-      <section id="trigger-7" class="h-screen w-full"></section>
-      <section id="trigger-8" class="h-screen w-full"></section>
-      <section id="trigger-9" class="h-screen w-full"></section>
-      <section id="trigger-10" class="h-screen w-full"></section>
-      <!-- Buffer zone per il loop -->
-      <section id="trigger-loop" class="h-[30vh] w-full"></section>
+      <section id="trigger-0"  class="section-trigger w-full"></section>
+      <section id="trigger-1"  class="section-trigger w-full"></section>
+      <section id="trigger-2"  class="section-trigger w-full"></section>
+      <section id="trigger-3"  class="section-trigger w-full"></section>
+      <section id="trigger-4"  class="section-trigger w-full"></section>
+      <section id="trigger-5"  class="section-trigger w-full"></section>
+      <section id="trigger-6"  class="section-trigger w-full"></section>
+      <section id="trigger-7"  class="section-trigger w-full"></section>
+      <section id="trigger-8"  class="section-trigger w-full"></section>
+      <section id="trigger-9"  class="section-trigger w-full"></section>
+      <section id="trigger-10" class="section-trigger w-full"></section>
     </div>
   </div>
 
@@ -245,7 +248,7 @@
     <a href="public/termini.html" target="_blank" class="hover:text-white transition-colors">Termini e Condizioni</a>
   </div>
 
-  <script src="scrubber.js" defer></script>
+  <script src="scrubber.js"></script>
 
   <script>
     const yr = document.getElementById("current-year");
@@ -560,11 +563,17 @@
       }
     }
 
-    // ─── BILATERAL LOOP DETECTOR (LOOP INFINITO DEI FOTOGRAMMI E SCHEDE) ───
+    // ─── LOOP PULITO: warp silenzioso senza rompere ScrollTrigger ───
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    let loopLocked = false;
     window.addEventListener('scroll', () => {
+      if (loopLocked) return;
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      if (window.scrollY >= maxScroll - 4) {
-        window.scrollTo(0, 15); 
+      if (window.scrollY >= maxScroll - 40) {
+        loopLocked = true;
+        window.scrollTo({ top: 1, behavior: 'instant' });
+        ScrollTrigger.refresh();
+        setTimeout(() => { loopLocked = false; }, 200);
       }
     });
 
@@ -640,57 +649,54 @@
       }
     }
 
-    // ─── INIZIALIZZAZIONE TIMELINE E SCROLL-BOUND TRANSITIONS (DISCRETE EVENT TRIGGERS) ───
+    // ─── CARD ANIMATIONS: ogni scheda entra e rimane visibile per tutta la sua sezione ───
     function initCardAnimations() {
       const triggers = gsap.utils.toArray("#scroll-triggers section");
-      const cards = gsap.utils.toArray(".scene-card");
+      const cards    = gsap.utils.toArray(".scene-card");
 
       triggers.forEach((trigger, index) => {
         const card = cards[index];
         if (!card) return;
 
         const props = getSceneProps(index);
+        const isFirst = index === 0;
+        const isLast  = index === triggers.length - 1;
 
-        // Applichiamo lo stato iniziale fisso con autoAlpha (forza visibility hidden ed evita flash)
-        gsap.set(card, props.init);
+        // Stato iniziale
+        gsap.set(card, isFirst ? props.mid : props.init);
 
-        // Timeline per la prima scheda (Intro - inizia visibile ed esce allo scorrimento)
-        if (index === 0) {
-          gsap.set(card, props.mid);
-        }
-
-        // Creiamo il trigger discreto infallibile: elimina qualsiasi coesistenza o blocco tra schede
         ScrollTrigger.create({
           trigger: trigger,
-          start: "top 50%",   // Entra quando la sezione taglia la metà dello schermo
-          end: "bottom 50%", // Esce quando la sezione supera la metà dello schermo
+          // Entra appena la sezione raggiunge il 70% basso dello schermo (per non anticipare)
+          start: "top 70%",
+          // Esce quando la sezione ha lasciato il 30% dello schermo (transizione pulita)
+          end: "bottom 30%",
           onEnter: () => {
             gsap.killTweensOf(card);
-            gsap.fromTo(card, props.init, { ...props.mid, duration: 0.35, ease: "power2.out" });
+            gsap.fromTo(card, props.init, {
+              ...props.mid, duration: 0.5, ease: "power3.out"
+            });
           },
           onEnterBack: () => {
             gsap.killTweensOf(card);
-            gsap.fromTo(card, props.exit, { ...props.mid, duration: 0.35, ease: "power2.out" });
+            gsap.fromTo(card, props.exit, {
+              ...props.mid, duration: 0.5, ease: "power3.out"
+            });
           },
           onLeave: () => {
+            if (isLast) return; // Ultima scheda rimane visibile
             gsap.killTweensOf(card);
-            // Non esegue l'uscita se è l'ultimo modulo (Contatti) per non avere vuoto finale
-            if (index !== triggers.length - 1) {
-              gsap.to(card, { ...props.exit, duration: 0.25, ease: "power2.in" });
-            }
+            gsap.to(card, { ...props.exit, duration: 0.35, ease: "power2.in" });
           },
           onLeaveBack: () => {
+            if (isFirst) return; // Prima scheda rimane visibile se si torna su
             gsap.killTweensOf(card);
-            // Non esegue l'uscita all'indietro se è il primo modulo (Intro)
-            if (index !== 0) {
-              gsap.to(card, { ...props.init, duration: 0.25, ease: "power2.in" });
-            }
+            gsap.to(card, { ...props.init, duration: 0.35, ease: "power2.in" });
           }
         });
       });
     }
 
-    preloadImages();
   </script>
 
   <!-- Collegamento nativo al chatbot e al cookie banner nella cartella public -->
