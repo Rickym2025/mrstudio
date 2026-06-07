@@ -1,12 +1,11 @@
 /**
- * scrubber.js — Canvas Frame Scrubber v3.0
+ * scrubber.js — Canvas Frame Scrubber v3.1
  *
  * ARCHITETTURA CHIAVE:
- * - Una sola fonte di verità: scrollTracker.frame (0 → TOTAL_FRAMES-1)
- * - Le card vengono attivate/disattivate direttamente dal frame corrente
- *   tramite updateCardTimeline() → zero sfasamento tra video e schede
- * - scrub desktop: 0.5 (fluido). Mobile: false (istantaneo, no lag)
- * - Sezioni: desktop 200vh, mobile 400vh (ampio spazio per vedere il video)
+ * - Una sola fonte di verità: progress normalizzato dello scroll (0 → 1)
+ * - Mappatura non-lineare nativa sia per i frame che per le card (zero sfasamento)
+ * - activeCardIndex pre-inizializzato a 0 per bloccare il flash di RM Studio
+ * - scrub desktop: 0.5 (fluido) | scrub mobile: 0.1 (sensibile, no autoscroll)
  */
 
 (function () {
@@ -46,14 +45,11 @@
 
   function resizeCanvas() {
     updateCanvasSize();
-    drawFrame(getMappedIndex(scrollTracker.frame));
+    const progress = scrollTracker.frame / (TOTAL_FRAMES - 1);
+    drawFrameFromProgress(progress);
   }
 
   // ─── DRAW ────────────────────────────────────────────────────────────────────
-  function getMappedIndex(raw) {
-    return Math.max(0, Math.min(Math.round(raw), TOTAL_FRAMES - 1));
-  }
-
   function drawFrame(idx) {
     let img = images[idx];
     if (!img || !img.complete || img.naturalWidth === 0) {
@@ -75,27 +71,48 @@
     ctx.drawImage(img, dx, dy, dw, dh);
   }
 
+  // ─── MAPPATURA NON-LINEARE DINAMICA DEL VIDEO ─────────────────────────────────
+  function drawFrameFromProgress(progress) {
+    const sceneIdx = Math.min(Math.floor(progress * SCENES_COUNT), SCENES_COUNT - 1);
+    const sceneProgress = (progress * SCENES_COUNT) - sceneIdx;
+    
+    let videoFrame = 1;
+    if (sceneIdx === 0) {
+      videoFrame = 1 + sceneProgress * 29; // frame 1 a 30 (RM Studio Intro)
+    } else if (sceneIdx === 1) {
+      videoFrame = 30 + sceneProgress * 90; // frame 30 a 120 (NexusAI)
+    } else if (sceneIdx === 10) {
+      videoFrame = 1080 + sceneProgress * 240; // frame 1080 a 1320 (Contatti)
+    } else {
+      // Sezioni intermedie (120 frame ciascuna)
+      videoFrame = (sceneIdx - 1) * 120 + sceneProgress * 120;
+    }
+
+    let idx;
+    if (IS_MOBILE) {
+      // Mappa il frame video reale (1-1320) sull'indice logico mobile (0-659)
+      idx = Math.max(0, Math.min(Math.round((videoFrame - 1) / 2), TOTAL_FRAMES - 1));
+    } else {
+      idx = Math.max(0, Math.min(Math.round(videoFrame - 1), TOTAL_FRAMES - 1));
+    }
+    
+    drawFrame(idx);
+  }
+
   // ─── CARD SYNC ───────────────────────────────────────────────────────────────
-  // Ogni scena occupa TOTAL_FRAMES/SCENES_COUNT frame (120 desktop, 60 mobile).
-  // La card N è "attiva" quando il frame corrente è nella zona N.
-  // Transizione: 15 frame di overlap per entrata/uscita fluida.
-  const FRAMES_PER_SCENE = TOTAL_FRAMES / SCENES_COUNT; // 120 desktop, 60 mobile
-  const TRANSITION_FRAMES = Math.round(FRAMES_PER_SCENE * 0.12); // ~14 desktop, ~7 mobile
+  let cards = null;
+  let activeCardIndex = 0; // Inizializzato fisso a 0 per evitare il flash della prima card
 
-  let cards = null; // popolato dopo initCardAnimations
-  let activeCardIndex = -1;
-
-  function updateCardTimeline(rawFrame) {
+  function updateCardTimeline(progress) {
     if (!cards || cards.length === 0) return;
 
-    const frame = getMappedIndex(rawFrame);
-    // Scena corrente: quale "blocco" di FRAMES_PER_SCENE siamo
+    // Determina la sezione attiva basandosi sul progresso lineare complessivo dello scroll
     const sceneIdx = Math.min(
-      Math.floor(frame / FRAMES_PER_SCENE),
+      Math.floor(progress * SCENES_COUNT),
       SCENES_COUNT - 1
     );
 
-    if (sceneIdx === activeCardIndex) return; // nessun cambio
+    if (sceneIdx === activeCardIndex) return; // Nessun cambio di card
     const prevIdx = activeCardIndex;
     activeCardIndex = sceneIdx;
 
@@ -120,12 +137,10 @@
     }
   }
 
-  // Esposta globalmente — viene chiamata da scrubber onUpdate
-  window.updateCardTimeline = updateCardTimeline;
-
   // Chiamata da initCardAnimations (in index.html) per passare i riferimenti
   window.registerCards = function(cardElements) {
     cards = cardElements;
+    activeCardIndex = 0; // Forza la sincronizzazione iniziale sulla card 0
   };
 
   // ─── PRELOAD ─────────────────────────────────────────────────────────────────
@@ -149,7 +164,7 @@
   function preloadImages() {
     loadFrame(0, () => {
       updateCanvasSize();
-      drawFrame(0);
+      drawFrameFromProgress(0);
       startApp();
       // Carica i primi 80 in parallelo (alta priorità)
       const PRI = Math.min(80, TOTAL_FRAMES);
@@ -181,13 +196,13 @@
         trigger: "#app-container",
         start: "top top",
         end:   "bottom bottom",
-        // Mobile: false = istantaneo, zero lag. Desktop: 0.5 fluido
-        scrub: IS_MOBILE ? false : 0.5,
+        // Su mobile "0.1" vincola reattivamente il progresso al dito evitando l'effetto autoplay accelerato
+        scrub: IS_MOBILE ? 0.1 : 0.5,
       },
       onUpdate() {
-        const idx = getMappedIndex(scrollTracker.frame);
-        drawFrame(idx);
-        updateCardTimeline(scrollTracker.frame);
+        const progress = scrollTracker.frame / (TOTAL_FRAMES - 1);
+        drawFrameFromProgress(progress);
+        updateCardTimeline(progress);
       },
     });
 

@@ -569,11 +569,11 @@
     window.addEventListener('scroll', () => {
       if (loopLocked) return;
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      if (window.scrollY >= maxScroll - 2) {
+      if (window.scrollY >= maxScroll - 4) {
         loopLocked = true;
-        window.scrollTo({ top: 1, behavior: 'instant' });
-        ScrollTrigger.refresh();
-        setTimeout(() => { loopLocked = false; }, 200);
+        // Reset istantaneo e sicuro compatibile con tutti i browser mobili
+        window.scrollTo(0, 2);
+        setTimeout(() => { loopLocked = false; }, 150);
       }
     });
 
@@ -650,11 +650,6 @@
     }
 
     // ─── CARD ANIMATIONS ────────────────────────────────────────────────────────
-    // Le card NON usano ScrollTrigger separati.
-    // Vengono attivate direttamente da updateCardTimeline() in scrubber.js
-    // che legge scrollTracker.frame — stessa fonte del canvas → zero sfasamento.
-    //
-    // getSceneProps() è esposta globalmente affinché scrubber.js possa usarla.
     window.getSceneProps = getSceneProps;
 
     function initCardAnimations() {
