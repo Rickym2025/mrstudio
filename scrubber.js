@@ -1,11 +1,10 @@
 /**
- * scrubber.js — Canvas & HTML5 Video Frame Scrubber v4.2 (Desktop & Mobile Unified Master)
+ * scrubber.js — Canvas & Video Scrub Suite v5.0 (Hybrid Mobile Video Engine)
  *
  * ARCHITETTURA:
- * - Esporta window.initScrubber() per prevenire race-condition a monte in index.html.
- * - Su Desktop: scrubbing lineare su <canvas> caricando JPEGs, cambio scheda sincronizzato al fotogramma visualizzato reale.
- * - Su Mobile: disattivato il caricamento dei 660 frame JPEG. Riproduzione assistita nativa sul file video "frames/background.mp4" 
- *   tramite GSAP currentTime, con sblocco forzato della GPU mobile (Warmup) all'interazione dell'utente.
+ * - Desktop: 11 ScrollTrigger individuali con rendering Canvas JPEG e attivazione card ritardata al 25% della sezione.
+ * - Mobile: Scrubbing MP4 hardware-accelerato integrato via GSAP currentTime (senza caricamento frame JPEG per massima velocità).
+ * - Sincronizzazione dinamica e precisa della scheda attiva all'ingresso di ogni sezione.
  */
 
 (function () {
@@ -13,7 +12,7 @@
 
   const IS_MOBILE = window.innerWidth < 768;
 
-  // 1320 frame fisici su desktop. Su mobile il video gestisce il tempo in secondi.
+  // 1320 frame fisici su desktop (660 su mobile se attivo, ma ignorato in modalità MP4 mobile)
   const TOTAL_FRAMES = IS_MOBILE ? 660 : 1320;
   const SCENES_COUNT = 11; // trigger-0 … trigger-10
 
@@ -22,64 +21,47 @@
     return `frames/frame_${String(n).padStart(4, "0")}.jpg`;
   }
 
-  // Helper per ottenere l'esatto range di frame video di ogni scena (per il canvas desktop)
+  // Mappatura temporale precisa (in secondi) di background.mp4 basata sui 1320 frame a 30fps
+  function getSceneTimeRange(index) {
+    const ranges = [
+      [0.0, 1.0],      // Scena 0: RM Studio Intro (frame 0-30)
+      [1.0, 4.0],      // Scena 1: NexusAI (frame 30-120)
+      [4.0, 8.0],      // Scena 2: Concierge24 (frame 120-240)
+      [8.0, 12.0],     // Scena 3: Dentis (frame 240-360)
+      [12.0, 16.0],    // Scena 4: Lexis AI (frame 360-480)
+      [16.0, 20.0],    // Scena 5: DriveMotion (frame 480-600)
+      [20.0, 24.0],    // Scena 6: HomeTour AI (frame 600-720)
+      [24.0, 28.0],    // Scena 7: OmniaStudio (frame 720-840)
+      [28.0, 32.0],    // Scena 8: FF Edizioni (frame 840-960)
+      [32.0, 36.0],    // Scena 9: Ecosistema Connesso (frame 960-1080)
+      [36.0, 43.9]     // Scena 10: Contatti (frame 1080-1320)
+    ];
+    return {
+      start: ranges[index][0],
+      end: ranges[index][1]
+    };
+  }
+
+  // Helper per il range di frame su Desktop
   function getSceneFrameRange(index) {
     const ranges = [
-      [0, 30],       // Scena 0: RM Studio Intro
-      [30, 120],     // Scena 1: NexusAI
-      [120, 240],    // Scena 2: Concierge24
-      [240, 360],    // Scena 3: Dentis
-      [360, 480],    // Scena 4: Lexis AI
-      [480, 600],    // Scena 5: DriveMotion
-      [600, 720],    // Scena 6: HomeTour AI
-      [720, 840],    // Scena 7: OmniaStudio
-      [840, 960],    // Scena 8: FF Edizioni
-      [960, 1080],   // Scena 9: Ecosistema Connesso
-      [1080, 1319]   // Scena 10: Contatti
+      [0, 30],
+      [30, 120],
+      [120, 240],
+      [240, 360],
+      [360, 480],
+      [480, 600],
+      [600, 720],
+      [720, 840],
+      [840, 960],
+      [960, 1080],
+      [1080, 1319]
     ];
     const r = ranges[index];
     return {
       start: r[0],
       end: r[1]
     };
-  }
-
-  // Mappa i fotogrammi teorici (da 0 a 1320) in secondi reali basandosi sulla durata del video mobile (con fallback robusto a 44.0s)
-  function getSceneTimeRange(index, duration) {
-    const ranges = [
-      [0, 30],       // Scena 0: RM Studio Intro
-      [30, 120],     // Scena 1: NexusAI
-      [120, 240],    // Scena 2: Concierge24
-      [240, 360],    // Scena 3: Dentis
-      [360, 480],    // Scena 4: Lexis AI
-      [480, 600],    // Scena 5: DriveMotion
-      [600, 720],    // Scena 6: HomeTour AI
-      [720, 840],    // Scena 7: OmniaStudio
-      [840, 960],    // Scena 8: FF Edizioni
-      [960, 1080],   // Scena 9: Ecosistema Connesso
-      [1080, 1319]   // Scena 10: Contatti
-    ];
-    const r = ranges[index];
-    const totalFrames = 1320;
-    const dur = (duration && !isNaN(duration) && duration > 0) ? duration : 44.0;
-    return {
-      start: (r[0] / totalFrames) * dur,
-      end: (r[1] / totalFrames) * dur
-    };
-  }
-
-  // Individua l'indice della scena attiva partendo da un determinato frame (Desktop)
-  function getSceneIndexFromFrame(frame) {
-    const ranges = [
-      [0, 30], [30, 120], [120, 240], [240, 360], [360, 480],
-      [480, 600], [600, 720], [720, 840], [840, 960], [960, 1080], [1080, 1320]
-    ];
-    for (let i = 0; i < ranges.length; i++) {
-      if (frame >= ranges[i][0] && frame < ranges[i][1]) {
-        return i;
-      }
-    }
-    return ranges.length - 1;
   }
 
   // ─── STATO ───────────────────────────────────────────────────────────────────
@@ -92,7 +74,7 @@
   const ctx    = canvas.getContext("2d");
   const loader = document.getElementById("loader");
 
-  // ─── PROGRESSO LOADER ────────────────────────────────────────────────────────
+  // ─── PROGRESSO LOADER (Solo Desktop) ──────────────────────────────────────────
   let loadedCount = 0;
   const loaderBar = document.getElementById("loader-bar");
   const loaderText = document.getElementById("loader-text");
@@ -106,7 +88,6 @@
 
   // ─── CANVAS SIZING ───────────────────────────────────────────────────────────
   function updateCanvasSize() {
-    if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     canvasW = rect.width  || window.innerWidth;
     canvasH = rect.height || window.innerHeight;
@@ -117,14 +98,12 @@
   }
 
   function resizeCanvas() {
-    if (IS_MOBILE) return;
     updateCanvasSize();
     drawFrame(Math.max(0, Math.min(Math.round(scrollTracker.frame), TOTAL_FRAMES - 1)));
   }
 
-  // ─── DRAW CANVAS (Desktop Only) ──────────────────────────────────────────────
+  // ─── DRAW ────────────────────────────────────────────────────────────────────
   function drawFrame(idx) {
-    if (IS_MOBILE) return;
     let img = images[idx];
     if (!img || !img.complete || img.naturalWidth === 0) {
       for (let b = idx - 1; b >= 0; b--) {
@@ -145,7 +124,7 @@
     ctx.drawImage(img, dx, dy, dw, dh);
   }
 
-  // ─── CARD SYNC (Desktop & Mobile) ────────────────────────────────────────────
+  // ─── CARD SYNC ───────────────────────────────────────────────────────────────
   let cards = null;
   let activeCardIndex = 0;
 
@@ -177,10 +156,11 @@
     }
   }
 
-  // Chiamata da initCardAnimations per registrare ed allineare l'indice iniziale
+  // Registrazione iniziale ed auto-allineamento dinamico
   window.registerCards = function (cardElements) {
     cards = cardElements;
 
+    // Individua la sezione attiva sull'eventuale ricarica della pagina a metà scorrimento
     let initialActiveIndex = 0;
     for (let i = 0; i < SCENES_COUNT; i++) {
       const trigger = document.getElementById(`trigger-${i}`);
@@ -194,7 +174,7 @@
     }
     activeCardIndex = initialActiveIndex;
 
-    // Forza la card visibile allineata allo scroll effettivo al caricamento della pagina
+    // Mostra solo la scheda attiva al caricamento
     cards.forEach((card, i) => {
       const props = window.getSceneProps && window.getSceneProps(i);
       if (props) {
@@ -202,47 +182,48 @@
       }
     });
 
-    // Allinea la posizione temporale o di frame iniziale della sorgente video/canvas
+    // Se mobile, salta istantaneamente al timestamp corretto del video HTML5
     if (IS_MOBILE) {
-      const video = document.getElementById("immersive-video");
-      if (video) {
-        const duration = video.duration || 44.0;
-        const timeRange = getSceneTimeRange(activeCardIndex, duration);
-        video.currentTime = timeRange.end;
+      const videoEl = document.getElementById("immersive-video");
+      if (videoEl) {
+        const times = getSceneTimeRange(activeCardIndex);
+        videoEl.currentTime = times.end;
       }
-    } else {
-      const range = getSceneFrameRange(activeCardIndex);
-      scrollTracker.frame = range.end;
-      drawFrame(range.end);
     }
   };
 
   // ─── PRELOAD ─────────────────────────────────────────────────────────────────
+  function loadFrame(i, cb) {
+    if (images[i] !== null) { cb && cb(); return; }
+    const img = new Image();
+    images[i] = img;
+    img.onload = img.onerror = () => {
+      updateLoaderProgress();
+      cb && cb();
+    };
+    img.src = getFramePath(i);
+  }
+
+  function loadBatch(from, size) {
+    if (from >= TOTAL_FRAMES) return;
+    const to = Math.min(from + size, TOTAL_FRAMES);
+    let done = 0, n = to - from;
+    for (let i = from; i < to; i++) {
+      loadFrame(i, () => { if (++done === n) setTimeout(() => loadBatch(to, size), 16); });
+    }
+  }
+
   function preloadImages() {
     if (IS_MOBILE) {
-      // MOBILE: Ignora il precaricamento delle immagini JPEG ed imposta direttamente il video
-      const video = document.getElementById("immersive-video");
-      if (video) {
-        // Fallback robusto nel caso il percorso differisca tra ambienti di sviluppo/produzione
-        video.src = "frames/background.mp4";
-        video.addEventListener("error", function() {
-          if (video.src.indexOf("public/") === -1) {
-            video.src = "public/frames/background.mp4";
-            video.load();
-          }
-        }, { once: true });
-
-        video.load();
+      // Su mobile saltiamo l'attesa dei frame JPEG per caricare all'istante
+      const videoEl = document.getElementById("immersive-video");
+      if (videoEl) {
+        videoEl.load();
+        videoEl.play().catch(() => console.log("Video caricato e pronto per ScrollTrigger"));
       }
-
-      // Nascondi istantaneamente il loader per un ingresso fulmineo su mobile
-      if (loaderBar) loaderBar.style.width = "100%";
-      if (loaderText) loaderText.innerText = "Inizializzazione...";
-      setTimeout(() => {
-        startApp();
-      }, 300);
+      startApp();
     } else {
-      // DESKTOP: Carica la sequenza di immagini
+      // Desktop preloading dei frame
       loadFrame(0, () => {
         updateCanvasSize();
         drawFrame(0);
@@ -254,49 +235,35 @@
     }
   }
 
-  // ─── INIZIALIZZAZIONE TRIGGERS INDIVIDUALI ─────────────────────────────────────
+  // ─── INIZIALIZZAZIONE TRIGGERS DI SEZIONE (DESKTOP / MOBILE IBRIDO) ────────────
   function initTriggers() {
     if (IS_MOBILE) {
-      const video = document.getElementById("immersive-video");
+      const videoEl = document.getElementById("immersive-video");
 
-      // FUNZIONE WARMUP MOBILE: Sblocca istantaneamente la GPU e l'audio muto su iOS/Safari su interazione dell'utente
-      const warmupVideo = () => {
-        if (video) {
-          video.play().then(() => {
-            video.pause();
-            // Allinea la posizione del video alla scheda iniziale sbloccata
-            const duration = video.duration || 44.0;
-            const timeRange = getSceneTimeRange(activeCardIndex, duration);
-            video.currentTime = timeRange.end;
-          }).catch(err => {
-            console.log("Warmup retry su scroll...", err);
-          });
-        }
-        window.removeEventListener("touchstart", warmupVideo);
-        window.removeEventListener("scroll", warmupVideo);
-      };
-      window.addEventListener("touchstart", warmupVideo, { passive: true });
-      window.addEventListener("scroll", warmupVideo, { passive: true });
-
-      // MOBILE: Triggers con interpolazione GSAP a 60fps
+      // MOBILE: Riproduzione automatica hardware-accelerata tramite currentTime del tag <video>
       for (let i = 0; i < SCENES_COUNT; i++) {
+        const times = getSceneTimeRange(i);
+
         ScrollTrigger.create({
           trigger: `#trigger-${i}`,
-          start: "top 60%", // Attiva la scena quando entra al 60% dello schermo
+          start: "top 60%",
           end: "bottom 60%",
           onToggle(self) {
             if (self.isActive) {
-              updateCardTimelineDirect(i);
+              // Ritardo ottimizzato per coordinare l'ingresso della scheda a metà della transizione video
+              setTimeout(() => {
+                if (cards && activeCardIndex !== i) {
+                  updateCardTimelineDirect(i);
+                }
+              }, 350);
 
-              if (video) {
-                // Ricalcola dinamicamente la durata del video ad ogni scroll per evitare NaN
-                const duration = video.duration || 44.0;
-                const timeRange = getSceneTimeRange(i, duration);
-
-                gsap.to(video, {
-                  currentTime: timeRange.end,
-                  duration: 1.2,
-                  ease: "power2.out",
+              if (videoEl) {
+                // Pausa obbligatoria per evitare conflitti tra il play nativo e lo scrub GSAP
+                videoEl.pause();
+                gsap.to(videoEl, {
+                  currentTime: times.end,
+                  duration: 1.5,
+                  ease: "power1.inOut",
                   overwrite: "auto"
                 });
               }
@@ -305,7 +272,7 @@
         });
       }
     } else {
-      // DESKTOP: Scrubbing legato allo scroll su Canvas
+      // DESKTOP: Scrubbing frame-by-frame di precisione sul canvas
       for (let i = 0; i < SCENES_COUNT; i++) {
         const range = getSceneFrameRange(i);
 
@@ -319,9 +286,19 @@
             scrollTracker.frame = currentFrame;
             drawFrame(Math.max(0, Math.min(Math.round(currentFrame), TOTAL_FRAMES - 1)));
 
-            // Sincronizza l'attivazione della scheda sull'esatto frame renderizzato
-            const currentActiveScene = getSceneIndexFromFrame(currentFrame);
-            updateCardTimelineDirect(currentActiveScene);
+            // Sincronizzazione ritardata della scheda: appare solo dopo il 25% della transizione video
+            if (self.isActive) {
+              if (self.progress >= 0.25) {
+                updateCardTimelineDirect(i);
+              } else if (self.progress < 0.25 && i > 0) {
+                updateCardTimelineDirect(i - 1);
+              }
+            }
+          },
+          onToggle(self) {
+            if (self.isActive && i === 0) {
+              updateCardTimelineDirect(0);
+            }
           }
         });
       }
@@ -335,9 +312,9 @@
   // ─── START ───────────────────────────────────────────────────────────────────
   function startApp() {
     if (loader) {
-      loader.style.transition = "opacity 0.6s";
+      loader.style.transition = "opacity 0.4s";
       loader.style.opacity = "0";
-      setTimeout(() => { if (loader) loader.style.display = "none"; }, 700);
+      setTimeout(() => { if (loader) loader.style.display = "none"; }, 400);
     }
 
     if (!IS_MOBILE) {
@@ -352,9 +329,6 @@
     initTriggers();
   }
 
-  // Esporta la funzione di avvio sicuro invocata alla fine di index.html
-  window.initScrubber = function () {
-    preloadImages();
-  };
+  preloadImages();
 
 })();

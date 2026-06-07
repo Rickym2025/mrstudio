@@ -195,14 +195,16 @@
     </a>
   </header>
 
-  <!-- ─── CONTENITORE IMMERSIVO CANVAS ─── -->
+  <!-- ─── CONTENITORE IMMERSIVO CANVAS & VIDEO HTML5 ─── -->
   <div id="app-container" class="relative w-full bg-[#020205]">
     <div class="sticky top-0 h-screen w-full overflow-hidden z-0 bg-black">
-      <!-- Canvas: Schermo intero solo su Desktop -->
-      <canvas id="immersive-canvas" class="absolute inset-0 w-full h-full opacity-90 hidden md:block" style="will-change: transform; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"></canvas>
+      <!-- Canvas: Schermo intero su tutti i dispositivi (Solo Desktop) -->
+      <canvas id="immersive-canvas" class="absolute inset-0 w-full h-full opacity-90 md:block hidden" style="will-change: transform; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"></canvas>
       
-      <!-- Video: Utilizzato esclusivamente su dispositivi Mobile -->
-      <video id="immersive-video" class="absolute inset-0 w-full h-full opacity-90 object-cover block md:hidden" playsinline webkit-playsinline muted preload="auto" style="will-change: transform; pointer-events: none;"></video>
+      <!-- Video: Schermo intero su mobile per massime performance (Solo Mobile) -->
+      <video id="immersive-video" class="absolute inset-0 w-full h-full object-cover opacity-90 md:hidden block" playsinline muted loop preload="auto" style="pointer-events: none;">
+        <source src="frames/background.mp4" type="video/mp4">
+      </video>
       
       <!-- Vignetta: gradiente che copre la metà inferiore su mobile, tutto su desktop -->
       <div class="absolute inset-0 pointer-events-none"
@@ -300,7 +302,7 @@
         logo: "logo_concierge.png",
         problem: "La reception offre di picchi di sovraccarico, con centralini intasati e turisti frustrati in attesa di risposte su Wi-Fi e check-in nelle ore notturne.",
         solution: "Giulia risponde all'istante con un'espressivita vocale calda e umana, parlando la lingua nativa dell'ospite, proponendo servizi e inviando conferme su WhatsApp.",
-        neuroCopy: "Il cervello rettiliano percepisce l'attesa como un disservizio immediato. Giulia azzera la frizione d'ingresso, elevando la percezione di status della struttura.",
+        neuroCopy: "Il cervello rettiliano percepisce l'attesa come un disservizio immediato. Giulia azzera la frizione d'ingresso, elevando la percezione di status della struttura.",
         isProduct: true,
         url: "https://concierge24.rmstudio.app"
       },
@@ -356,7 +358,7 @@
         id: "omniastudio",
         chapter: "Chapter VII — Privacy AI",
         title: "OmniaStudio",
-        subtitle: "La potenza dell'AI generativa sul tuo PC, completely offline. Analizza contratti, PDF e dati sensibili senza inviare dati al cloud, a tutela del segreto professionale.",
+        subtitle: "La potenza dell'AI generativa sul tuo PC, completamente offline. Analizza contratti, PDF e dati sensibili senza inviare dati al cloud, a tutela del segreto professionale.",
         logo: "logo_omniastudio.png",
         problem: "Restrizioni severe sul GDPR e rischio di fuga di dati sensibili inviando contratti e documenti privati ai server cloud delle intelligenze artificiali pubbliche.",
         solution: "Un software monolitico installato localmente sul tuo hardware che analizza documenti, esegue OCR ed elabora report a connessione totalmente disattivata.",
@@ -396,12 +398,13 @@
       }
     ];
 
-    // ─── GENERAZIONE DINAMICA SCHEDE EDITORIALI ───
+    // ─── GENERAZIONE DINAMICA SCHEDE EDITORIALI CON ALLINEAMENTO RESPONSIVO ADATTATO (SPLIT 50/50 SU SMARTPHONE) ───
     const overlayContainer = document.getElementById("text-overlays");
 
     SCENES.forEach((scene, index) => {
       const cardWrapper = document.createElement("div");
       
+      // Allineamento: Su desktop pl-24 a sinistra, su mobile centrato verticalmente
       let alignmentClass = "justify-center items-center md:justify-start md:items-center md:pl-24 text-left";
       if (scene.isIntro || scene.isTheUnion || scene.isContact) {
         alignmentClass = "justify-center items-center text-center";
@@ -412,12 +415,14 @@
       const isEven = index % 2 === 0;
       const flexDirClass = isEven ? "md:flex-row" : "md:flex-row-reverse";
 
+      // Colonna Logo per i Prodotti (Nascondiamo su mobile per evitare affollamento verticale)
       const logoColumn = `
         <div class="hidden md:flex flex-shrink-0 items-center justify-center bg-black/50 border border-white/10 rounded-[2rem] p-6 w-32 h-32 md:w-44 md:h-44 shadow-inner">
           <img src="public/loghi/${scene.logo}" alt="${scene.title} Logo" class="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]">
         </div>
       `;
 
+      // Colonna Foto per l'Intro (Un cerchio elegante e visibile per mobile, grande su desktop)
       let rickyPhotoColumn = `
         <div class="flex-shrink-0 flex items-center justify-center border-2 border-[#F2D28B]/30 rounded-full md:rounded-[2.5rem] p-0.5 md:p-1.5 w-20 h-20 md:w-80 md:h-80 bg-[#050505] shadow-[0_0_40px_rgba(242,210,139,0.20)]">
           <img src="public/loghi/foto_riccardo.jpeg" alt="Riccardo Modena" class="w-full h-full object-cover rounded-full md:rounded-[2rem]">
@@ -476,6 +481,7 @@
         `;
       }
 
+      // ─── COLONNA DESTRA (SISTEMA ORBITALE - NASCOSTO SU SMARTPHONE PER FAR COMPARIRE I VIDEO) ───
       let rightColumnContent = logoColumn;
       if (scene.isIntro) {
         rightColumnContent = rickyPhotoColumn;
@@ -491,6 +497,7 @@
       const hrefAttr = scene.isProduct ? `href="${scene.url}" target="_blank" rel="noopener noreferrer"` : "";
       const cursorClass = scene.isProduct ? "cursor-pointer hover:border-[#F2D28B]/30 hover:shadow-[0_40px_100px_rgba(242,210,139,0.05)] transition-all duration-300" : "";
 
+      // Layout compatto per mobile, grande per desktop
       let cardSizeClass = "max-w-3xl";
       if (scene.isIntro || scene.isTheUnion) {
         cardSizeClass = "max-w-6xl p-5 md:p-16 gap-16 lg:gap-24";
@@ -500,9 +507,11 @@
         cardSizeClass = "max-w-3xl p-5 md:p-14";
       }
 
+      // Costruzione finale della scheda
       cardWrapper.innerHTML = `
         <${tagType} ${hrefAttr} class="scene-card w-full ${cardSizeClass} bg-[#07070a]/92 backdrop-blur-3xl border border-white/10 rounded-2xl md:rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.95)] preserve-3d opacity-0 pointer-events-none flex flex-col ${flexDirClass} gap-4 md:gap-12 items-center justify-between ${cursorClass}">
           <div class="flex-1 text-left w-full max-w-xl">
+            <!-- Logo nell'intestazione della scheda con percorso corretto public/loghi/ -->
             <div class="flex items-center gap-4 mb-4">
               <img src="public/loghi/${scene.logo}" alt="${scene.title} Logo" class="w-10 h-10 object-contain rounded-xl bg-black/40 p-1 border border-white/10" onerror="this.style.display='none'">
               <div>
@@ -570,7 +579,13 @@
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       if (window.scrollY >= maxScroll - 4) {
         loopLocked = true;
+        // Reset istantaneo standard per evitare incompatibilità su mobile Safari/iOS
         window.scrollTo(0, 2);
+        
+        // Reset istantaneo della timeline video mobile
+        const mobVideo = document.getElementById("immersive-video");
+        if (mobVideo) mobVideo.currentTime = 0;
+        
         setTimeout(() => { loopLocked = false; }, 150);
       }
     });
@@ -647,6 +662,7 @@
       }
     }
 
+    // ─── CARD ANIMATIONS ────────────────────────────────────────────────────────
     window.getSceneProps = getSceneProps;
 
     function initCardAnimations() {
@@ -663,13 +679,6 @@
       if (typeof window.registerCards === "function") {
         window.registerCards(cards);
       }
-    }
-
-    window.initCardAnimations = initCardAnimations;
-
-    // Avvia l'inizializzazione dello Scrubber solo dopo che tutto il DOM di index.html è pronto e parsed
-    if (typeof window.initScrubber === "function") {
-      window.initScrubber();
     }
 
   </script>
