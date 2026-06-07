@@ -1,33 +1,15 @@
-// Rileva se l'utente è su un dispositivo mobile (schermo inferiore a 768px)
 const isMobile = window.innerWidth < 768;
 
-// Se l'utente è su mobile, disattiviamo completamente il precaricamento pesante dei frame
-// Questo fa caricare il sito all'istante su mobile, salvando banda e GPU
-if (isMobile) {
-  document.addEventListener("DOMContentLoaded", () => {
-    const canvas = document.getElementById("immersive-canvas");
-    if (canvas) canvas.style.display = "none";
-    const loader = document.getElementById("loader");
-    if (loader) {
-      loader.style.opacity = "0";
-      setTimeout(() => { loader.style.display = "none"; }, 400);
-    }
-    // Inizializza solo le animazioni di entrata/uscita delle schede
-    initCardAnimations();
-  });
-} else {
-  // Caricamento desktop classico (precarica frame 1, sblocca, poi precarica i restanti in background)
-  preloadImages();
-}
-
-const totalFrames = 1320;
+// Manteniamo attivo il Canvas su tutti i dispositivi, ma ottimizzato al 50% su mobile
+const totalFrames = isMobile ? 660 : 1320;
 const canvas = document.getElementById("immersive-canvas");
 const context = canvas.getContext("2d");
 const images = [];
 const scrollTracker = { frame: 0 };
 
 const getFramePath = index => {
-  return `frames/frame_${String(index).padStart(4, '0')}.jpg`;
+  const targetIndex = isMobile ? (index * 2) - 1 : index;
+  return `frames/frame_${String(targetIndex).padStart(4, '0')}.jpg`;
 };
 
 let loadedCount = 0;
@@ -36,7 +18,7 @@ const loaderBar = document.getElementById("loader-bar");
 const loaderText = document.getElementById("loader-text");
 
 function preloadImages() {
-  // Carica immediatamente solo il 1° fotogramma per mostrare subito lo sfondo
+  // Carica immediatamente solo il 1° fotogramma per mostrare subito lo sfondo ed evitare schermi neri
   const firstImg = new Image();
   firstImg.src = getFramePath(1);
   
@@ -76,8 +58,8 @@ function preloadRemainingImages() {
 }
 
 function resizeCanvas() {
-  if (isMobile) return;
-  const dpr = window.devicePixelRatio || 1;
+  // Limitatore DPR: frena a 1.2 su mobile per garantire fluidità eccellente a 60fps
+  const dpr = isMobile ? Math.min(window.devicePixelRatio, 1.2) : (window.devicePixelRatio || 1);
   canvas.width = window.innerWidth * dpr;
   canvas.height = window.innerHeight * dpr;
   context.scale(dpr, dpr);
@@ -87,9 +69,10 @@ function resizeCanvas() {
 }
 
 function getMappedFrame(rawFrame) {
-  const sectionLength = totalFrames / 11; 
-  const sectionIndex = Math.floor(rawFrame / sectionLength);
-  const sectionProgress = (rawFrame % sectionLength) / sectionLength;
+  const normalizedFrame = isMobile ? rawFrame * 2 : rawFrame;
+  const sectionLength = 1320 / 11; 
+  const sectionIndex = Math.floor(normalizedFrame / sectionLength);
+  const sectionProgress = (normalizedFrame % sectionLength) / sectionLength;
 
   if (sectionIndex === 0) {
     return 1 + Math.floor(sectionProgress * 30);
@@ -114,8 +97,8 @@ function getMappedFrame(rawFrame) {
 }
 
 function drawFrame(index) {
-  if (isMobile) return;
-  const img = images[index];
+  const targetIndex = isMobile ? Math.floor(index / 2) : index;
+  const img = images[targetIndex];
   if (!img || !img.complete || img.naturalWidth === 0) return;
 
   const imgRatio = img.width / img.height;
@@ -160,3 +143,5 @@ function initCanvasScrub() {
     }
   });
 }
+
+preloadImages();

@@ -198,11 +198,8 @@
   <!-- ─── CONTENITORE IMMERSIVO CANVAS ─── -->
   <div id="app-container" class="relative w-full bg-[#020205]">
     <div class="sticky top-0 h-screen w-full overflow-hidden z-0 bg-black">
-      <!-- Il Canvas viene nascosto nativamente su mobile (hidden md:block) per azzerare i lag -->
-      <canvas id="immersive-canvas" class="w-full h-full object-cover opacity-80 hidden md:block"></canvas>
-      
-      <!-- Sfondo Mobile di emergenza ultra-fluido (glowing gradient) se il canvas è nascosto -->
-      <div class="absolute inset-0 bg-gradient-to-tr from-[#020205] via-[#050510] to-[#0c0c1a] block md:hidden"></div>
+      <!-- Il Canvas rimane attivo su ogni dispositivo -->
+      <canvas id="immersive-canvas" class="w-full h-full object-cover opacity-80"></canvas>
       <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/80 pointer-events-none"></div>
     </div>
 
@@ -222,11 +219,12 @@
       <section id="trigger-8" class="h-screen w-full"></section>
       <section id="trigger-9" class="h-screen w-full"></section>
       <section id="trigger-10" class="h-screen w-full"></section>
+      <!-- Buffer zone per il loop -->
       <section id="trigger-loop" class="h-[30vh] w-full"></section>
     </div>
   </div>
 
-  <!-- ─── FLOATING DOCK IN BASSO CON COLLEGAMENTO AD ECOSISTEMI SU TRIGGER-9 ─── -->
+  <!-- ─── FLOATING DOCK IN BASSO ─── -->
   <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 bg-black/40 border border-white/10 px-6 py-4 rounded-full backdrop-blur-md pointer-events-auto shadow-2xl">
     <a href="#trigger-0" class="text-[10px] font-mono text-[#F2D28B] hover:text-white uppercase tracking-widest transition-colors">Intro</a>
     <span class="text-white/10 text-[10px]">|</span>
@@ -386,16 +384,16 @@
       }
     ];
 
-    // ─── GENERAZIONE DINAMICA SCHEDE EDITORIALI CON ALLINEAMENTO LATERALE RESPONSIVO ───
+    // ─── GENERAZIONE DINAMICA SCHEDE EDITORIALI CON ALLINEAMENTO ADATTIVO IN BASSO SU MOBILE ───
     const overlayContainer = document.getElementById("text-overlays");
 
     SCENES.forEach((scene, index) => {
       const cardWrapper = document.createElement("div");
       
-      // Su Desktop le schede prodotto si allineano a sinistra (md:justify-start md:pl-24), su mobile al centro (justify-center)
-      let alignmentClass = "justify-center md:justify-start text-left items-center md:pl-24";
+      // Allineamento: Su desktop pl-24 a sinistra (md:justify-start), su mobile in basso al centro (justify-center items-end pb-24) per liberare la parte superiore del video
+      let alignmentClass = "justify-center items-end pb-24 md:justify-start md:items-center md:pl-24 md:pb-12 text-left";
       if (scene.isIntro || scene.isTheUnion || scene.isContact) {
-        alignmentClass = "justify-center text-center mx-auto items-center";
+        alignmentClass = "justify-center items-end pb-24 md:items-center md:justify-center mx-auto text-center";
       }
 
       cardWrapper.className = `absolute inset-0 flex pointer-events-none p-4 md:p-12 ${alignmentClass}`;
@@ -410,7 +408,7 @@
         </div>
       `;
 
-      // Colonna Foto per l'Intro (Nascondiamo su mobile per ottimizzare altezza)
+      // Colonna Foto per l'Intro
       let rickyPhotoColumn = "";
       if (scene.isIntro) {
         rickyPhotoColumn = `
@@ -438,7 +436,7 @@
       let introButton = "";
       if (scene.isIntro) {
         introButton = `
-          <button onclick="handleVCardClick()" class="inline-flex items-center justify-center gap-3 bg-white text-black text-xs tracking-wider font-extrabold uppercase px-8 py-5 rounded-full hover:scale-105 hover:bg-neutral-100 active:scale-95 transition-all duration-300 mt-8 cursor-pointer pointer-events-auto shadow-[0_0_30px_rgba(255,255,255,0.25)] focus:outline-none">
+          <button onclick="handleVCardClick()" class="inline-flex items-center justify-center gap-3 bg-white text-black text-sm tracking-wider font-extrabold uppercase px-8 py-5 rounded-full hover:scale-105 hover:bg-neutral-100 active:scale-95 transition-all duration-300 mt-8 cursor-pointer pointer-events-auto shadow-[0_0_30px_rgba(255,255,255,0.25)] focus:outline-none">
             <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
@@ -476,7 +474,7 @@
         `;
       }
 
-      // ─── COLONNA DESTRA (SISTEMA ORBITALE - NASCOSTO SU SMARTPHONE PER ECCELLENZA MOBILE) ───
+      // ─── COLONNA DESTRA (SISTEMA ORBITALE - NASCOSTO SU SMARTPHONE PER FAR COMPARIRE I VIDEO) ───
       let rightColumnContent = logoColumn;
       if (scene.isIntro) {
         rightColumnContent = rickyPhotoColumn;
@@ -502,10 +500,11 @@
         cardSizeClass = "max-w-3xl p-5 md:p-14";
       }
 
+      // Costruzione finale della scheda
       cardWrapper.innerHTML = `
         <${tagType} ${hrefAttr} class="scene-card w-full ${cardSizeClass} bg-[#07070a]/92 backdrop-blur-3xl border border-white/10 rounded-2xl md:rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.95)] preserve-3d opacity-0 pointer-events-none flex flex-col ${flexDirClass} gap-4 md:gap-12 items-center justify-between ${cursorClass}">
           <div class="flex-1 text-left w-full max-w-xl">
-            <!-- Logo nel titolo sempre visibile e coerente su ogni dispositivo -->
+            <!-- Logo nell'intestazione della scheda con percorso corretto public/loghi/ -->
             <div class="flex items-center gap-4 mb-4">
               <img src="public/loghi/${scene.logo}" alt="${scene.title} Logo" class="w-10 h-10 object-contain rounded-xl bg-black/40 p-1 border border-white/10" onerror="this.style.display='none'">
               <div>
@@ -570,8 +569,6 @@
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       if (window.scrollY >= maxScroll - 4) {
         window.scrollTo(0, 15); 
-      } else if (window.scrollY <= 2) {
-        window.scrollTo(0, maxScroll - 10); 
       }
     });
 
@@ -696,6 +693,8 @@
         });
       });
     }
+
+    preloadImages();
   </script>
 
   <!-- Collegamento nativo al chatbot e al cookie banner nella cartella public -->
