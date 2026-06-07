@@ -172,7 +172,7 @@
 </head>
 <body>
 
-  <!-- ─── PRELOADER (DIMEZZATO NELL'INTESTAZIONE) ─── -->
+  <!-- ─── PRELOADER CON PROGRESSO IN TEMPO REALE ─── -->
   <div id="loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#050505] transition-opacity duration-700">
     <div class="text-center">
       <span class="text-[#F2D28B] text-xs tracking-[0.4em] uppercase block mb-3 font-semibold">Ecosistema AI</span>
@@ -209,11 +209,14 @@
     <!-- Contenitore Fisso delle Schede -->
     <div id="text-overlays" class="fixed inset-0 z-10 pointer-events-none"></div>
 
-    <!-- Triggers Invisibili per lo Scroll — ogni sezione ha spazio generoso per mostrare il video -->
-    <!-- Desktop: 200vh × 11 = 2200vh | Mobile: 400vh × 11 = 4400vh -->
+    <!-- Triggers Invisibili per lo Scroll — altezze non-uniformi per far apparire subito Nexus dopo il primo tocco -->
     <style>
       .section-trigger { height: 200vh; }
-      @media (max-width: 767px) { .section-trigger { height: 400vh; } }
+      #trigger-0 { height: 60vh; } /* Intro cortissima su desktop per mostrare subito Nexus al primo scorrimento */
+      @media (max-width: 767px) { 
+        .section-trigger { height: 250vh; } 
+        #trigger-0 { height: 80vh; } /* Intro cortissima su mobile per favorire la transizione immediata */
+      }
     </style>
     <div id="scroll-triggers" class="relative z-20 w-full pointer-events-none">
       <section id="trigger-0"  class="section-trigger w-full"></section>
@@ -294,7 +297,7 @@
         logo: "logo_concierge.png",
         problem: "La reception offre di picchi di sovraccarico, con centralini intasati e turisti frustrati in attesa di risposte su Wi-Fi e check-in nelle ore notturne.",
         solution: "Giulia risponde all'istante con un'espressivita vocale calda e umana, parlando la lingua nativa dell'ospite, proponendo servizi e inviando conferme su WhatsApp.",
-        neuroCopy: "Il cervello rettiliano percepisce l'attesa come un disservizio immediato. Giulia azzera la frizione d'ingresso, elevando la percezione di status della struttura.",
+        neuroCopy: "Il cervello rettiliano percepisce l'attesa como un disservizio immediato. Giulia azzera la frizione d'ingresso, elevando la percezione di status della struttura.",
         isProduct: true,
         url: "https://concierge24.rmstudio.app"
       },
@@ -571,7 +574,7 @@
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       if (window.scrollY >= maxScroll - 4) {
         loopLocked = true;
-        // Reset istantaneo e sicuro compatibile con tutti i browser mobili
+        // Reset istantaneo standard per evitare incompatibilità su mobile Safari/iOS
         window.scrollTo(0, 2);
         setTimeout(() => { loopLocked = false; }, 150);
       }
@@ -655,11 +658,11 @@
     function initCardAnimations() {
       const cards = gsap.utils.toArray(".scene-card");
 
-      // Imposta stato iniziale: card 0 visibile, tutte le altre nascoste
+      // Imposta stato iniziale nascosto (verrà forzato dinamicamente su scrubber in base alla posizione reale)
       cards.forEach((card, i) => {
         const props = getSceneProps(i);
         if (!props) return;
-        gsap.set(card, i === 0 ? props.mid : props.init);
+        gsap.set(card, props.init);
       });
 
       // Registra i riferimenti nel scrubber per le transizioni frame-based
