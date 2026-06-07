@@ -196,16 +196,20 @@
   </header>
 
   <!-- ─── CONTENITORE IMMERSIVO CANVAS ─── -->
-  <div id="app-container" class="relative w-full">
+  <div id="app-container" class="relative w-full bg-[#020205]">
     <div class="sticky top-0 h-screen w-full overflow-hidden z-0 bg-black">
-      <canvas id="immersive-canvas" class="w-full h-full object-cover opacity-80"></canvas>
+      <!-- Il Canvas viene nascosto nativamente su mobile (hidden md:block) per azzerare i lag -->
+      <canvas id="immersive-canvas" class="w-full h-full object-cover opacity-80 hidden md:block"></canvas>
+      
+      <!-- Sfondo Mobile di emergenza ultra-fluido (glowing gradient) se il canvas è nascosto -->
+      <div class="absolute inset-0 bg-gradient-to-tr from-[#020205] via-[#050510] to-[#0c0c1a] block md:hidden"></div>
       <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/80 pointer-events-none"></div>
     </div>
 
-    <!-- Contenitore Fisso delle Schede (Centrate) -->
+    <!-- Contenitore Fisso delle Schede -->
     <div id="text-overlays" class="fixed inset-0 z-10 pointer-events-none"></div>
 
-    <!-- Triggers Invisibili per lo Scroll (1130vh totali inclusa zona di buffer del loop) -->
+    <!-- Triggers Invisibili per lo Scroll (1130vh totali) -->
     <div id="scroll-triggers" class="relative z-20 w-full pointer-events-none">
       <section id="trigger-0" class="h-screen w-full"></section>
       <section id="trigger-1" class="h-screen w-full"></section>
@@ -218,7 +222,6 @@
       <section id="trigger-8" class="h-screen w-full"></section>
       <section id="trigger-9" class="h-screen w-full"></section>
       <section id="trigger-10" class="h-screen w-full"></section>
-      <!-- Zona di buffer invisibile per il loop in fondo per non interferire con i Contatti -->
       <section id="trigger-loop" class="h-[30vh] w-full"></section>
     </div>
   </div>
@@ -244,11 +247,9 @@
   <script src="scrubber.js"></script>
 
   <script>
-    // Forza la scrittura dell'anno corrente nel footer
     const yr = document.getElementById("current-year");
     if (yr) yr.innerText = new Date().getFullYear();
 
-    // Caricamento dinamico, centralizzato e asincrono del sistema orbitale
     let orbitHTML = "";
     fetch("public/orbit-template.html")
       .then(res => res.text())
@@ -385,41 +386,45 @@
       }
     ];
 
-    // ─── GENERAZIONE DINAMICA SCHEDE EDITORIALI CON ALLINEAMENTO LATERALE SINISTRO RESPONSIVO ───
+    // ─── GENERAZIONE DINAMICA SCHEDE EDITORIALI CON ALLINEAMENTO LATERALE RESPONSIVO ───
     const overlayContainer = document.getElementById("text-overlays");
 
     SCENES.forEach((scene, index) => {
       const cardWrapper = document.createElement("div");
       
+      // Su Desktop le schede prodotto si allineano a sinistra (md:justify-start md:pl-24), su mobile al centro (justify-center)
       let alignmentClass = "justify-center md:justify-start text-left items-center md:pl-24";
       if (scene.isIntro || scene.isTheUnion || scene.isContact) {
         alignmentClass = "justify-center text-center mx-auto items-center";
       }
 
-      cardWrapper.className = `absolute inset-0 flex pointer-events-none p-6 md:p-12 ${alignmentClass}`;
+      cardWrapper.className = `absolute inset-0 flex pointer-events-none p-4 md:p-12 ${alignmentClass}`;
 
       const isEven = index % 2 === 0;
       const flexDirClass = isEven ? "md:flex-row" : "md:flex-row-reverse";
 
+      // Colonna Logo per i Prodotti (Nascondiamo su mobile per evitare affollamento verticale)
       const logoColumn = `
-        <div class="flex-shrink-0 flex items-center justify-center bg-black/50 border border-white/10 rounded-[2rem] p-6 w-32 h-32 md:w-44 md:h-44 shadow-inner">
+        <div class="hidden md:flex flex-shrink-0 items-center justify-center bg-black/50 border border-white/10 rounded-[2rem] p-6 w-32 h-32 md:w-44 md:h-44 shadow-inner">
           <img src="public/loghi/${scene.logo}" alt="${scene.title} Logo" class="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]">
         </div>
       `;
 
+      // Colonna Foto per l'Intro (Nascondiamo su mobile per ottimizzare altezza)
       let rickyPhotoColumn = "";
       if (scene.isIntro) {
         rickyPhotoColumn = `
-          <div class="flex-shrink-0 flex items-center justify-center border-2 border-[#F2D28B]/30 rounded-[2.5rem] p-1.5 w-44 h-44 md:w-80 md:h-80 bg-[#050505] shadow-[0_0_40px_rgba(242,210,139,0.25)]">
+          <div class="hidden md:flex flex-shrink-0 items-center justify-center border-2 border-[#F2D28B]/30 rounded-[2.5rem] p-1.5 w-44 h-44 md:w-80 md:h-80 bg-[#050505] shadow-[0_0_40px_rgba(242,210,139,0.25)]">
             <img src="public/loghi/foto_riccardo.jpeg" alt="Riccardo Modena" class="w-full h-full object-cover rounded-[2rem]">
           </div>
         `;
       }
 
+      // Corpo Editoriale (Nascondiamo i dettagli lunghi B2B su mobile per leggibilità perfetta)
       let editorialBody = "";
       if (scene.isProduct) {
         editorialBody = `
-          <div class="mt-6 space-y-4 border-t border-white/5 pt-6 text-base text-neutral-300 font-light leading-relaxed">
+          <div class="hidden md:block mt-6 space-y-4 border-t border-white/5 pt-6 text-base text-neutral-300 font-light leading-relaxed">
             <p>${scene.problem}</p>
             <p>${scene.solution}</p>
             <div class="relative bg-gradient-to-r from-[#F2D28B]/10 to-transparent p-5 rounded-2xl border-l-2 border-[#F2D28B] text-[15px] italic text-[#F2D28B]/95 font-light leading-relaxed">
@@ -429,10 +434,11 @@
         `;
       }
 
+      // Pulsante VCard
       let introButton = "";
       if (scene.isIntro) {
         introButton = `
-          <button onclick="handleVCardClick()" class="inline-flex items-center justify-center gap-3 bg-white text-black text-sm tracking-wider font-extrabold uppercase px-8 py-5 rounded-full hover:scale-105 hover:bg-neutral-100 active:scale-95 transition-all duration-300 mt-8 cursor-pointer pointer-events-auto shadow-[0_0_30px_rgba(255,255,255,0.25)] focus:outline-none">
+          <button onclick="handleVCardClick()" class="inline-flex items-center justify-center gap-3 bg-white text-black text-xs tracking-wider font-extrabold uppercase px-8 py-5 rounded-full hover:scale-105 hover:bg-neutral-100 active:scale-95 transition-all duration-300 mt-8 cursor-pointer pointer-events-auto shadow-[0_0_30px_rgba(255,255,255,0.25)] focus:outline-none">
             <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
@@ -441,6 +447,7 @@
         `;
       }
 
+      // Link al Sito Ufficiale
       let siteLinkButton = "";
       if (scene.isProduct && scene.url) {
         siteLinkButton = `
@@ -450,6 +457,7 @@
         `;
       }
 
+      // Modulo Contatti
       let contactForm = "";
       if (scene.isContact) {
         contactForm = `
@@ -468,13 +476,13 @@
         `;
       }
 
-      // ─── COLONNA DESTRA (CON SUPPORTO DEL GAPS DI SICUREZZA PER NON SOVRAPPORRE THE UNION) ───
+      // ─── COLONNA DESTRA (SISTEMA ORBITALE - NASCOSTO SU SMARTPHONE PER ECCELLENZA MOBILE) ───
       let rightColumnContent = logoColumn;
       if (scene.isIntro) {
         rightColumnContent = rickyPhotoColumn;
       } else if (scene.isTheUnion) {
         rightColumnContent = `
-          <div id="orbit-container-target" class="relative w-[400px] h-[400px] flex items-center justify-center scale-95 md:scale-110 mt-6 md:mt-0 pointer-events-auto">
+          <div id="orbit-container-target" class="hidden md:flex relative w-[400px] h-[400px] items-center justify-center scale-95 md:scale-110 mt-6 md:mt-0 pointer-events-auto">
             ${orbitHTML ? orbitHTML : "Caricamento Ecosistema..."}
           </div>
         `;
@@ -484,20 +492,28 @@
       const hrefAttr = scene.isProduct ? `href="${scene.url}" target="_blank" rel="noopener noreferrer"` : "";
       const cursorClass = scene.isProduct ? "cursor-pointer hover:border-[#F2D28B]/30 hover:shadow-[0_40px_100px_rgba(242,210,139,0.05)] transition-all duration-300" : "";
 
-      // Gaps e larghezza ampi per prevenire sovrapposizioni visive
+      // Layout compatto per mobile, grande per desktop
       let cardSizeClass = "max-w-3xl";
       if (scene.isIntro || scene.isTheUnion) {
-        cardSizeClass = "max-w-6xl md:p-16 gap-16 lg:gap-24";
+        cardSizeClass = "max-w-6xl p-5 md:p-16 gap-16 lg:gap-24";
       } else if (scene.isContact) {
-        cardSizeClass = "max-w-4xl md:p-14";
+        cardSizeClass = "max-w-4xl p-5 md:p-14";
+      } else {
+        cardSizeClass = "max-w-3xl p-5 md:p-14";
       }
 
       cardWrapper.innerHTML = `
-        <${tagType} ${hrefAttr} class="scene-card w-full ${cardSizeClass} bg-[#07070a]/92 backdrop-blur-3xl p-8 md:p-14 border border-white/10 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.95)] preserve-3d opacity-0 pointer-events-none flex flex-col ${flexDirClass} gap-8 md:gap-12 items-center justify-between ${cursorClass}">
+        <${tagType} ${hrefAttr} class="scene-card w-full ${cardSizeClass} bg-[#07070a]/92 backdrop-blur-3xl border border-white/10 rounded-2xl md:rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.95)] preserve-3d opacity-0 pointer-events-none flex flex-col ${flexDirClass} gap-4 md:gap-12 items-center justify-between ${cursorClass}">
           <div class="flex-1 text-left w-full max-w-xl">
-            <span class="text-[10px] uppercase tracking-[0.4em] text-[#F2D28B] block mb-2 font-semibold font-mono">${scene.chapter}</span>
-            <h2 class="font-serif text-3xl md:text-5xl text-[#F6F3F0] tracking-wide leading-tight mb-4">${scene.title}</h2>
-            <p class="text-base md:text-lg tracking-wide text-neutral-300 leading-relaxed font-light">${scene.subtitle}</p>
+            <!-- Logo nel titolo sempre visibile e coerente su ogni dispositivo -->
+            <div class="flex items-center gap-4 mb-4">
+              <img src="public/loghi/${scene.logo}" alt="${scene.title} Logo" class="w-10 h-10 object-contain rounded-xl bg-black/40 p-1 border border-white/10" onerror="this.style.display='none'">
+              <div>
+                <span class="text-[9px] uppercase tracking-[0.4em] text-[#F2D28B] block font-semibold font-mono">${scene.chapter}</span>
+                <h2 class="font-serif text-2xl md:text-4xl text-[#F6F3F0] tracking-wide leading-tight">${scene.title}</h2>
+              </div>
+            </div>
+            <p class="text-base tracking-wide text-neutral-300 leading-relaxed font-light">${scene.subtitle}</p>
             ${editorialBody}
             ${introButton}
             ${siteLinkButton}
@@ -680,8 +696,6 @@
         });
       });
     }
-
-    preloadImages();
   </script>
 
   <!-- Collegamento nativo al chatbot e al cookie banner nella cartella public -->

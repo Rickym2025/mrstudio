@@ -1,27 +1,48 @@
+// Rileva se l'utente è su un dispositivo mobile (schermo inferiore a 768px)
 const isMobile = window.innerWidth < 768;
-const totalFrames = isMobile ? 660 : 1320;
-const images = [];
+
+// Se l'utente è su mobile, disattiviamo completamente il precaricamento pesante dei frame
+// Questo fa caricare il sito all'istante su mobile, salvando banda e GPU
+if (isMobile) {
+  document.addEventListener("DOMContentLoaded", () => {
+    const canvas = document.getElementById("immersive-canvas");
+    if (canvas) canvas.style.display = "none";
+    const loader = document.getElementById("loader");
+    if (loader) {
+      loader.style.opacity = "0";
+      setTimeout(() => { loader.style.display = "none"; }, 400);
+    }
+    // Inizializza solo le animazioni di entrata/uscita delle schede
+    initCardAnimations();
+  });
+} else {
+  // Caricamento desktop classico (precarica frame 1, sblocca, poi precarica i restanti in background)
+  preloadImages();
+}
+
+const totalFrames = 1320;
 const canvas = document.getElementById("immersive-canvas");
 const context = canvas.getContext("2d");
+const images = [];
 const scrollTracker = { frame: 0 };
 
 const getFramePath = index => {
-  const targetIndex = isMobile ? (index * 2) - 1 : index;
-  return `frames/frame_${String(targetIndex).padStart(4, '0')}.jpg`;
+  return `frames/frame_${String(index).padStart(4, '0')}.jpg`;
 };
 
+let loadedCount = 0;
 const loader = document.getElementById("loader");
 const loaderBar = document.getElementById("loader-bar");
 const loaderText = document.getElementById("loader-text");
 
 function preloadImages() {
-  // 1. Carica immediatamente e in modo bloccante solo il PRIMISSIMO frame
+  // Carica immediatamente solo il 1° fotogramma per mostrare subito lo sfondo
   const firstImg = new Image();
   firstImg.src = getFramePath(1);
   
   firstImg.onload = () => {
     images[0] = firstImg;
-    drawFrame(0); // Disegna subito il primo frame sul canvas all'indice 0 (risolve sfondo nero)
+    drawFrame(0); // Disegna subito (risolve sfondo nero)
     hideLoaderAndStart(); 
   };
   
@@ -29,7 +50,6 @@ function preloadImages() {
     hideLoaderAndStart();
   };
 
-  // Prepariamo l'array delle restanti immagini fittizie
   images.push(firstImg);
   for (let i = 2; i <= totalFrames; i++) {
     const img = new Image();
@@ -45,7 +65,6 @@ function hideLoaderAndStart() {
     if (typeof initCardAnimations === "function") {
       initCardAnimations();
     }
-    // Avvia il caricamento asincrono di tutti i restanti frame in background
     preloadRemainingImages();
   }, 600);
 }
@@ -57,21 +76,20 @@ function preloadRemainingImages() {
 }
 
 function resizeCanvas() {
+  if (isMobile) return;
   const dpr = window.devicePixelRatio || 1;
   canvas.width = window.innerWidth * dpr;
   canvas.height = window.innerHeight * dpr;
   context.scale(dpr, dpr);
   
-  // Utilizza l'indice 0-based corretto per evitare schermi neri all'avvio
   const mappedFrame = getMappedFrame(scrollTracker.frame);
   drawFrame(mappedFrame - 1);
 }
 
 function getMappedFrame(rawFrame) {
-  const normalizedFrame = isMobile ? rawFrame * 2 : rawFrame;
-  const sectionLength = 1320 / 11; 
-  const sectionIndex = Math.floor(normalizedFrame / sectionLength);
-  const sectionProgress = (normalizedFrame % sectionLength) / sectionLength;
+  const sectionLength = totalFrames / 11; 
+  const sectionIndex = Math.floor(rawFrame / sectionLength);
+  const sectionProgress = (rawFrame % sectionLength) / sectionLength;
 
   if (sectionIndex === 0) {
     return 1 + Math.floor(sectionProgress * 30);
@@ -96,8 +114,8 @@ function getMappedFrame(rawFrame) {
 }
 
 function drawFrame(index) {
-  const targetIndex = isMobile ? Math.floor(index / 2) : index;
-  const img = images[targetIndex];
+  if (isMobile) return;
+  const img = images[index];
   if (!img || !img.complete || img.naturalWidth === 0) return;
 
   const imgRatio = img.width / img.height;
@@ -134,7 +152,6 @@ function initCanvasScrub() {
       scrub: 0.8
     },
     onUpdate: () => {
-      // Disegna applicando la correzione base-0
       const mappedFrame = getMappedFrame(scrollTracker.frame);
       drawFrame(mappedFrame - 1);
       if (typeof updateCardTimeline === "function") {
@@ -143,5 +160,3 @@ function initCanvasScrub() {
     }
   });
 }
-
-preloadImages();
