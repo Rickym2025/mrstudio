@@ -1,11 +1,12 @@
 /**
- * scrubber.js — Canvas Frame Scrubber v4.0 (Desktop & Mobile Segmented Architecture)
+ * scrubber.js — Canvas Frame Scrubber v4.1 (Dynamic Asset Streaming Architecture)
  *
- * ARCHITETTURA:
- * - 11 istanze di ScrollTrigger individuali per garantire perfetta sincronia card-video.
- * - Su Desktop: scrubbing manuale iper-preciso con progress specifico di sezione.
- * - Su Mobile: autoplay assistito fluido a 60fps all'attivazione della scheda per abbattere la latenza.
- * - Sincronia dinamica del loader-bar all'inizializzazione.
+ * ARCHITETTURA CHIAVE:
+ * - 11 Triggers individuali per allineamento millimetrico.
+ * - Queue di caricamento prioritario (Streaming Loader): i frame della sezione attiva
+ *   vengono messi in cima alla coda e scaricati istantaneamente in micro-batch (2 alla volta su mobile)
+ *   evitando congestione di rete e sovraccarichi di CPU/GPU mobile.
+ * - Triggers ridotti a 100vh su mobile per rendere lo scroll iper-reattivo.
  */
 
 (function () {
@@ -22,7 +23,7 @@
     return `frames/frame_${String(n).padStart(4, "0")}.jpg`;
   }
 
-  // Helper per ottenere l'esatto range di frame video di ogni scena
+  // Helper per calcolare i frame esatti assegnati ad ogni scena
   function getSceneFrameRange(index) {
     const ranges = [
       [0, 30],       // Scena 0: RM Studio Intro
@@ -60,16 +61,53 @@
   const ctx    = canvas.getContext("2d");
   const loader = document.getElementById("loader");
 
-  // ─── PROGRESSO LOADER IN TEMPO REALE ──────────────────────────────────────────
+  // ─── STREAMING QUEUE DI CARICAMENTO AUTOMATICO ───────────────────────────────
+  let loadingQueue = [];
+  let isCurrentlyLoading = false;
+  const BATCH_SIZE = IS_MOBILE ? 2 : 5; // Limita i download in parallelo per preservare la CPU
+
   let loadedCount = 0;
   const loaderBar = document.getElementById("loader-bar");
   const loaderText = document.getElementById("loader-text");
 
   function updateLoaderProgress() {
     loadedCount++;
-    const pct = Math.round((loadedCount / TOTAL_FRAMES) * 100);
+    const pct = Math.min(100, Math.round((loadedCount / TOTAL_FRAMES) * 100));
     if (loaderBar) loaderBar.style.width = `${pct}%`;
     if (loaderText) loaderText.innerText = `Inizializzazione... ${pct}%`;
+  }
+
+  // Aggiunge frame specifici in testa alla coda di caricamento (Priorità Massima)
+  function enqueueSceneFrames(sceneIdx) {
+    const range = getSceneFrameRange(sceneIdx);
+    const sceneFrames = [];
+    for (let f = range.start; f <= range.end; f++) {
+      if (!images[f] || !images[f].complete) {
+        sceneFrames.push(f);
+      }
+    }
+    // Mette i frame in cima eliminando eventuali duplicati
+    loadingQueue = [...sceneFrames, ...loadingQueue.filter(f => !sceneFrames.includes(f))];
+    triggerQueueLoad();
+  }
+
+  function triggerQueueLoad() {
+    if (isCurrentlyLoading || loadingQueue.length === 0) return;
+    isCurrentlyLoading = true;
+    
+    const batch = loadingQueue.splice(0, BATCH_SIZE);
+    let completed = 0;
+    
+    batch.forEach(frameIdx => {
+      loadFrame(frameIdx, () => {
+        completed++;
+        if (completed === batch.length) {
+          isCurrentlyLoading = false;
+          // Un piccolo ritardo lascia respirare il browser mobile durante lo scorrimento
+          setTimeout(triggerQueueLoad, IS_MOBILE ? 40 : 20);
+        }
+      });
+    });
   }
 
   // ─── CANVAS SIZING ───────────────────────────────────────────────────────────
@@ -92,6 +130,7 @@
   function drawFrame(idx) {
     let img = images[idx];
     if (!img || !img.complete || img.naturalWidth === 0) {
+      // Fallback sul frame caricato precedentemente più vicino per non mostrare buchi neri
       for (let b = idx - 1; b >= 0; b--) {
         const fb = images[b];
         if (fb && fb.complete && fb.naturalWidth > 0) { img = fb; break; }
@@ -118,10 +157,15 @@
     if (!cards || cards.length === 0) return;
     if (sceneIdx === activeCardIndex) return;
 
+    // Dai priorità istantanea ai frame della nuova sezione che sta per entrare e a quella successiva
+    enqueueSceneFrames(sceneIdx);
+    if (sceneIdx + 1 < SCENES_COUNT) {
+      enqueueSceneFrames(sceneIdx + 1);
+    }
+
     const prevIdx = activeCardIndex;
     activeCardIndex = sceneIdx;
 
-    // Anima l'uscita della scheda precedente
     if (prevIdx >= 0 && prevIdx < cards.length) {
       const prev = cards[prevIdx];
       const prevProps = window.getSceneProps && window.getSceneProps(prevIdx);
@@ -131,7 +175,6 @@
       }
     }
 
-    // Anima l'entrata della scheda corrente
     if (sceneIdx >= 0 && sceneIdx < cards.length) {
       const card = cards[sceneIdx];
       const props = window.getSceneProps && window.getSceneProps(sceneIdx);
@@ -142,11 +185,9 @@
     }
   }
 
-  // Chiamata da initCardAnimations (in index.html) per registrare ed allineare l'indice iniziale
   window.registerCards = function (cardElements) {
     cards = cardElements;
 
-    // Individua la sezione attiva sull'eventuale ricarica della pagina a metà scorrimento
     let initialActiveIndex = 0;
     for (let i = 0; i < SCENES_COUNT; i++) {
       const trigger = document.getElementById(`trigger-${i}`);
@@ -160,7 +201,9 @@
     }
     activeCardIndex = initialActiveIndex;
 
-    // Imposta immediatamente visibile solo la card corretta allineata al punto di caricamento
+    // Prioritizza i frame di partenza
+    enqueueSceneFrames(activeCardIndex);
+
     cards.forEach((card, i) => {
       const props = window.getSceneProps && window.getSceneProps(i);
       if (props) {
@@ -171,7 +214,18 @@
 
   // ─── PRELOAD ─────────────────────────────────────────────────────────────────
   function loadFrame(i, cb) {
-    if (images[i] !== null) { cb && cb(); return; }
+    if (images[i] !== null) {
+      if (images[i].complete) {
+        cb && cb();
+      } else {
+        const prevOnload = images[i].onload;
+        images[i].onload = images[i].onerror = () => {
+          if (prevOnload) prevOnload();
+          cb && cb();
+        };
+      }
+      return;
+    }
     const img = new Image();
     images[i] = img;
     img.onload = img.onerror = () => {
@@ -181,44 +235,38 @@
     img.src = getFramePath(i);
   }
 
-  function loadBatch(from, size) {
-    if (from >= TOTAL_FRAMES) return;
-    const to = Math.min(from + size, TOTAL_FRAMES);
-    let done = 0, n = to - from;
-    for (let i = from; i < to; i++) {
-      loadFrame(i, () => { if (++done === n) setTimeout(() => loadBatch(to, size), 16); });
-    }
-  }
-
   function preloadImages() {
     loadFrame(0, () => {
       updateCanvasSize();
       drawFrame(0);
       startApp();
-      // Carica i primi 80 in parallelo ad alta priorità
-      const PRI = Math.min(80, TOTAL_FRAMES);
-      for (let i = 1; i < PRI; i++) loadFrame(i, null);
-      // Restanti in background a piccoli blocchi
-      setTimeout(() => loadBatch(PRI, 50), 200);
+      
+      // Carica il resto dei frame in background con priorità standard (in coda)
+      const allFrames = [];
+      for (let i = 1; i < TOTAL_FRAMES; i++) {
+        allFrames.push(i);
+      }
+      loadingQueue = [...loadingQueue, ...allFrames.filter(f => !loadingQueue.includes(f))];
+      triggerQueueLoad();
     });
   }
 
   // ─── INIZIALIZZAZIONE TRIGGERS INDIVIDUALI ─────────────────────────────────────
   function initTriggers() {
     if (IS_MOBILE) {
-      // MOBILE: Passaggio automatico e controllato a 60fps per la fluidità del video
+      // MOBILE: Passaggio automatico fluido assistito a 60fps basato sulle sezioni
       for (let i = 0; i < SCENES_COUNT; i++) {
         const range = getSceneFrameRange(i);
 
         ScrollTrigger.create({
           trigger: `#trigger-${i}`,
-          start: "top 60%", // Rileva il focus della sezione al 60% dello schermo
-          end: "bottom 60%",
+          start: "top top", // Sequenzialità perfetta e lineare senza sovrapposizioni
+          end: "bottom top",
           onToggle(self) {
             if (self.isActive) {
               updateCardTimelineDirect(i);
 
-              // Animazione controllata di riproduzione frame senza sbalzi d'interfaccia
+              // Transizione automatica morbida dal frame in cui ci si trova fino all'end-frame della nuova sezione
               gsap.to(scrollTracker, {
                 frame: range.end,
                 duration: 1.2,
@@ -233,7 +281,7 @@
         });
       }
     } else {
-      // DESKTOP: Scrubbing di precisione legato allo scorrimento fisico
+      // DESKTOP: Scrubbing iper-preciso legato allo scorrimento fisico
       for (let i = 0; i < SCENES_COUNT; i++) {
         const range = getSceneFrameRange(i);
 
@@ -243,7 +291,6 @@
           end: "bottom top",
           scrub: 0.5,
           onUpdate(self) {
-            // Calcola il progresso all'interno della singola sezione per identificare il frame corrispondente
             const currentFrame = range.start + self.progress * (range.end - range.start);
             scrollTracker.frame = currentFrame;
             drawFrame(Math.max(0, Math.min(Math.round(currentFrame), TOTAL_FRAMES - 1)));

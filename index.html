@@ -209,13 +209,13 @@
     <!-- Contenitore Fisso delle Schede -->
     <div id="text-overlays" class="fixed inset-0 z-10 pointer-events-none"></div>
 
-    <!-- Triggers Invisibili per lo Scroll — altezze non-uniformi per far apparire subito Nexus dopo il primo tocco -->
+    <!-- Triggers Invisibili per lo Scroll -->
     <style>
       .section-trigger { height: 200vh; }
-      #trigger-0 { height: 60vh; } /* Intro cortissima su desktop per mostrare subito Nexus al primo scorrimento */
+      #trigger-0 { height: 60vh; }
       @media (max-width: 767px) { 
-        .section-trigger { height: 250vh; } 
-        #trigger-0 { height: 80vh; } /* Intro cortissima su mobile per favorire la transizione immediata */
+        .section-trigger { height: 100vh; } /* 100vh su mobile rende ogni swipe reattivo al cambio scheda */
+        #trigger-0 { height: 60vh; } /* Intro cortissima per reattività immediata */
       }
     </style>
     <div id="scroll-triggers" class="relative z-20 w-full pointer-events-none">
@@ -297,7 +297,7 @@
         logo: "logo_concierge.png",
         problem: "La reception offre di picchi di sovraccarico, con centralini intasati e turisti frustrati in attesa di risposte su Wi-Fi e check-in nelle ore notturne.",
         solution: "Giulia risponde all'istante con un'espressivita vocale calda e umana, parlando la lingua nativa dell'ospite, proponendo servizi e inviando conferme su WhatsApp.",
-        neuroCopy: "Il cervello rettiliano percepisce l'attesa como un disservizio immediato. Giulia azzera la frizione d'ingresso, elevando la percezione di status della struttura.",
+        neuroCopy: "Il cervello rettiliano percepisce l'attesa come un disservizio immediato. Giulia azzera la frizione d'ingresso, elevando la percezione di status della struttura.",
         isProduct: true,
         url: "https://concierge24.rmstudio.app"
       },
@@ -353,7 +353,7 @@
         id: "omniastudio",
         chapter: "Chapter VII — Privacy AI",
         title: "OmniaStudio",
-        subtitle: "La potenza dell'AI generativa sul tuo PC, completamente offline. Analizza contratti, PDF e dati sensibili senza inviare dati al cloud, a tutela del segreto professionale.",
+        subtitle: "La potenza dell'AI generativa sul tuo PC, completely offline. Analizza contratti, PDF e dati sensibili senza inviare dati al cloud, a tutela del segreto professionale.",
         logo: "logo_omniastudio.png",
         problem: "Restrizioni severe sul GDPR e rischio di fuga di dati sensibili inviando contratti e documenti privati ai server cloud delle intelligenze artificiali pubbliche.",
         solution: "Un software monolitico installato localmente sul tuo hardware che analizza documenti, esegue OCR ed elabora report a connessione totalmente disattivata.",
@@ -393,13 +393,12 @@
       }
     ];
 
-    // ─── GENERAZIONE DINAMICA SCHEDE EDITORIALI CON ALLINEAMENTO RESPONSIVO ADATTATO (SPLIT 50/50 SU SMARTPHONE) ───
+    // ─── GENERAZIONE DINAMICA SCHEDE EDITORIALI CON ALLINEAMENTO RESPONSIVO ───
     const overlayContainer = document.getElementById("text-overlays");
 
     SCENES.forEach((scene, index) => {
       const cardWrapper = document.createElement("div");
       
-      // Allineamento: Su desktop pl-24 a sinistra, su mobile centrato verticalmente
       let alignmentClass = "justify-center items-center md:justify-start md:items-center md:pl-24 text-left";
       if (scene.isIntro || scene.isTheUnion || scene.isContact) {
         alignmentClass = "justify-center items-center text-center";
@@ -410,14 +409,12 @@
       const isEven = index % 2 === 0;
       const flexDirClass = isEven ? "md:flex-row" : "md:flex-row-reverse";
 
-      // Colonna Logo per i Prodotti (Nascondiamo su mobile per evitare affollamento verticale)
       const logoColumn = `
         <div class="hidden md:flex flex-shrink-0 items-center justify-center bg-black/50 border border-white/10 rounded-[2rem] p-6 w-32 h-32 md:w-44 md:h-44 shadow-inner">
           <img src="public/loghi/${scene.logo}" alt="${scene.title} Logo" class="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]">
         </div>
       `;
 
-      // Colonna Foto per l'Intro (Un cerchio elegante e visibile per mobile, grande su desktop)
       let rickyPhotoColumn = `
         <div class="flex-shrink-0 flex items-center justify-center border-2 border-[#F2D28B]/30 rounded-full md:rounded-[2.5rem] p-0.5 md:p-1.5 w-20 h-20 md:w-80 md:h-80 bg-[#050505] shadow-[0_0_40px_rgba(242,210,139,0.20)]">
           <img src="public/loghi/foto_riccardo.jpeg" alt="Riccardo Modena" class="w-full h-full object-cover rounded-full md:rounded-[2rem]">
@@ -476,7 +473,6 @@
         `;
       }
 
-      // ─── COLONNA DESTRA (SISTEMA ORBITALE - NASCOSTO SU SMARTPHONE PER FAR COMPARIRE I VIDEO) ───
       let rightColumnContent = logoColumn;
       if (scene.isIntro) {
         rightColumnContent = rickyPhotoColumn;
@@ -492,7 +488,6 @@
       const hrefAttr = scene.isProduct ? `href="${scene.url}" target="_blank" rel="noopener noreferrer"` : "";
       const cursorClass = scene.isProduct ? "cursor-pointer hover:border-[#F2D28B]/30 hover:shadow-[0_40px_100px_rgba(242,210,139,0.05)] transition-all duration-300" : "";
 
-      // Layout compatto per mobile, grande per desktop
       let cardSizeClass = "max-w-3xl";
       if (scene.isIntro || scene.isTheUnion) {
         cardSizeClass = "max-w-6xl p-5 md:p-16 gap-16 lg:gap-24";
@@ -502,11 +497,9 @@
         cardSizeClass = "max-w-3xl p-5 md:p-14";
       }
 
-      // Costruzione finale della scheda
       cardWrapper.innerHTML = `
         <${tagType} ${hrefAttr} class="scene-card w-full ${cardSizeClass} bg-[#07070a]/92 backdrop-blur-3xl border border-white/10 rounded-2xl md:rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.95)] preserve-3d opacity-0 pointer-events-none flex flex-col ${flexDirClass} gap-4 md:gap-12 items-center justify-between ${cursorClass}">
           <div class="flex-1 text-left w-full max-w-xl">
-            <!-- Logo nell'intestazione della scheda con percorso corretto public/loghi/ -->
             <div class="flex items-center gap-4 mb-4">
               <img src="public/loghi/${scene.logo}" alt="${scene.title} Logo" class="w-10 h-10 object-contain rounded-xl bg-black/40 p-1 border border-white/10" onerror="this.style.display='none'">
               <div>
@@ -566,7 +559,7 @@
       }
     }
 
-    // ─── LOOP PULITO: warp silenzioso senza rompere ScrollTrigger ───
+    // ─── LOOP PULITO ───
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     let loopLocked = false;
     window.addEventListener('scroll', () => {
@@ -574,76 +567,75 @@
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       if (window.scrollY >= maxScroll - 4) {
         loopLocked = true;
-        // Reset istantaneo standard per evitare incompatibilità su mobile Safari/iOS
         window.scrollTo(0, 2);
         setTimeout(() => { loopLocked = false; }, 150);
       }
     });
 
-    // ─── SCENOPHONIC 3D TRANSITIONS FORZATE CON INTEGRATIVO AUTOALPHA (VISIBILITY SECURE) ───
+    // ─── SCENOPHONIC 3D TRANSITIONS FORZATE CON INTEGRATIVO AUTOALPHA ───
     function getSceneProps(index) {
       switch (index) {
-        case 0: // Intro / Hero
+        case 0:
           return {
             init: { autoAlpha: 0, opacity: 0, scale: 0.7, z: -400, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
             mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
             exit: { autoAlpha: 0, opacity: 0, scale: 1.1, z: 100, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
           };
-        case 1: // NexusAI
+        case 1:
           return {
             init: { autoAlpha: 0, opacity: 0, rotateY: 90, x: 250, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
             mid: { autoAlpha: 1, opacity: 1, rotateY: 0, x: 0, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
             exit: { autoAlpha: 0, opacity: 0, rotateY: -90, x: -250, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
           };
-        case 2: // Concierge24
+        case 2:
           return {
             init: { autoAlpha: 0, opacity: 0, y: -300, rotateX: 45, scale: 1, z: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
             mid: { autoAlpha: 1, opacity: 1, y: 0, rotateX: 0, scale: 1, z: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
             exit: { autoAlpha: 0, opacity: 0, y: 150, rotateX: -15, scale: 1, z: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
           };
-        case 3: // Dentis
+        case 3:
           return {
             init: { autoAlpha: 0, opacity: 0, scale: 0.3, z: -700, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
             mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
             exit: { autoAlpha: 0, opacity: 0, scale: 1.5, z: 250, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
           };
-        case 4: // Lexis AI
+        case 4:
           return {
             init: { autoAlpha: 0, opacity: 0, rotateY: -60, rotateX: 20, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
             mid: { autoAlpha: 1, opacity: 1, rotateY: 0, rotateX: 0, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
             exit: { autoAlpha: 0, opacity: 0, rotateY: 60, rotateX: -20, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
           };
-        case 5: // DriveMotion
+        case 5:
           return {
             init: { autoAlpha: 0, opacity: 0, scale: 0.1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
             mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
             exit: { autoAlpha: 0, opacity: 0, scale: 0.1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
           };
-        case 6: // HomeTour AI
+        case 6:
           return {
             init: { autoAlpha: 0, opacity: 0, x: 350, skewX: -12, scale: 1, z: 0, rotateX: 0, rotateY: 0, y: 0, rotateZ: 0, pointerEvents: "none" },
             mid: { autoAlpha: 1, opacity: 1, x: 0, skewX: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, y: 0, rotateZ: 0, pointerEvents: "auto" },
             exit: { autoAlpha: 0, opacity: 0, x: -350, skewX: 12, scale: 1, z: 0, rotateX: 0, rotateY: 0, y: 0, rotateZ: 0, pointerEvents: "none" }
           };
-        case 7: // OmniaStudio
+        case 7:
           return {
             init: { autoAlpha: 0, opacity: 0, rotateZ: -180, scale: 0.5, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, skewX: 0, pointerEvents: "none" },
             mid: { autoAlpha: 1, opacity: 1, rotateZ: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, skewX: 0, pointerEvents: "auto" },
             exit: { autoAlpha: 0, opacity: 0, rotateZ: 180, scale: 0.5, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, skewX: 0, pointerEvents: "none" }
           };
-        case 8: // FF Edizioni
+        case 8:
           return {
             init: { autoAlpha: 0, opacity: 0, scale: 1.4, z: 200, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
             mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
             exit: { autoAlpha: 0, opacity: 0, scale: 0.7, z: -200, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
           };
-        case 9: // The Union (Synthesis)
+        case 9:
           return {
             init: { autoAlpha: 0, opacity: 0, rotateY: -180, z: -500, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
             mid: { autoAlpha: 1, opacity: 1, rotateY: 0, z: 0, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
             exit: { autoAlpha: 0, opacity: 0, rotateY: 180, z: 500, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
           };
-        case 10: // Contacts / Outro
+        case 10:
           return {
             init: { autoAlpha: 0, opacity: 0, y: 150, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
             mid: { autoAlpha: 1, opacity: 1, y: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
@@ -658,14 +650,12 @@
     function initCardAnimations() {
       const cards = gsap.utils.toArray(".scene-card");
 
-      // Imposta stato iniziale nascosto (verrà forzato dinamicamente su scrubber in base alla posizione reale)
       cards.forEach((card, i) => {
         const props = getSceneProps(i);
         if (!props) return;
         gsap.set(card, props.init);
       });
 
-      // Registra i riferimenti nel scrubber per le transizioni frame-based
       if (typeof window.registerCards === "function") {
         window.registerCards(cards);
       }
