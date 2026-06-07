@@ -254,8 +254,22 @@
     <a href="public/termini.html" target="_blank" class="hover:text-white transition-colors">Termini e Condizioni</a>
   </div>
 
-  <!-- Sotto-script inline per configurare le schede -->
+  <script src="scrubber.js"></script>
+
   <script>
+    const yr = document.getElementById("current-year");
+    if (yr) yr.innerText = new Date().getFullYear();
+
+    let orbitHTML = "";
+    fetch("public/orbit-template.html")
+      .then(res => res.text())
+      .then(html => {
+        orbitHTML = html;
+        const target = document.getElementById("orbit-container-target");
+        if (target) target.innerHTML = html;
+      })
+      .catch(err => console.error("Errore nel caricamento del file orbitale:", err));
+
     const SCENES = [
       {
         id: "hero-start",
@@ -273,7 +287,7 @@
         subtitle: "Assunzioni e vendite H24 sul tuo sito attuale senza cambiare codice. NexusAI inietta un assistente intelligente che accoglie, informa e converte i visitatori in lead profilati.",
         logo: "logo_nexus.png",
         problem: "I siti web aziendali statici registrano costantemente alti tassi di rimbalzo (bounce rate), fallendo nel convertire il traffico serale o festivo in clienti attivi.",
-        solution: "L'overlay invisibile si aggancia all'istante alla tua infrastruttura, scansiona in autonomia la conoscenza aziendale e acquidisce i dati di contatto dei visitatori in tempo reale.",
+        solution: "L'overlay invisibile si aggancia all'istante alla tua infrastruttura, scansiona in autonomia la conoscenza aziendale e acquisisce i dati di contatto dei visitatori in tempo reale.",
         neuroCopy: "Il 96% degli utenti abbandona le pagine a causa del sovraccarico cognitivo. Nexus agisce sul principio biologico di fluidità, intercettando il dubbio del visitatore all'istante.",
         isProduct: true,
         url: "https://nexus.rmstudio.app"
@@ -633,14 +647,35 @@
       }
     }
 
+    window.getSceneProps = getSceneProps;
+
+    function initCardAnimations() {
+      const cards = gsap.utils.toArray(".scene-card");
+
+      // Imposta stato iniziale nascosto (verrà forzato dinamicamente su scrubber in base alla posizione reale)
+      cards.forEach((card, i) => {
+        const props = getSceneProps(i);
+        if (!props) return;
+        gsap.set(card, props.init);
+      });
+
+      // Registra i riferimenti nel scrubber per le transizioni frame-based
+      if (typeof window.registerCards === "function") {
+        window.registerCards(cards);
+      }
+    }
+
     window.initCardAnimations = initCardAnimations;
+
+    // Avvia l'inizializzazione dello Scrubber solo dopo che tutto il DOM di index.html è pronto e parsed
+    if (typeof window.initScrubber === "function") {
+      window.initScrubber();
+    }
+
   </script>
 
   <!-- Collegamento nativo al chatbot e al cookie banner nella cartella public -->
   <script src="public/cookie-banner.js"></script>
   <script src="public/chatbot.js"></script>
-
-  <!-- Spostiamo scrubber.js alla fine dell'HTML per garantire l'inizializzazione corretta -->
-  <script src="scrubber.js"></script>
 </body>
 </html>
