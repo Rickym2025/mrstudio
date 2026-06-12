@@ -228,7 +228,8 @@
 
   // Creazione elementi DOM del Chatbot
   const chatContainer = document.createElement('div');
-  chatContainer.innerHTML = `
+  
+  let containerHTML = `
     <!-- Bolla Fluttuante Cinetica -->
     <div id="chat-bubble" class="chat-bubble pointer-events-auto">
       <svg class="w-8 h-8 text-[#F2D28B]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -236,9 +237,11 @@
       </svg>
       <span class="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-black animate-pulse"></span>
     </div>
+  `;
 
-    <!-- Fumetto di Neuromarketing -->
-    \${!isTooltipClosed ? \`
+  if (!isTooltipClosed) {
+    containerHTML += `
+      <!-- Fumetto di Neuromarketing -->
       <div id="chat-tooltip" class="chat-tooltip pointer-events-auto">
         <span class="tracking-wide">In quale settore operi? Scopri l'AI su misura per te 🎯</span>
         <button id="tooltip-close" class="text-neutral-400 hover:text-white transition-colors focus:outline-none cursor-pointer">
@@ -247,8 +250,10 @@
           </svg>
         </button>
       </div>
-    \` : ''}
+    `;
+  }
 
+  containerHTML += `
     <!-- Finestra di Chat -->
     <div id="chat-window" class="chat-window pointer-events-auto">
       <div class="chat-header">
@@ -286,6 +291,8 @@
       </form>
     </div>
   `;
+
+  chatContainer.innerHTML = containerHTML;
   document.body.appendChild(chatContainer);
 
   const bubble = document.getElementById('chat-bubble');
@@ -358,7 +365,7 @@
   bubble.addEventListener('click', openChat);
   closeBtn.addEventListener('click', closeChat);
 
-  // CONFIGURAZIONE AVVIO: APERTO SU DESKTOP, CHIUSO SU MOBILE
+  // CONFIGURAZIONE AVVIO: SEMPRE APERTO SU DESKTOP, CHIUSO SU MOBILE
   const isDesktop = window.innerWidth >= 768;
   if (isDesktop) {
     openChat();
