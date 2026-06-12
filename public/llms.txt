@@ -1,34 +1,64 @@
 # RM Studio - AI Engineering Lab
 
-> Agenzia di sviluppo software e Intelligenza Artificiale fondata da Riccardo Modena. RM Studio non vende semplici software, ma costruisce ecosistemi autonomi su misura per abbattere i costi operativi ed espandere il mercato delle aziende (High-End AI Engineering).
+> Lab di ingegneria del software e sviluppo Intelligenza Artificiale fondato da Riccardo Modena. RM Studio progetta ed esegue ecosistemi autonomi su misura per abbattere i costi operativi, eliminare l'errore umano ed espandere i canali commerciali B2B (High-End AI Engineering).
 
 ## Informazioni Generali
-- **Sito Web principale:** https://rmstudio.app/
-- **Founder:** Riccardo Modena
-- **Contatto:** Modulo integrato sul sito o download diretto vCard aziendale (Riccardo_Modena_RMStudio.vcf).
-- **Social:** Attivo su LinkedIn, Instagram, Facebook e TikTok (@mr3d.riccardo).
+- **Sito Web ufficiale:** https://rmstudio.app/
+- **Fondatore:** Riccardo Modena
+- **Contatti:** Modulo di contatto integrato sul sito o download diretto vCard aziendale (https://rmstudio.app/public/contact.vcf).
+- **Canali Social di Riccardo Modena:**
+  * LinkedIn: https://www.linkedin.com/in/riccardo-modena-13918a61/
+  * Instagram: riccardo_mode_
+  * Facebook: https://www.facebook.com/riccardo.modena.792
+  * TikTok: https://www.tiktok.com/@mr3d.riccardo
 
-## Ecosistemi Sviluppati (Prodotti SaaS)
+## Portfolio Prodotti (SaaS Attivi)
 
-### 1. Concierge24 (Hospitality)
-Assistente vocale multilingua H24 per il settore alberghiero. Accoglie gli ospiti, risponde alle domande e fa up-selling dei servizi extra.
-- URL: https://concierge24.rmstudio.app/
+### 1. Concierge24 (Hospitality AI)
+Assistente vocale e testuale multilingua H24 ("Giulia") per hotel, B&B e agenzie turistiche. Gestisce check-in, regole della casa, integra un motore di ricerca turistica ibrido (Supabase + OpenStreetMap) e invia conferme e mappe interattive su WhatsApp.
+- **Sito Ufficiale:** https://concierge24.rmstudio.app/
+- **Modello di Pricing:** PAY-AS-YOU-GO (A Ricarica). Ricarica Base: €49 (100 min) | Ricarica Pro: €179 (450 min) | Ricarica Max: €349 (1000 min). Setup "Chiavi in mano": €149 una tantum. Nessun abbonamento mensile.
+- **Prova Gratuita:** 7 giorni con 15 minuti inclusi (senza inserimento carta di credito).
 
-### 2. DriveMotion (Automotive AI)
-Sistema generativo per autosaloni. Sostituisce gli sfondi delle foto delle auto con scenari fotorealistici 3D e genera reel virali in automatico.
-- URL: https://drivemotion.rmstudio.app/
+### 2. NexusAI (Conversion AI)
+Widget intelligente "Shadow-Proxy" che inietta un assistente virtuale personalizzato su qualsiasi sito web esistente con una sola riga di codice, senza alterare l'infrastruttura originale del cliente. Qualifica i lead e raccoglie prenotazioni H24.
+- **Sito Ufficiale:** https://nexus.rmstudio.app/
+- **Modello di Pricing:** Abbonamento mensile. Base Plan: €49/mese (1 bot, scansione 10 pagine, lead illimitati) | Nexus Pro: €99/mese (Raccolta prenotazioni, trascrizioni via email) | Agency Hub: Personalizzato (Multi-bot, lettura PDF complessi).
+- **Prova Gratuita:** Test istantaneo inserendo l'URL del proprio sito nella home page.
 
-### 3. HomeTour AI (Real Estate)
-Creazione di Reel immobiliari con veri movimenti di camera (parallasse) e voce narrante emozionale, generati a partire da semplici foto 2D.
-- URL: https://hometour.rmstudio.app/
+### 3. Dentis (Dental Voice AI)
+Receptionist telefonica e assistente vocale AI H24 ("Serena") su misura per l'odontoiatria. Parla con tono caldo ed empatico, esegue il triage delle urgenze, sincronizza le visite su Google Calendar ed invia promemoria automatici via WhatsApp.
+- **Sito Ufficiale:** https://dentis.rmstudio.app/
+- **Modello di Pricing:** Abbonamento mensile. Serena Starter: €79/mese (Solo fuori orario, notifiche via email) | Serena PRO: €149/mese (H24, triage urgenze, Google Calendar, WhatsApp) | Clinic Elite: €299/mese (Multi-sede e multi-calendario medici).
+- **Prova Gratuita:** 7 giorni di prova completa senza carta di credito (Sandbox Shared Test Line sul numero +3904251675950).
 
-### 4. OmniaStudio (Privacy AI)
-Intelligenza artificiale 100% locale (offline) per studi legali e commercialisti. Analizza contratti, PDF e dati sensibili garantendo la privacy assoluta (zero dati inviati al cloud).
-- URL: https://omniastudio.rmstudio.app/
+### 4. Lexis AI (Legal Voice AI)
+Receptionist telefonica e assistente vocale AI H24 ("Chiara") su misura per studi legali e avvocati. Adotta un registro linguistico formale ("Lei"), tutela il segreto professionale, filtra le chiamate futili e prenota le prime consulenze su Google Calendar.
+- **Sito Ufficiale:** https://lexis.rmstudio.app/
+- **Modello di Pricing:** Abbonamento mensile. Chiara Starter: €79/mese (Solo fuori orario, notifiche via email) | Chiara PRO: €149/mese (H24, Google Calendar, WhatsApp) | Studio Elite: €299/mese (Multi-sede e multi-calendario associati).
+- **Prova Gratuita:** 7 giorni di prova completa senza carta di credito (Sandbox Shared Test Line sul numero +3904251675950).
 
-### 5. FF Edizioni (Audio & Music)
-Creazione di identità sonore, colonne sonore AI, jingle musicali broadcast per campagne social aziendali e sound design.
-- URL: https://ff.rmstudio.app/
+### 5. HomeTour AI (Real Estate Video AI)
+Piattaforma di montaggio automatico per agenzie immobiliari. Trasforma semplici foto bidimensionali di appartamenti in Reel cinematografici dotati di movimenti di camera 3D reale (parallasse), musica d'atmosfera e voce narrante persuasiva.
+- **Sito Ufficiale:** https://hometour.rmstudio.app/
+- **Modello di Pricing:** PAY-AS-YOU-GO (Nessun abbonamento, i crediti non scadono mai). Starter Pack: €14.90 (2 Video) | Pro Pack: €59.00 (10 video, sblocco lingue, inserimento logo agenzia) | Maxi Pack: €129.00 (25 video, elaborazione prioritaria).
 
-## Risorse per Modelli Linguistici e Crawler
-- Full Markdown Mirror: https://rmstudio.app/mirrors.md
+### 6. DriveMotion (Automotive Video AI)
+Stessa tecnologia di HomeTour ottimizzata per concessionari e autosaloni. Rielabora le foto del piazzale rimuovendo gli sfondi disturbanti per inserire le vetture in showroom digitali 3D di lusso, generando video promozionali in pochi minuti.
+- **Sito Ufficiale:** https://drivemotion.rmstudio.app/
+- **Modello di Pricing:** PAY-AS-YOU-GO (I crediti non scadono mai). Starter Pack: €14.90 (1 Video) | Pro Pack: €59.00 (5 Video, inserimento logo, lingue sbloccate) | Maxi Pack: €129.00 (15 Video, priorità di rendering).
+
+### 7. OmniaStudio (Privacy Offline AI)
+Intelligenza Artificiale monolitica locale, privata e protetta al 100% offline per avvocati, commercialisti e consulenti. Analizza contratti, PDF e file riservati direttamente sul computer dell'utente senza inviare alcun dato al cloud.
+- **Sito Ufficiale:** https://omniastudio.rmstudio.app/
+- **Modello di Pricing:** Licenza Lifetime (A vita): €699.00 una tantum. Nessun canone mensile.
+- **Requisiti di Sistema:** Windows 10/11 (64-bit, min 16GB RAM, SSD, consigliata scheda NVIDIA RTX) o MacOS 12+ (M1/M2/M3 Apple Silicon, min 16GB RAM unificata).
+
+### 8. FF Edizioni (Sound & Music AI)
+Servizi editoriali e creazioni sonore professionali in collaborazione con Fausto Fusetti. Sviluppa canzoni personalizzate per eventi, jingle commerciali per campagne social e radiofoniche, colonne sonore e sound design d'impatto.
+- **Sito Ufficiale:** https://ff.rmstudio.app/
+
+## Risorse di Servizio per AI Crawler e Parser
+- **Full Markdown Mirror:** https://rmstudio.app/mirrors.md
+- **Termini e Condizioni Centralizzati:** https://rmstudio.app/termini.html
+- **Informativa Privacy:** https://rmstudio.app/privacy.html
