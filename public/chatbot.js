@@ -237,7 +237,7 @@
       <span class="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-black animate-pulse"></span>
     </div>
 
-    <!-- Fumetto di Neuromarketing (In quale settore operi?) -->
+    <!-- Fumetto di Neuromarketing -->
     \${!isTooltipClosed ? \`
       <div id="chat-tooltip" class="chat-tooltip pointer-events-auto">
         <span class="tracking-wide">In quale settore operi? Scopri l'AI su misura per te 🎯</span>
@@ -253,7 +253,6 @@
     <div id="chat-window" class="chat-window pointer-events-auto">
       <div class="chat-header">
         <div class="flex items-center gap-3">
-          <!-- AVATAR DINAMICO CON LOGHI ALTERNATI -->
           <div class="chat-avatar-frame">
             <img id="chat-logo-avatar" src="public/loghi/logo_rm.png" alt="RM Logo">
           </div>
@@ -299,7 +298,7 @@
   const chatMessages = document.getElementById('chat-messages');
   const avatarImg = document.getElementById('chat-logo-avatar');
 
-  // Logica rotazione loghi nell'avatar
+  // Rotazione loghi avatar
   const avatarLogos = [
     "public/loghi/logo_rm.png",
     "public/loghi/logo_nexus.png",
@@ -324,7 +323,7 @@
     }, 2500);
   }
 
-  // Gestione comparsa del fumetto
+  // Fumetto di benvenuto
   if (tooltip) {
     setTimeout(() => {
       if (!windowEl.classList.contains('active')) {
@@ -339,7 +338,7 @@
     });
   }
 
-  // Apertura chatbot
+  // Funzione Apertura Chatbot
   function openChat() {
     windowEl.classList.add('active');
     bubble.style.opacity = '0';
@@ -349,7 +348,7 @@
     }
   }
 
-  // Chiusura chatbot
+  // Funzione Chiusura Chatbot
   function closeChat() {
     windowEl.classList.remove('active');
     bubble.style.opacity = '1';
@@ -359,16 +358,16 @@
   bubble.addEventListener('click', openChat);
   closeBtn.addEventListener('click', closeChat);
 
-  // ─── APERTURA AUTOMATICA INIZIALE SU DESKTOP (E CHIUSA SU MOBILE) ───
+  // APERTURA AUTOMATICA INIZIALE SU DESKTOP (CHIUSA SU MOBILE)
   const isDesktop = window.innerWidth >= 768;
   if (isDesktop && !sessionStorage.getItem('nova_auto_opened')) {
     setTimeout(() => {
       openChat();
       sessionStorage.setItem('nova_auto_opened', 'true');
-    }, 1500); // Elegante ritardo di 1.5 secondi
+    }, 1500);
   }
 
-  // Chiamata al webhook reale di n8n con parser dei link cliccabili
+  // Invio messaggio a n8n con parser dei link cliccabili
   chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const text = chatInput.value.trim();
@@ -406,7 +405,7 @@
         const botMsg = document.createElement('div');
         botMsg.className = 'message system';
         
-        // PARSER DELLE URL: Rende cliccabili i link nudi generati da Nova
+        // PARSER DELLE URL: Rende cliccabili i link nudi generati da Nova (in elegante colore oro F2D28B)
         const rawResponse = data.response;
         const urlRegex = /(https?:\/\/[^\s<]+)/g;
         if (urlRegex.test(rawResponse)) {
