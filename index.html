@@ -185,7 +185,7 @@
       "jobTitle": "Founder & Software Engineer",
       "sameAs": [
         "https://www.linkedin.com/in/riccardo-modena-13918a61/",
-        "https://www.facebook.com/riccardo.modena.792",
+        "https://www.facebook.com/riccardo-modena.792",
         "https://www.instagram.com/riccardo_mode_"
       ]
     },
@@ -428,7 +428,7 @@
       <section id="trigger-9"  class="section-trigger w-full"></section>
       <section id="trigger-10" class="section-trigger w-full"></section>
       <section id="trigger-11" class="section-trigger w-full"></section>
-      <!-- Spacer di sicurezza per consentire lo scorrimento e la lettura prima del loop su Contatti -->
+      <!-- Spacer di sicurezza per consentire lo scorrimento prima del loop su Contatti -->
       <div style="height: 110vh;" class="w-full"></div>
     </div>
   </div>
@@ -457,7 +457,7 @@
     const yr = document.getElementById("current-year");
     if (yr) yr.innerText = new Date().getFullYear();
 
-    // Cache-Busting attiva per forzare il download della ruota orbitale a 9 SaaS aggiornata
+    // Cache-Busting attiva per forzare il download della ruota orbitale a 9 SaaS aggiornata ad ogni caricamento
     let orbitHTML = "";
     fetch("public/orbit-template.html?v=" + new Date().getTime())
       .then(res => res.text())
