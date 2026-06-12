@@ -900,5 +900,29 @@
   <!-- Collegamento nativo al chatbot e al cookie banner nella cartella public -->
   <script src="public/cookie-banner.js"></script>
   <script src="public/chatbot.js"></script>
+  <script>
+    // Intercettazione dei click sui link interni per scorrere all'interno della zona di attivazione del trigger
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll('a[href^="#trigger-"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          const targetId = this.getAttribute("href");
+          const targetEl = document.querySelector(targetId);
+          if (targetEl) {
+            const targetScrollY = targetEl.getBoundingClientRect().top + window.scrollY;
+            const targetHeight = targetEl.offsetHeight;
+            
+            // Calcolo di un offset del 35% dentro la sezione per superare la soglia di attivazione delle schede
+            const scrollOffset = targetId === "#trigger-0" ? 0 : (targetHeight * 0.35);
+            
+            window.scrollTo({
+              top: targetScrollY + scrollOffset,
+              behavior: "smooth"
+            });
+          }
+        });
+      });
+    });
+  </script>
 </body>
 </html>

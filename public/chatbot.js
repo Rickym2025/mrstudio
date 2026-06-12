@@ -358,13 +358,12 @@
   bubble.addEventListener('click', openChat);
   closeBtn.addEventListener('click', closeChat);
 
-  // APERTURA AUTOMATICA INIZIALE SU DESKTOP (CHIUSA SU MOBILE)
+  // CONFIGURAZIONE AVVIO: APERTO SU DESKTOP, CHIUSO SU MOBILE
   const isDesktop = window.innerWidth >= 768;
-  if (isDesktop && !sessionStorage.getItem('nova_auto_opened')) {
-    setTimeout(() => {
-      openChat();
-      sessionStorage.setItem('nova_auto_opened', 'true');
-    }, 1500);
+  if (isDesktop) {
+    openChat();
+  } else {
+    closeChat();
   }
 
   // Invio messaggio a n8n con parser dei link cliccabili
