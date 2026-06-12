@@ -46,7 +46,7 @@
       pointer-events: none;
     }
 
-    /* ─── ANIMAZIONI E STILI PER IL SISTEMA ORBITALE (SCENE 9) ─── */
+    /* ─── ANIMAZIONI E STILI PER IL SISTEMA ORBITALE (SCENE 10) ─── */
     @keyframes orbit-rotation {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
@@ -190,7 +190,7 @@
       <img src="public/loghi/logo_rm.png" alt="RM Studio Logo" class="w-6 h-6 object-contain" onerror="this.style.display='none'">
       <span class="font-serif text-lg tracking-widest uppercase text-[#F2D28B]">RM Studio</span>
     </div>
-    <a href="#trigger-10" class="border border-[#F2D28B]/40 text-[#F2D28B] hover:bg-[#F2D28B] hover:text-black transition-all duration-300 px-5 py-2 text-[10px] tracking-widest uppercase font-mono">
+    <a href="#trigger-11" class="border border-[#F2D28B]/40 text-[#F2D28B] hover:bg-[#F2D28B] hover:text-black transition-all duration-300 px-5 py-2 text-[10px] tracking-widest uppercase font-mono">
       CONTATTI
     </a>
   </header>
@@ -235,6 +235,7 @@
       <section id="trigger-8"  class="section-trigger w-full"></section>
       <section id="trigger-9"  class="section-trigger w-full"></section>
       <section id="trigger-10" class="section-trigger w-full"></section>
+      <section id="trigger-11" class="section-trigger w-full"></section>
     </div>
   </div>
 
@@ -242,9 +243,9 @@
   <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 bg-black/40 border border-white/10 px-6 py-4 rounded-full backdrop-blur-md pointer-events-auto shadow-2xl">
     <a href="#trigger-0" class="text-[10px] font-mono text-[#F2D28B] hover:text-white uppercase tracking-widest transition-colors">Intro</a>
     <span class="text-white/10 text-[10px]">|</span>
-    <a href="#trigger-9" class="text-[10px] font-mono text-white/40 hover:text-white uppercase tracking-widest transition-colors">Ecosistemi</a>
+    <a href="#trigger-10" class="text-[10px] font-mono text-white/40 hover:text-white uppercase tracking-widest transition-colors">Ecosistemi</a>
     <span class="text-white/10 text-[10px]">|</span>
-    <a href="#trigger-10" class="text-[10px] font-mono text-white/40 hover:text-white uppercase tracking-widest transition-colors">Contatti</a>
+    <a href="#trigger-11" class="text-[10px] font-mono text-white/40 hover:text-white uppercase tracking-widest transition-colors">Contatti</a>
   </div>
 
   <!-- ─── PIÈ DI PAGINA FISSO CON PRIVACY E TERMINI DA PUBLIC ─── -->
@@ -302,7 +303,7 @@
         logo: "logo_concierge.png",
         problem: "La reception offre di picchi di sovraccarico, con centralini intasati e turisti frustrati in attesa di risposte su Wi-Fi e check-in nelle ore notturne.",
         solution: "Giulia risponde all'istante con un'espressivita vocale calda e umana, parlando la lingua nativa dell'ospite, proponendo servizi e inviando conferme su WhatsApp.",
-        neuroCopy: "Il cervello rettiliano percepisce l'attesa come un disservizio immediato. Giulia azzera la frizione d'ingresso, elevando la percezione di status della struttura.",
+        neuroCopy: "Il cervello rettiliano percepisce l'attesa como un disservizio immediato. Giulia azzera la frizione d'ingresso, elevando la percezione di status della struttura.",
         isProduct: true,
         url: "https://concierge24.rmstudio.app"
       },
@@ -379,10 +380,22 @@
         url: "https://ff.rmstudio.app"
       },
       {
+        id: "vision",
+        chapter: "Chapter IX — UGC Video AI",
+        title: "Vision",
+        subtitle: "Generazione video UGC con presentatori virtuali iper-realistici. Crea campagne video pronte per i social in 24 ore ed abbatti del 90% i costi delle produzioni tradizionali.",
+        logo: "logo_vision.png",
+        problem: "Ingaggiare attori reali, registi e montatori per produrre video di marketing social per e-commerce richiede budget sproporzionati e tempistiche estenuanti.",
+        solution: "Utilizzo di modelli virtuali iper-realistici e coerenti (come Camila) che recitano i tuoi testi e script promozionali con fluidità espressiva e dizione perfetta.",
+        neuroCopy: "Lo sguardo e l'espressione di un volto umano stimolano la dopamina e riducono lo scetticismo d'acquisto. Vision replica la vicinanza umana a costo zero.",
+        isProduct: true,
+        url: "https://vision.rmstudio.app"
+      },
+      {
         id: "the-union",
         chapter: "The Synthesis",
         title: "Ecosistema Connesso",
-        subtitle: "La convergenza di otto canali autonomi integrati sotto un'unica direzione tecnica. Sincronizzazione automatica tramite database relazionali per azzerare ogni forma di frizione logica ed operativa.",
+        subtitle: "La convergenza di nove canali autonomi integrati sotto un'unica direzione tecnica. Sincronizzazione automatica tramite database relazionali per azzerare ogni forma di frizione logica ed operativa.",
         logo: "logo_rm.png",
         isProduct: false,
         isTheUnion: true
@@ -398,7 +411,7 @@
       }
     ];
 
-    // ─── GENERAZIONE DINAMICA SCHEDE EDITORIALI CON ALLINEAMENTO RESPONSIVO ADATTATO (SPLIT 50/50 SU SMARTPHONE) ───
+    // ─── GENERAZIONE DINAMICA SCHEDE EDITORIALI CON ALLINEAMENTO RESPONSIVO ADATTATO ───
     const overlayContainer = document.getElementById("text-overlays");
 
     SCENES.forEach((scene, index) => {
@@ -481,7 +494,7 @@
         `;
       }
 
-      // ─── COLONNA DESTRA (SISTEMA ORBITALE - NASCOSTO SU SMARTPHONE PER FAR COMPARIRE I VIDEO) ───
+      // ─── COLONNA DESTRA (SISTEMA ORBITALE - NASCOSTO SU SMARTPHONE) ───
       let rightColumnContent = logoColumn;
       if (scene.isIntro) {
         rightColumnContent = rickyPhotoColumn;
@@ -511,7 +524,7 @@
       cardWrapper.innerHTML = `
         <${tagType} ${hrefAttr} class="scene-card w-full ${cardSizeClass} bg-[#07070a]/92 backdrop-blur-3xl border border-white/10 rounded-2xl md:rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.95)] preserve-3d opacity-0 pointer-events-none flex flex-col ${flexDirClass} gap-4 md:gap-12 items-center justify-between ${cursorClass}">
           <div class="flex-1 text-left w-full max-w-xl">
-            <!-- Logo nell'intestazione della scheda con percorso corretto public/loghi/ -->
+            <!-- Logo nell'intestazione della scheda -->
             <div class="flex items-center gap-4 mb-4">
               <img src="public/loghi/${scene.logo}" alt="${scene.title} Logo" class="w-10 h-10 object-contain rounded-xl bg-black/40 p-1 border border-white/10" onerror="this.style.display='none'">
               <div>
@@ -590,7 +603,7 @@
       }
     });
 
-    // ─── SCENOPHONIC 3D TRANSITIONS FORZATE CON INTEGRATIVO AUTOALPHA (VISIBILITY SECURE) ───
+    // ─── SCENOPHONIC 3D TRANSITIONS FORZATE CON INTEGRATIVO AUTOALPHA ───
     function getSceneProps(index) {
       switch (index) {
         case 0: // Intro / Hero
@@ -647,13 +660,19 @@
             mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
             exit: { autoAlpha: 0, opacity: 0, scale: 0.7, z: -200, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
           };
-        case 9: // The Union (Synthesis)
+        case 9: // Vision (Nuovo inserimento alla fine)
+          return {
+            init: { autoAlpha: 0, opacity: 0, scale: 1.2, z: 150, rotateX: -10, rotateY: 10, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, opacity: 0, scale: 0.8, z: -150, rotateX: 10, rotateY: -10, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+          };
+        case 10: // The Union (Synthesis)
           return {
             init: { autoAlpha: 0, opacity: 0, rotateY: -180, z: -500, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
             mid: { autoAlpha: 1, opacity: 1, rotateY: 0, z: 0, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
             exit: { autoAlpha: 0, opacity: 0, rotateY: 180, z: 500, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
           };
-        case 10: // Contacts / Outro
+        case 11: // Contacts / Outro
           return {
             init: { autoAlpha: 0, opacity: 0, y: 150, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
             mid: { autoAlpha: 1, opacity: 1, y: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
