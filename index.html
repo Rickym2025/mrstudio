@@ -457,8 +457,9 @@
     const yr = document.getElementById("current-year");
     if (yr) yr.innerText = new Date().getFullYear();
 
+    // Cache-Busting attiva per forzare il download della ruota orbitale a 9 SaaS aggiornata
     let orbitHTML = "";
-    fetch("public/orbit-template.html")
+    fetch("public/orbit-template.html?v=" + new Date().getTime())
       .then(res => res.text())
       .then(html => {
         orbitHTML = html;

@@ -220,13 +220,13 @@
       .chat-tooltip {
         right: 96px;
         top: 104px;
-        bottom: auto; /* Annulla il bottom desktop */
+        bottom: auto;
       }
     }
   `;
   document.head.appendChild(style);
 
-  // 2. Creazione elementi DOM del Chatbot
+  // Creazione elementi DOM del Chatbot
   const chatContainer = document.createElement('div');
   chatContainer.innerHTML = `
     <!-- Bolla Fluttuante Cinetica -->
@@ -238,7 +238,7 @@
     </div>
 
     <!-- Fumetto di Neuromarketing (In quale settore operi?) -->
-    ${!isTooltipClosed ? `
+    \${!isTooltipClosed ? \`
       <div id="chat-tooltip" class="chat-tooltip pointer-events-auto">
         <span class="tracking-wide">In quale settore operi? Scopri l'AI su misura per te 🎯</span>
         <button id="tooltip-close" class="text-neutral-400 hover:text-white transition-colors focus:outline-none cursor-pointer">
@@ -247,7 +247,7 @@
           </svg>
         </button>
       </div>
-    ` : ''}
+    \` : ''}
 
     <!-- Finestra di Chat -->
     <div id="chat-window" class="chat-window pointer-events-auto">
@@ -299,7 +299,7 @@
   const chatMessages = document.getElementById('chat-messages');
   const avatarImg = document.getElementById('chat-logo-avatar');
 
-  // ─── LOGICA ROTAZIONE LOGHI NELL'AVATAR (DISSOLVENZA CON ALTERNANZA) ───
+  // Logica rotazione loghi nell'avatar
   const avatarLogos = [
     "public/loghi/logo_rm.png",
     "public/loghi/logo_nexus.png",
@@ -316,15 +316,15 @@
   if (avatarImg) {
     setInterval(() => {
       currentAvatarIndex = (currentAvatarIndex + 1) % avatarLogos.length;
-      avatarImg.style.opacity = '0'; // Dissolvenza in uscita
+      avatarImg.style.opacity = '0';
       setTimeout(() => {
         avatarImg.src = avatarLogos[currentAvatarIndex];
-        avatarImg.style.opacity = '1'; // Dissolvenza in entrata
+        avatarImg.style.opacity = '1';
       }, 250);
     }, 2500);
   }
 
-  // Gestione comparsa del fumetto con delay di 2 secondi
+  // Gestione comparsa del fumetto
   if (tooltip) {
     setTimeout(() => {
       if (!windowEl.classList.contains('active')) {
@@ -339,22 +339,36 @@
     });
   }
 
-  bubble.addEventListener('click', () => {
+  // Apertura chatbot
+  function openChat() {
     windowEl.classList.add('active');
     bubble.style.opacity = '0';
     bubble.style.pointerEvents = 'none';
     if (tooltip) {
       tooltip.classList.remove('active');
     }
-  });
+  }
 
-  closeBtn.addEventListener('click', () => {
+  // Chiusura chatbot
+  function closeChat() {
     windowEl.classList.remove('active');
     bubble.style.opacity = '1';
     bubble.style.pointerEvents = 'auto';
-  });
+  }
 
-  // Chiamata al webhook reale di n8n
+  bubble.addEventListener('click', openChat);
+  closeBtn.addEventListener('click', closeChat);
+
+  // ─── APERTURA AUTOMATICA INIZIALE SU DESKTOP (E CHIUSA SU MOBILE) ───
+  const isDesktop = window.innerWidth >= 768;
+  if (isDesktop && !sessionStorage.getItem('nova_auto_opened')) {
+    setTimeout(() => {
+      openChat();
+      sessionStorage.setItem('nova_auto_opened', 'true');
+    }, 1500); // Elegante ritardo di 1.5 secondi
+  }
+
+  // Chiamata al webhook reale di n8n con parser dei link cliccabili
   chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const text = chatInput.value.trim();
@@ -391,7 +405,18 @@
       if (data && data.response) {
         const botMsg = document.createElement('div');
         botMsg.className = 'message system';
-        botMsg.innerText = data.response;
+        
+        // PARSER DELLE URL: Rende cliccabili i link nudi generati da Nova
+        const rawResponse = data.response;
+        const urlRegex = /(https?:\/\/[^\s<]+)/g;
+        if (urlRegex.test(rawResponse)) {
+          botMsg.innerHTML = rawResponse.replace(urlRegex, (url) => {
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: #F2D28B; text-decoration: underline; font-weight: 600;">${url}</a>`;
+          });
+        } else {
+          botMsg.innerText = rawResponse;
+        }
+
         chatMessages.appendChild(botMsg);
       } else {
         throw new Error("Risposta non valida");
