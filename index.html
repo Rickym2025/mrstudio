@@ -200,7 +200,7 @@
           "url": "https://nexus.rmstudio.app",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "All",
-          "description": "Sales Overlay invisibile per siti web. Acquisisce lead e gestisce prenotazioni in chat H24.",
+          "description": "Sales Overlay invisibile per siti web. Raccoglie prenotazioni e lead profilati H24.",
           "offers": {
             "@type": "Offer",
             "price": "49.00",
@@ -303,7 +303,6 @@
   }
   </script>
 
-  
 </head>
 <body>
 
@@ -407,7 +406,7 @@
     <!-- Contenitore Fisso delle Schede -->
     <div id="text-overlays" class="fixed inset-0 z-10 pointer-events-none"></div>
 
-    <!-- Triggers Invisibili per lo Scroll — altezze non-uniformi per far apparire subito Nexus dopo il primo tocco -->
+    <!-- Triggers Invisibili per lo Scroll -->
     <style>
       .section-trigger { height: 200vh; }
       #trigger-0 { height: 60vh; } /* Intro cortissima su desktop per mostrare subito Nexus al primo scorrimento */
@@ -429,6 +428,8 @@
       <section id="trigger-9"  class="section-trigger w-full"></section>
       <section id="trigger-10" class="section-trigger w-full"></section>
       <section id="trigger-11" class="section-trigger w-full"></section>
+      <!-- Spacer di sicurezza per consentire lo scorrimento e la lettura su Ecosistemi e Contatti prima del loop -->
+      <div style="height: 110vh;" class="w-full"></div>
     </div>
   </div>
 
