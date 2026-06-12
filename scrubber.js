@@ -151,13 +151,14 @@
     ctx.drawImage(img, dx, dy, dw, dh);
   }
 
-  // ─── CARD SYNC ───────────────────────────────────────────────────────────────
+// ─── CARD SYNC ───────────────────────────────────────────────────────────────
   let cards = null;
   let activeCardIndex = 0;
 
-  function updateCardTimelineDirect(sceneIdx) {
+  function updateCardTimelineDirect(sceneIdx, force = false) {
+    if (window.isAutoScrolling && !force) return;
     if (!cards || cards.length === 0) return;
-    if (sceneIdx === activeCardIndex) return;
+    if (sceneIdx === activeCardIndex && !force) return;
 
     const prevIdx = activeCardIndex;
     activeCardIndex = sceneIdx;
@@ -187,9 +188,10 @@
     }
   }
 
-  let videoReady = false;
-  let isLooping = false;
-  let currentTargetTime = 0;
+  // Forza l'aggiornamento scavalcando il blocco di scorrimento rapido
+  window.forceUpdateCard = function(sceneIdx) {
+    updateCardTimelineDirect(sceneIdx, true);
+  };
 
   // Funzione ultra-performante per gestire la riproduzione nativa fluida (Bypass del seek lag)
   function playMobileVideoSegment(index) {
