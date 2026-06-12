@@ -460,13 +460,21 @@
     // Cache-Busting attiva per forzare il download della ruota orbitale a 9 SaaS aggiornata ad ogni caricamento
     let orbitHTML = "";
     fetch("public/orbit-template.html?v=" + new Date().getTime())
-      .then(res => res.text())
-      .then(html => {
-        orbitHTML = html;
-        const target = document.getElementById("orbit-container-target");
-        if (target) target.innerHTML = html;
-      })
-      .catch(err => console.error("Errore nel caricamento del file orbitale:", err));
+	  .then(res => res.text())
+	  .then(html => {
+		orbitHTML = html;
+		function injectOrbit() {
+		  const target = document.getElementById("orbit-container-target");
+		  if (target) {
+			target.innerHTML = html;
+		  } else {
+			// Il container non è ancora nel DOM, riprova tra 100ms
+			setTimeout(injectOrbit, 100);
+		  }
+		}
+		injectOrbit();
+	  })
+	  .catch(err => console.error("Errore nel caricamento del file orbitale:", err));
 
     const SCENES = [
       {
