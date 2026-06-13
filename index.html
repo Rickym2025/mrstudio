@@ -703,7 +703,7 @@
         rightColumnContent = rickyPhotoColumn;
       } else if (scene.isTheUnion) {
 		  rightColumnContent = `
-			<div id="orbit-container-target" class="hidden md:flex relative w-[400px] h-[400px] items-center justify-center scale-95 md:scale-110 mt-6 md:mt-0 pointer-events-auto">
+			<div id="orbit-container-target" class="hidden md:flex relative w-[380px] h-[380px] items-center justify-center scale-90 md:scale-100 mt-6 md:mt-0 pointer-events-auto">
 			  <!-- orbit verrà iniettata via fetch -->
 			</div>
 		  `;
@@ -716,9 +716,9 @@
       // Layout compatto per mobile, grande per desktop
       let cardSizeClass = "max-w-3xl";
       if (scene.isIntro || scene.isTheUnion) {
-	  cardSizeClass = "max-w-4xl p-5 md:p-12 gap-12 lg:gap-16";
+		  cardSizeClass = "max-w-5xl p-5 md:p-14 gap-14 lg:gap-20";
 		} else if (scene.isContact) {
-		  cardSizeClass = "max-w-2xl p-5 md:p-10";
+		  cardSizeClass = "max-w-3xl p-5 md:p-12";
 		} else {
 		  cardSizeClass = "max-w-3xl p-5 md:p-14";
 		}
