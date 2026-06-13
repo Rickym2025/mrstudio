@@ -1,19 +1,31 @@
 <style>
-  /* ─── STILI AUTOINSTALLANTI PER L'ELEVAZIONE DEI FUMETTI (z-index fix) ─── */
+  /* ─── ENGIN DELLO STACKING CONTEXT TRIDIMENSIONALE (3D RENDER) ─── */
   
-  /* 1. Forza l'intero blocco orbitante (il wrapper) a salire sopra a tutto il resto (inclusa la foto centrale) durante l'hover */
-  .orbit-wrapper:hover {
-      z-index: 100 !important;
+  /* Attiva lo spazio tridimensionale reale per l'anello orbitale */
+  .orbit-ring {
+      transform-style: preserve-3d !important;
+      perspective: 1000px !important;
   }
 
-  /* 2. Stile grafico del fumetto (tooltip) con protezione tridimensionale */
+  .orbit-wrapper {
+      transform-style: preserve-3d !important;
+      transition: transform 0.3s ease-in-out !important;
+  }
+
+  /* Quando si passa sopra l'elemento, lo solleva fisicamente sull'asse Z spaziale di 100px */
+  .orbit-wrapper:hover {
+      z-index: 9999 !important;
+      transform: translate(-50%, -50%) translateZ(100px) !important;
+  }
+
+  /* Stile grafico del fumetto (tooltip) con protezione tridimensionale */
   .orbit-tooltip {
       position: absolute !important;
       bottom: 85px !important; /* Leggermente sollevato per non sovrapporsi all'icona */
       left: 50% !important;
       transform: translateX(-50%) !important;
       width: 210px !important;
-      background: #060b19 !important; /* Sfondo blu scuro elegante coordinato con i loghi */
+      background: #060b19 !important; /* Sfondo blu scuro elegante coordinato */
       border: 1px solid rgba(0, 229, 242, 0.18) !important; /* Bordo ciano luminescente */
       color: #94a3b8 !important;
       font-size: 13px !important;
@@ -37,7 +49,7 @@
       font-weight: 700 !important;
   }
 
-  /* 3. Forza la visualizzazione del fumetto al passaggio del mouse sull'elemento orbitale */
+  /* Forza la visualizzazione del fumetto al passaggio del mouse sull'elemento orbitale */
   .orbit-item:hover .orbit-tooltip,
   .orbit-wrapper:hover .orbit-tooltip {
       opacity: 1 !important;
@@ -89,7 +101,7 @@
   </div>
 
   <!-- 4. OMNIASTUDIO (120° -> top: 75.0%, left: 93.3%) -->
-  <div class="orbit-wrapper" style="top: 75.0%, left: 93.3%;" style="top: 75.0%; left: 93.3%;">
+  <div class="orbit-wrapper" style="top: 75.0%; left: 93.3%;">
     <div class="orbit-item">
       <a href="https://omniastudio.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link" style="background: #0a0a0c; padding: 10px;">
         <img src="https://rmstudio.app/public/loghi/logo_omniastudio.png" alt="OmniaStudio" class="orbit-img" />
