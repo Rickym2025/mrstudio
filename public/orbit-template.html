@@ -1,8 +1,14 @@
 <style>
   /* ─── ENGIN DELLO STACKING CONTEXT TRIDIMENSIONALE (3D RENDER) ─── */
   
-  /* Attiva lo spazio tridimensionale reale per l'anello orbitale */
+  /* 1. Abbassa la foto centrale per metterla sotto l'anello dei loghi e dei fumetti */
+  .orbit-center-photo {
+      z-index: 2 !important;
+  }
+
+  /* 2. Assicura che l'anello sia posizionato sopra la foto centrale e usi lo spazio 3D */
   .orbit-ring {
+      z-index: 10 !important;
       transform-style: preserve-3d !important;
       perspective: 1000px !important;
   }
@@ -12,10 +18,10 @@
       transition: transform 0.3s ease-in-out !important;
   }
 
-  /* Quando si passa sopra l'elemento, lo solleva fisicamente sull'asse Z spaziale di 100px */
+  /* Quando si passa sopra l'elemento, lo solleva fisicamente sull'asse Z spaziale di 150px */
   .orbit-wrapper:hover {
-      z-index: 9999 !important;
-      transform: translate(-50%, -50%) translateZ(100px) !important;
+      z-index: 1000 !important;
+      transform: translate(-50%, -50%) translateZ(150px) !important;
   }
 
   /* Stile grafico del fumetto (tooltip) con protezione tridimensionale */
@@ -25,7 +31,7 @@
       left: 50% !important;
       transform: translateX(-50%) !important;
       width: 210px !important;
-      background: #060b19 !important; /* Sfondo blu scuro elegante coordinato */
+      background: #060b19 !important; /* Sfondo blu scuro elegante coordinato con i loghi */
       border: 1px solid rgba(0, 229, 242, 0.18) !important; /* Bordo ciano luminescente */
       color: #94a3b8 !important;
       font-size: 13px !important;
@@ -35,7 +41,7 @@
       pointer-events: none !important;
       transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out !important;
       text-align: center !important;
-      z-index: 99999 !important; /* Garantisce la posizione al livello visivo massimo */
+      z-index: 99999 !important; /* Garantisce la posizione al livello visivo massimo assoluto */
       box-shadow: 0 10px 30px rgba(0,0,0,0.6) !important;
       line-height: 1.4 !important;
   }
