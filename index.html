@@ -716,12 +716,12 @@
       // Layout compatto per mobile, grande per desktop
       let cardSizeClass = "max-w-3xl";
       if (scene.isIntro || scene.isTheUnion) {
-        cardSizeClass = "max-w-6xl p-5 md:p-16 gap-16 lg:gap-24";
-      } else if (scene.isContact) {
-        cardSizeClass = "max-w-4xl p-5 md:p-14";
-      } else {
-        cardSizeClass = "max-w-3xl p-5 md:p-14";
-      }
+	  cardSizeClass = "max-w-4xl p-5 md:p-12 gap-12 lg:gap-16";
+		} else if (scene.isContact) {
+		  cardSizeClass = "max-w-2xl p-5 md:p-10";
+		} else {
+		  cardSizeClass = "max-w-3xl p-5 md:p-14";
+		}
 
       // Costruzione finale della scheda
       cardWrapper.innerHTML = `
