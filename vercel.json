@@ -1,7 +1,9 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": false,
   "headers": [
     {
-      "source": "/public/orbit-template.html",
+      "source": "/public/(.*)",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
@@ -26,6 +28,14 @@
     {
       "source": "/orbit-template",
       "destination": "/public/orbit-template.html"
+    },
+    {
+      "source": "/cookie-banner.js",
+      "destination": "/public/cookie-banner.js"
+    },
+    {
+      "source": "/chatbot.js",
+      "destination": "/public/chatbot.js"
     }
   ]
 }
