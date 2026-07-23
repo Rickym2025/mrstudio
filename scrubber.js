@@ -92,9 +92,12 @@
   }
 
   // ─── STATO ───────────────────────────────────────────────────────────────────
-  const images = new Array(TOTAL_FRAMES).fill(null);
+   const images = new Array(TOTAL_FRAMES).fill(null);
   const scrollTracker = { frame: 0 };
   let canvasW = 1, canvasH = 1, dpr = 1;
+  let videoReady = false;
+  let isLooping = false;
+  let currentTargetTime = 0;
 
   // ─── DOM ─────────────────────────────────────────────────────────────────────
   const canvas = document.getElementById("immersive-canvas");
