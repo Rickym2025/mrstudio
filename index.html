@@ -303,6 +303,26 @@
   }
   </script>
 
+	<!-- ─── SCHEMA.ORG FOR GOOGLE SEARCH & AI BOTS (MASTER BLOG LINK) ─── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "@id": "https://blogs.rmstudio.app/#masterblog",
+    "name": "RM Studio Master Blog & Insights",
+    "url": "https://blogs.rmstudio.app/",
+    "description": "Hub centrale degli approfondimenti B2B, guide sull'Intelligenza Artificiale, e innovazioni tecnologiche dell'ecosistema RM Studio.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "RM Studio",
+      "url": "https://rmstudio.app/",
+      "logo": "https://rmstudio.app/public/loghi/logo_rm.png"
+    }
+  }
+  </script>
+
+	
+
 </head>
 <body>
 
@@ -361,6 +381,13 @@
         <p>Produzione di colonne sonore originali, jingle pubblicitari pronti per il social broadcast e branding acustico curati da Fausto Fusetti.</p>
       </article>
     </main>
+
+	  <article>
+        <h3>RM Studio Master Blog & Tech Insights</h3>
+        <p>Leggi tutte le notizie, le guide operative B2B e gli aggiornamenti sull'Intelligenza Artificiale applicata ai vari settori commerciali.</p>
+        <p><a href="https://blogs.rmstudio.app/" target="_blank"><strong>Visita il Master Blog Ufficiale di RM Studio</strong></a></p>
+      </article>
+	  
   </noscript>
   
 
@@ -376,15 +403,20 @@
     </div>
   </div>
 
-  <!-- ─── HEADER MINIMALISTA FISSO ─── -->
+<!-- ─── HEADER MINIMALISTA FISSO ─── -->
   <header class="fixed top-0 left-0 w-full z-40 flex justify-between items-center px-6 md:px-12 py-6 border-b border-white/5 bg-black/10 backdrop-blur-md">
     <div class="flex items-center gap-3">
       <img src="public/loghi/logo_rm.png" alt="RM Studio Logo" class="w-6 h-6 object-contain" onerror="this.style.display='none'">
       <span class="font-serif text-lg tracking-widest uppercase text-[#F2D28B]">RM Studio</span>
     </div>
-    <a href="#trigger-11" class="border border-[#F2D28B]/40 text-[#F2D28B] hover:bg-[#F2D28B] hover:text-black transition-all duration-300 px-5 py-2 text-[10px] tracking-widest uppercase font-mono">
-      CONTATTI
-    </a>
+    <div class="flex items-center gap-4">
+      <a href="https://blogs.rmstudio.app/" target="_blank" class="text-white/70 hover:text-[#F2D28B] transition-colors text-[10px] tracking-widest uppercase font-mono hidden md:block">
+        📰 MASTER BLOG
+      </a>
+      <a href="#trigger-11" class="border border-[#F2D28B]/40 text-[#F2D28B] hover:bg-[#F2D28B] hover:text-black transition-all duration-300 px-5 py-2 text-[10px] tracking-widest uppercase font-mono">
+        CONTATTI
+      </a>
+    </div>
   </header>
 
   <!-- ─── CONTENITORE IMMERSIVO CANVAS & VIDEO HTML5 ─── -->
@@ -433,11 +465,15 @@
     </div>
   </div>
 
-  <!-- ─── FLOATING DOCK IN BASSO ─── -->
-  <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 bg-black/40 border border-white/10 px-6 py-4 rounded-full backdrop-blur-md pointer-events-auto shadow-2xl">
+<!-- ─── FLOATING DOCK IN BASSO ─── -->
+  <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 md:gap-4 bg-black/50 border border-white/10 px-5 py-3.5 rounded-full backdrop-blur-md pointer-events-auto shadow-2xl">
     <a href="#trigger-0" class="text-[10px] font-mono text-[#F2D28B] hover:text-white uppercase tracking-widest transition-colors">Intro</a>
     <span class="text-white/10 text-[10px]">|</span>
     <a href="#trigger-10" class="text-[10px] font-mono text-white/40 hover:text-white uppercase tracking-widest transition-colors">Ecosistemi</a>
+    <span class="text-white/10 text-[10px]">|</span>
+    <a href="https://blogs.rmstudio.app/" target="_blank" class="text-[10px] font-mono text-[#F2D28B] hover:text-white uppercase tracking-widest transition-colors flex items-center gap-1">
+      <span>📰</span> Blog
+    </a>
     <span class="text-white/10 text-[10px]">|</span>
     <a href="#trigger-11" class="text-[10px] font-mono text-white/40 hover:text-white uppercase tracking-widest transition-colors">Contatti</a>
   </div>
