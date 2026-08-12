@@ -5,3 +5,4 @@ Disallow: /public/
 Disallow: /loghi/
 
 Sitemap: https://rmstudio.app/sitemap.xml
+Sitemap: https://blogs.rmstudio.app/manifest.json
