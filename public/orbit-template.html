@@ -114,7 +114,7 @@
       border-radius: 50% !important;
   }
 
-  /* 3. FUMETTO TOOLTIP LUMINOSO */
+  /* 3. FUMETTO TOOLTIP LUMINOSO STANDARD (Verso l'alto) */
   .orbit-tooltip {
       position: absolute !important;
       bottom: 65px !important;
@@ -122,7 +122,7 @@
       transform: translateX(-50%) !important;
       width: 210px !important;
       background: #080812 !important;
-      border: 1px solid rgba(147, 51, 234, 0.4) !important;
+      border: 1px solid rgba(147, 51, 234, 0.5) !important;
       color: #cbd5e1 !important;
       font-size: 12px !important;
       border-radius: 10px !important;
@@ -132,7 +132,7 @@
       transition: opacity 0.2s ease, transform 0.2s ease !important;
       text-align: center !important;
       z-index: 99999 !important;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 15px rgba(147, 51, 234, 0.2) !important;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.9), 0 0 15px rgba(147, 51, 234, 0.3) !important;
       line-height: 1.4 !important;
       font-family: 'DM Sans', system-ui, sans-serif !important;
   }
@@ -148,6 +148,18 @@
   .orbit-wrapper:hover .orbit-tooltip {
       opacity: 1 !important;
       transform: translateX(-50%) translateY(-6px) !important;
+  }
+
+  /* 4. FUMETTI PER LE ICONE IN ALTO: SI APRONO VERSO IL BASSO (Non toccano il testo!) */
+  .orbit-tooltip.tooltip-down {
+      bottom: auto !important;
+      top: 65px !important;
+      transform: translateX(-50%) !important;
+  }
+  .orbit-item:hover .orbit-tooltip.tooltip-down,
+  .orbit-wrapper:hover .orbit-tooltip.tooltip-down {
+      opacity: 1 !important;
+      transform: translateX(-50%) translateY(6px) !important;
   }
 
   .pulse-ring-element {
@@ -183,39 +195,39 @@
 
   <div class="orbit-ring">
 
-    <!-- 1. CONCIERGE24 (0.0°) -->
+    <!-- 1. CONCIERGE24 (0.0° - FUMETTO VERSO IL BASSO) -->
     <div class="orbit-wrapper" style="top: 0.0%; left: 50.0%;">
       <div class="orbit-item">
         <a href="https://concierge24.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
           <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_concierge.png" alt="Concierge24" class="orbit-img" />
         </a>
-        <div class="orbit-tooltip">
+        <div class="orbit-tooltip tooltip-down">
           <b>Concierge24</b>
           Assistente vocale e testuale AI H24 per hotel e strutture turistiche.
         </div>
       </div>
     </div>
 
-    <!-- 2. DRIVEMOTION (30.0°) -->
+    <!-- 2. DRIVEMOTION (30.0° - FUMETTO VERSO IL BASSO) -->
     <div class="orbit-wrapper" style="top: 6.7%; left: 75.0%;">
       <div class="orbit-item">
         <a href="https://drivemotion.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
           <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_drivemotion.png" alt="DriveMotion" class="orbit-img" />
         </a>
-        <div class="orbit-tooltip">
+        <div class="orbit-tooltip tooltip-down">
           <b>DriveMotion AI</b>
           Sfondi e video promozionali cinematografici per saloni auto.
         </div>
       </div>
     </div>
 
-    <!-- 3. NEXUS AI (60.0°) -->
+    <!-- 3. NEXUS AI (60.0° - FUMETTO VERSO IL BASSO) -->
     <div class="orbit-wrapper" style="top: 25.0%; left: 93.3%;">
       <div class="orbit-item">
         <a href="https://nexus.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
           <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_nexus.png" alt="Nexus AI" class="orbit-img" />
         </a>
-        <div class="orbit-tooltip">
+        <div class="orbit-tooltip tooltip-down">
           <b>Nexus AI</b>
           Widget chatbot intelligente per conversione automatica lead.
         </div>
@@ -313,26 +325,26 @@
       </div>
     </div>
 
-    <!-- 11. LOVE (300.0°) -->
+    <!-- 11. LOVE (300.0° - FUMETTO VERSO IL BASSO) -->
     <div class="orbit-wrapper" style="top: 25.0%; left: 6.7%;">
       <div class="orbit-item">
         <a href="https://love.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
           <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_love.png" alt="LOVE" class="orbit-img" />
         </a>
-        <div class="orbit-tooltip">
+        <div class="orbit-tooltip tooltip-down">
           <b>LOVE</b>
           Partecipazioni digitali d'autore con ceralacca 3D, musica e maxischermo.
         </div>
       </div>
     </div>
 
-    <!-- 12. ETERNIA (330.0°) -->
+    <!-- 12. ETERNIA (330.0° - FUMETTO VERSO IL BASSO) -->
     <div class="orbit-wrapper" style="top: 6.7%; left: 25.0%;">
       <div class="orbit-item">
         <a href="https://eternia.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/logo_eternia.png" alt="ETERNIA" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_eternia.png" alt="ETERNIA" class="orbit-img" />
         </a>
-        <div class="orbit-tooltip">
+        <div class="orbit-tooltip tooltip-down">
           <b>ETERNIA</b>
           Memoriali QR d'autore per Onoranze Funebri e Pet Memorials.
         </div>
