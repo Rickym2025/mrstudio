@@ -14,12 +14,12 @@
       100% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.6; }
   }
 
-  /* Contenitore wrapper con 105px di margine superiore di sicurezza */
+  /* Contenitore wrapper centrato */
   .orbit-container-inner {
       position: relative !important;
       width: 320px !important;
       height: 320px !important;
-      margin: 105px auto 40px auto !important;
+      margin: 40px auto !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
@@ -60,7 +60,7 @@
       z-index: 10 !important;
   }
 
-  /* Mette in pausa la rotazione al passaggio del mouse */
+  /* Mette in pausa la rotazione quando l'utente passa sopra il mouse */
   .orbit-container-inner:hover .orbit-ring,
   .orbit-container-inner:hover .orbit-item {
       animation-play-state: paused !important;
@@ -114,26 +114,27 @@
       border-radius: 50% !important;
   }
 
-  /* 3. FUMETTO TOOLTIP LUMINOSO COMPATTO */
+  /* 3. FUMETTO TOOLTIP LUMINOSO: APERTURA VERSO IL BASSO (NON ESCE DALL'ALTO) */
   .orbit-tooltip {
       position: absolute !important;
-      bottom: 58px !important;
+      top: 60px !important;
+      bottom: auto !important;
       left: 50% !important;
       transform: translateX(-50%) !important;
-      width: 200px !important;
+      width: 210px !important;
       background: #080812 !important;
-      border: 1px solid rgba(147, 51, 234, 0.5) !important;
+      border: 1px solid rgba(147, 51, 234, 0.6) !important;
       color: #cbd5e1 !important;
       font-size: 11px !important;
       border-radius: 10px !important;
-      padding: 8px 10px !important;
+      padding: 8px 12px !important;
       opacity: 0 !important;
       pointer-events: none !important;
       transition: opacity 0.2s ease, transform 0.2s ease !important;
       text-align: center !important;
       z-index: 99999 !important;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.9), 0 0 15px rgba(147, 51, 234, 0.3) !important;
-      line-height: 1.35 !important;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.95), 0 0 15px rgba(147, 51, 234, 0.4) !important;
+      line-height: 1.4 !important;
       font-family: 'DM Sans', system-ui, sans-serif !important;
   }
   .orbit-tooltip b {
@@ -147,7 +148,7 @@
   .orbit-item:hover .orbit-tooltip,
   .orbit-wrapper:hover .orbit-tooltip {
       opacity: 1 !important;
-      transform: translateX(-50%) translateY(-5px) !important;
+      transform: translateX(-50%) translateY(6px) !important;
   }
 
   .pulse-ring-element {
@@ -326,7 +327,7 @@
       </div>
     </div>
 
-    <!-- 12. ETERNIA (330.0° - CON FALLBACK A 3 LIVELLI SUL LOGO) -->
+    <!-- 12. ETERNIA (330.0°) -->
     <div class="orbit-wrapper" style="top: 6.7%; left: 25.0%;">
       <div class="orbit-item">
         <a href="https://eternia.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
