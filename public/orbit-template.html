@@ -14,12 +14,12 @@
       100% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.6; }
   }
 
-  /* Contenitore wrapper originale con padding di sicurezza */
+  /* Contenitore wrapper per centramento */
   .orbit-container-inner {
       position: relative !important;
       width: 320px !important;
       height: 320px !important;
-      margin: 50px auto 30px auto !important;
+      margin: 0 auto !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
@@ -60,11 +60,13 @@
       z-index: 10 !important;
   }
 
+  /* Mette in pausa la rotazione quando l'utente passa sopra il mouse */
   .orbit-container-inner:hover .orbit-ring,
   .orbit-container-inner:hover .orbit-item {
       animation-play-state: paused !important;
   }
 
+  /* Wrapper dell'icona nell'orbita */
   .orbit-wrapper {
       position: absolute !important;
       width: 52px !important;
@@ -78,6 +80,7 @@
       transform: translate(-50%, -50%) translateZ(120px) scale(1.15) !important;
   }
 
+  /* Icona contro-ruotata per rimanere dritta */
   .orbit-item {
       position: relative !important;
       width: 100% !important;
@@ -85,6 +88,7 @@
       animation: counter-spin 45s linear infinite !important;
   }
 
+  /* Link e Stile Grafico Cerchio */
   .orbit-link {
       display: flex !important;
       align-items: center !important;
@@ -110,6 +114,7 @@
       border-radius: 50% !important;
   }
 
+  /* 3. FUMETTO TOOLTIP LUMINOSO */
   .orbit-tooltip {
       position: absolute !important;
       bottom: 65px !important;
@@ -159,6 +164,7 @@
       pointer-events: none !important;
   }
 
+  /* ⚡ ADATTAMENTO RESPONSIVE PER SCHERMI MOBILE (< 600px) */
   @media (max-width: 600px) {
       .orbit-container-inner {
           transform: scale(0.78) !important;
@@ -168,131 +174,157 @@
 </style>
 
 <div class="orbit-container-inner">
+  
   <div class="pulse-ring-element"></div>
 
   <div class="orbit-center-photo">
-    <img src="https://portale.rmstudio.app/loghi/foto_riccardo.jpeg" onerror="this.src='https://rmstudio.app/logo.png'" alt="Riccardo Modena" />
+    <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/foto_riccardo.jpeg" alt="Riccardo Modena" />
   </div>
 
   <div class="orbit-ring">
-    <!-- 1. CONCIERGE24 (0.0°) -->
+
+    <!-- 1. CONCIERGE24 (0°) -->
     <div class="orbit-wrapper" style="top: 0.0%; left: 50.0%;">
       <div class="orbit-item">
         <a href="https://concierge24.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://portale.rmstudio.app/loghi/logo_concierge.png" alt="Concierge24" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_concierge.png" alt="Concierge24" class="orbit-img" />
         </a>
-        <div class="orbit-tooltip"><b>Concierge24</b>Assistente vocale e testuale AI H24 per hotel e strutture turistiche.</div>
+        <div class="orbit-tooltip">
+          <b>Concierge24</b>
+          Assistente vocale e testuale AI H24 per hotel e strutture turistiche.
+        </div>
       </div>
     </div>
 
-    <!-- 2. DRIVEMOTION (30.0°) -->
-    <div class="orbit-wrapper" style="top: 6.7%; left: 75.0%;">
+    <!-- 2. DRIVEMOTION (32.7°) -->
+    <div class="orbit-wrapper" style="top: 7.9%; left: 77.0%;">
       <div class="orbit-item">
         <a href="https://drivemotion.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://portale.rmstudio.app/loghi/logo_drivemotion.png" alt="DriveMotion" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_drivemotion.png" alt="DriveMotion" class="orbit-img" />
         </a>
-        <div class="orbit-tooltip"><b>DriveMotion AI</b>Sfondi e video promozionali cinematografici per saloni auto.</div>
+        <div class="orbit-tooltip">
+          <b>DriveMotion AI</b>
+          Sfondi e video promozionali cinematografici per saloni auto.
+        </div>
       </div>
     </div>
 
-    <!-- 3. NEXUS AI (60.0°) -->
-    <div class="orbit-wrapper" style="top: 25.0%; left: 93.3%;">
+    <!-- 3. NEXUS AI (65.5°) -->
+    <div class="orbit-wrapper" style="top: 29.2%; left: 95.5%;">
       <div class="orbit-item">
         <a href="https://nexus.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://portale.rmstudio.app/loghi/logo_nexus.png" alt="Nexus AI" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_nexus.png" alt="Nexus AI" class="orbit-img" />
         </a>
-        <div class="orbit-tooltip"><b>Nexus AI</b>Widget chatbot intelligente per conversione automatica lead.</div>
+        <div class="orbit-tooltip">
+          <b>Nexus AI</b>
+          Widget chatbot intelligente per conversione automatica lead.
+        </div>
       </div>
     </div>
 
-    <!-- 4. OMNIASTUDIO (90.0°) -->
-    <div class="orbit-wrapper" style="top: 50.0%; left: 100.0%;">
+    <!-- 4. OMNIASTUDIO (98.2°) -->
+    <div class="orbit-wrapper" style="top: 57.1%; left: 99.5%;">
       <div class="orbit-item">
         <a href="https://omniastudio.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://portale.rmstudio.app/loghi/logo_omniastudio.png" alt="OmniaStudio" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_omniastudio.png" alt="OmniaStudio" class="orbit-img" />
         </a>
-        <div class="orbit-tooltip"><b>OmniaStudio</b>IA locale e protetta 100% offline sul tuo PC, senza cloud.</div>
+        <div class="orbit-tooltip">
+          <b>OmniaStudio</b>
+          IA locale e protetta 100% offline sul tuo PC, senza cloud.
+        </div>
       </div>
     </div>
 
-    <!-- 5. DENTIS (120.0°) -->
-    <div class="orbit-wrapper" style="top: 75.0%; left: 93.3%;">
+    <!-- 5. DENTIS (130.9°) -->
+    <div class="orbit-wrapper" style="top: 82.7%; left: 87.8%;">
       <div class="orbit-item">
         <a href="https://dentis.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://portale.rmstudio.app/loghi/logo_dentis.png" alt="Dentis AI" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_dentis.png" alt="Dentis AI" class="orbit-img" />
         </a>
-        <div class="orbit-tooltip"><b>Dentis AI</b>Receptionist telefonica vocale AI H24 per studi dentistici.</div>
+        <div class="orbit-tooltip">
+          <b>Dentis AI</b>
+          Receptionist telefonica vocale AI H24 per studi dentistici.
+        </div>
       </div>
     </div>
 
-    <!-- 6. LEXIS AI (150.0°) -->
-    <div class="orbit-wrapper" style="top: 93.3%; left: 75.0%;">
+    <!-- 6. LEXIS AI (163.6°) -->
+    <div class="orbit-wrapper" style="top: 98.0%; left: 64.1%;">
       <div class="orbit-item">
         <a href="https://lexis.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://portale.rmstudio.app/loghi/logo_lexis.png" alt="Lexis AI" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_lexis.png" alt="Lexis AI" class="orbit-img" />
         </a>
-        <div class="orbit-tooltip"><b>Lexis AI</b>Receptionist telefonica vocale AI H24 per studi legali.</div>
+        <div class="orbit-tooltip">
+          <b>Lexis AI</b>
+          Receptionist telefonica vocale AI H24 per studi legali.
+        </div>
       </div>
     </div>
 
-    <!-- 7. FF EDIZIONI (180.0°) -->
-    <div class="orbit-wrapper" style="top: 100.0%; left: 50.0%;">
+    <!-- 7. FF EDIZIONI (196.4°) -->
+    <div class="orbit-wrapper" style="top: 98.0%; left: 35.9%;">
       <div class="orbit-item">
         <a href="https://ff-edizioni.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://portale.rmstudio.app/loghi/logo_ff.png" alt="FF Edizioni" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_ff.png" alt="FF Edizioni" class="orbit-img" />
         </a>
-        <div class="orbit-tooltip"><b>FF Edizioni</b>Canzoni personalizzate, jingle ed etichetta editoriale.</div>
+        <div class="orbit-tooltip">
+          <b>FF Edizioni</b>
+          Canzoni personalizzate, jingle ed etichetta editoriale.
+        </div>
       </div>
     </div>
 
-    <!-- 8. HOMETOUR (210.0°) -->
-    <div class="orbit-wrapper" style="top: 93.3%; left: 25.0%;">
+    <!-- 8. HOMETOUR (229.1°) -->
+    <div class="orbit-wrapper" style="top: 82.7%; left: 12.2%;">
       <div class="orbit-item">
         <a href="https://hometour.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://portale.rmstudio.app/loghi/logo_hometour.jpg" alt="HomeTour" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_hometour.jpg" alt="HomeTour" class="orbit-img" />
         </a>
-        <div class="orbit-tooltip"><b>HomeTour AI</b>Reel cinematografici 3D per agenzie immobiliari.</div>
+        <div class="orbit-tooltip">
+          <b>HomeTour AI</b>
+          Reel cinematografici 3D per agenzie immobiliari.
+        </div>
       </div>
     </div>
 
-    <!-- 9. VISION (240.0°) -->
-    <div class="orbit-wrapper" style="top: 75.0%; left: 6.7%;">
+    <!-- 9. VISION (261.8°) -->
+    <div class="orbit-wrapper" style="top: 57.1%; left: 0.5%;">
       <div class="orbit-item">
         <a href="https://vision.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://portale.rmstudio.app/loghi/logo_vision.png" alt="Vision UGC" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_vision.png" alt="Vision UGC" class="orbit-img" />
         </a>
-        <div class="orbit-tooltip"><b>Vision UGC</b>Video promozionali con influencer e attori virtuali AI.</div>
+        <div class="orbit-tooltip">
+          <b>Vision UGC</b>
+          Video promozionali con influencer e attori virtuali AI.
+        </div>
       </div>
     </div>
 
-    <!-- 10. ARESAI (270.0°) -->
-    <div class="orbit-wrapper" style="top: 50.0%; left: 0.0%;">
+    <!-- 10. ARESAI (294.5°) -->
+    <div class="orbit-wrapper" style="top: 29.2%; left: 4.5%;">
       <div class="orbit-item">
         <a href="https://ares.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://portale.rmstudio.app/loghi/logo_ares.png" alt="AresAI" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_ares.png" alt="AresAI" class="orbit-img" />
         </a>
-        <div class="orbit-tooltip"><b>AresAI</b>Co-pilota vocale per l'allenamento in palestra e dieta fotografica.</div>
+        <div class="orbit-tooltip">
+          <b>AresAI</b>
+          Co-pilota vocale per l'allenamento in palestra e dieta fotografica.
+        </div>
       </div>
     </div>
 
-    <!-- 11. LOVE (300.0°) -->
-    <div class="orbit-wrapper" style="top: 25.0%; left: 6.7%;">
+    <!-- 11. LOVE (327.3°) -->
+    <div class="orbit-wrapper" style="top: 7.9%; left: 23.0%;">
       <div class="orbit-item">
         <a href="https://love.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://portale.rmstudio.app/loghi/logo_love.png" alt="LOVE" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_love.png" alt="LOVE" class="orbit-img" />
         </a>
-        <div class="orbit-tooltip"><b>LOVE</b>Partecipazioni digitali d'autore con ceralacca 3D, musica e maxischermo.</div>
+        <div class="orbit-tooltip">
+          <b>LOVE</b>
+          Partecipazioni digitali d'autore con ceralacca 3D, musica e maxischermo.
+        </div>
       </div>
     </div>
 
-    <!-- 12. ETERNIA (330.0°) -->
-    <div class="orbit-wrapper" style="top: 6.7%; left: 25.0%;">
-      <div class="orbit-item">
-        <a href="https://eternia.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://portale.rmstudio.app/loghi/logo_eternia.png" onerror="this.src='https://eternia.rmstudio.app/logo.png'" alt="ETERNIA" class="orbit-img" />
-        </a>
-        <div class="orbit-tooltip"><b>ETERNIA</b>Memoriali QR d'autore per Onoranze Funebri e Pet Memorials.</div>
-      </div>
-    </div>
   </div>
 </div>
