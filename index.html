@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RM Studio - Creative AI Suite</title>
+  <title>RM Studio — Laboratorio di Ingegneria AI & SaaS Autonomi</title>
   
   <!-- ─── GOOGLE ANALYTICS 4 ─── -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-1KKJSLWGC6"></script>
@@ -11,74 +11,58 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-1KKJSLWGC6');
   </script>
 
-  <!-- Favicon Standard e Vettoriale -->
+  <!-- Favicon -->
   <link class="favicon" rel="icon" href="public/favicon.ico" sizes="any">
   <link class="favicon" rel="icon" href="public/favicon.svg" type="image/svg+xml">
   
-  <!-- Tailwind CSS CDN -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Google Fonts: Cormorant Garamond & Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- Google Fonts: Cormorant Garamond, Inter & SF Mono -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
-  <!-- GSAP Core & ScrollTrigger -->
+  <!-- GSAP & Lenis Smooth Scroll -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js"></script>
 
   <style>
+    *, *::before, *::after { box-sizing: border-box; }
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #050505;
+      background-color: #040406;
       color: #FFFFFF;
       overflow-x: hidden;
     }
-    .font-serif {
-      font-family: 'Cormorant Garamond', serif;
-    }
-    ::-webkit-scrollbar {
-      display: none;
-    }
-    html {
-      scrollbar-width: none;
-    }
-    .preserve-3d {
-      transform-style: preserve-3d;
-    }
+    .font-serif { font-family: 'Cormorant Garamond', serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    
+    ::-webkit-scrollbar { display: none; }
+    html { scrollbar-width: none; }
+    html.lenis, html.lenis body { height: auto; }
+    .lenis.lenis-smooth { scroll-behavior: auto !important; }
 
-    /* ─── PREVENZIONE FLASH DI CARICAMENTO INIZIALE ─── */
-    .scene-card {
-      opacity: 0;
-      visibility: hidden;
+    /* ─── FILM GRAIN OVERLAY CINEMATOGRAFICO (DAL PACCHETTO CARE) ─── */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
       pointer-events: none;
+      z-index: 9999;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     }
 
-    /* ─── ANIMAZIONI E STILI PER IL SISTEMA ORBITALE (SCENE 10) ─── */
-    @keyframes orbit-rotation {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    @keyframes counter-rotation {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(-360deg); }
-    }
-    @keyframes pulse-ring-optimized {
-      0%, 100% { opacity: 0.2; transform: scale(0.95); }
-      50% { opacity: 0.4; transform: scale(1.05); }
-    }
-    .pulse-ring-element {
-      position: absolute;
-      width: 380px;
-      height: 380px;
-      background-color: rgba(242, 210, 139, 0.05);
-      filter: blur(48px);
-      border-radius: 9999px;
-      will-change: transform, opacity;
-      animation: pulse-ring-optimized 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
+    .preserve-3d { transform-style: preserve-3d; }
+    .scene-card { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    /* ─── SISTEMA ORBITALE ─── */
+    @keyframes orbit-rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes counter-rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
+    
     .orbit-ring {
       position: relative;
       width: 400px;
@@ -88,371 +72,80 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
-      animation: orbit-rotation 40s linear infinite;
+      box-shadow: 0 0 35px rgba(242, 210, 139, 0.04);
+      animation: orbit-rotation 45s linear infinite;
     }
-    .orbit-wrapper {
-      position: absolute;
-      width: 64px;
-      height: 64px;
-      transform: translate(-50%, -50%);
-    }
-    .orbit-item {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      animation: counter-rotation 40s linear infinite;
-      transform-origin: center;
-    }
+    .orbit-wrapper { position: absolute; width: 60px; height: 60px; transform: translate(-50%, -50%); }
+    .orbit-item { position: relative; width: 100%; height: 100%; animation: counter-rotation 45s linear infinite; }
     .orbit-link {
-      display: flex;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,0.1);
-      box-sizing: border-box;
-      transition: 0.3s;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      text-decoration: none;
+      display: flex; width: 100%; height: 100%; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.12);
+      transition: all 0.3s ease; align-items: center; justify-content: center;
+      overflow: hidden; text-decoration: none; background: rgba(10,10,14,0.7);
     }
-    .orbit-link:hover {
-      border-color: #F2D28B;
-      box-shadow: 0 0 15px rgba(242, 210, 139, 0.4);
-    }
-    .orbit-img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-    .orbit-img.cover {
-      object-fit: cover;
-    }
-    .orbit-img.rounded {
-      border-radius: 9999px;
-    }
-    .orbit-center-photo {
-      position: absolute;
-      width: 180px;
-      height: 180px;
-      border-radius: 50%;
-      border: 4px solid #F2D28B;
-      padding: 4px;
-      background: #000;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-      z-index: 10;
-      box-sizing: border-box;
-    }
-    .orbit-center-photo img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 50%;
-    }
-    .orbit-tooltip {
-      position: absolute;
-      bottom: 85px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 220px;
-      background: #0a0a0c;
-      border: 1px solid rgba(255,255,255,0.08);
-      color: #94a3b8;
-      font-size: 11px;
-      border-radius: 8px;
-      padding: 12px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s;
-      text-align: center;
-      z-index: 100;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      line-height: 1.4;
-    }
-    .orbit-tooltip b {
-      color: white;
-      display: block;
-      margin-bottom: 4px;
-    }
-    .orbit-item:hover .orbit-tooltip {
-      opacity: 1;
-    }
+    .orbit-link:hover { border-color: #F2D28B; box-shadow: 0 0 20px rgba(242, 210, 139, 0.45); transform: scale(1.1); }
   </style>
-
-  <!-- ─── AGENTIC MASTER SCHEMA (RM STUDIO PORTFOLIO) ─── -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "RM Studio",
-    "url": "https://rmstudio.app/",
-    "logo": "https://rmstudio.app/public/loghi/logo_rm.png",
-    "image": "https://rmstudio.app/public/loghi/foto_riccardo.jpeg",
-    "founder": {
-      "@type": "Person",
-      "name": "Riccardo Modena",
-      "jobTitle": "Founder & Software Engineer",
-      "sameAs": [
-        "https://www.linkedin.com/in/riccardo-modena-13918a61/",
-        "https://www.facebook.com/riccardo-modena.792",
-        "https://www.instagram.com/riccardo_mode_"
-      ]
-    },
-    "description": "Lab di ingegneria del software specializzato nello sviluppo di ecosistemi AI su misura, automazione dei processi B2B e video marketing generativo.",
-    "hasOfferCatalog": {
-      "@type": "OfferCatalog",
-      "name": "SaaS Suite & AI Solutions",
-      "itemListElement": [
-        {
-          "@type": "SoftwareApplication",
-          "name": "NexusAI",
-          "url": "https://nexus.rmstudio.app",
-          "applicationCategory": "BusinessApplication",
-          "operatingSystem": "All",
-          "description": "Sales Overlay invisibile per siti web. Raccoglie prenotazioni e lead profilati H24.",
-          "offers": {
-            "@type": "Offer",
-            "price": "49.00",
-            "priceCurrency": "EUR"
-          }
-        },
-        {
-          "@type": "SoftwareApplication",
-          "name": "Concierge24",
-          "url": "https://concierge24.rmstudio.app",
-          "applicationCategory": "BusinessApplication",
-          "operatingSystem": "All",
-          "description": "Assistente vocale e testuale AI H24 multilingua per hotel, B&B e agenzie turistiche.",
-          "offers": {
-            "@type": "Offer",
-            "price": "49.00",
-            "priceCurrency": "EUR"
-          }
-        },
-        {
-          "@type": "SoftwareApplication",
-          "name": "Dentis",
-          "url": "https://dentis.rmstudio.app",
-          "applicationCategory": "BusinessApplication",
-          "operatingSystem": "All",
-          "description": "Receptionist telefonica e assistente vocale AI H24 su misura per studi dentistici.",
-          "offers": {
-            "@type": "Offer",
-            "price": "79.00",
-            "priceCurrency": "EUR"
-          }
-        },
-        {
-          "@type": "SoftwareApplication",
-          "name": "Lexis AI",
-          "url": "https://lexis.rmstudio.app",
-          "applicationCategory": "BusinessApplication",
-          "operatingSystem": "All",
-          "description": "Receptionist telefonica e assistente vocale AI H24 formale su misura per studi legali.",
-          "offers": {
-            "@type": "Offer",
-            "price": "79.00",
-            "priceCurrency": "EUR"
-          }
-        },
-        {
-          "@type": "SoftwareApplication",
-          "name": "DriveMotion",
-          "url": "https://drivemotion.rmstudio.app",
-          "applicationCategory": "BusinessApplication",
-          "operatingSystem": "All",
-          "description": "Generatore AI di video cinematografici con cambio sfondo per concessionari e autosaloni.",
-          "offers": {
-            "@type": "Offer",
-            "price": "14.90",
-            "priceCurrency": "EUR"
-          }
-        },
-        {
-          "@type": "SoftwareApplication",
-          "name": "HomeTour AI",
-          "url": "https://hometour.rmstudio.app",
-          "applicationCategory": "BusinessApplication",
-          "operatingSystem": "All",
-          "description": "Generazione automatica di video-visite immobiliari 3D e parallasse con voce narrante a partire da foto.",
-          "offers": {
-            "@type": "Offer",
-            "price": "14.90",
-            "priceCurrency": "EUR"
-          }
-        },
-        {
-          "@type": "SoftwareApplication",
-          "name": "OmniaStudio",
-          "url": "https://omniastudio.rmstudio.app",
-          "applicationCategory": "BusinessApplication",
-          "operatingSystem": "Windows, MacOS",
-          "description": "Intelligenza Artificiale locale e privata 100% offline per l'analisi di PDF, contratti e dati sensibili.",
-          "offers": {
-            "@type": "Offer",
-            "price": "699.00",
-            "priceCurrency": "EUR"
-          }
-        },
-        {
-          "@type": "SoftwareApplication",
-          "name": "FF Edizioni",
-          "url": "https://ff.rmstudio.app",
-          "applicationCategory": "MultimediaApplication",
-          "operatingSystem": "All",
-          "description": "Produzioni musicali, jingle commerciali e identità sonore originali create con l'ausilio di intelligenze artificiali.",
-          "offers": {
-            "@type": "Offer",
-            "price": "0.00",
-            "priceCurrency": "EUR"
-          }
-        }
-      ]
-    }
-  }
-  </script>
-
-  <!-- ─── SCHEMA.ORG FOR GOOGLE SEARCH & AI BOTS (MASTER BLOG LINK) ─── -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Blog",
-    "@id": "https://blogs.rmstudio.app/#masterblog",
-    "name": "RM Studio Master Blog & Insights",
-    "url": "https://blogs.rmstudio.app/",
-    "description": "Hub centrale degli approfondimenti B2B, guide sull'Intelligenza Artificiale, e innovazioni tecnologiche dell'ecosistema RM Studio.",
-    "publisher": {
-      "@type": "Organization",
-      "name": "RM Studio",
-      "url": "https://rmstudio.app/",
-      "logo": "https://rmstudio.app/public/loghi/logo_rm.png"
-    }
-  }
-  </script>
-
 </head>
 <body>
 
-  <!-- ─── RETROCOMPATIBILITÀ DI LETTURA PER BOT SCRAPER E AGENTI AI ─── -->
-  <noscript>
-    <main style="padding: 40px; max-width: 800px; margin: 0 auto; font-family: sans-serif; color: #fff; background: #000;">
-      <h1>RM Studio — Ecosistema Software AI di Riccardo Modena</h1>
-      <p>Sviluppiamo soluzioni SaaS verticali e sistemi autonomi su misura per ottimizzare l'efficienza aziendale, eliminare l'errore umano e sbloccare nuovi canali di vendita.</p>
-      
-      <h2>Il nostro catalogo di prodotti SaaS attivi:</h2>
-      
-      <article>
-        <h3>NexusAI — Conversione Lead e Chatbot</h3>
-        <p>Iniezione silente di assistenti intelligenti su qualsiasi sito web esistente, senza cambiare il codice del cliente. Raccoglie prenotazioni e lead profilati H24.</p>
-        <p><strong>Prezzo di partenza:</strong> €49.00 / mese (Piano Base)</p>
-      </article>
-
-      <article>
-        <h3>Concierge24 — Hospitality AI</h3>
-        <p>Assistente vocale e testuale multilingua in tempo reale per hotel, B&B e appartamenti turistici. Risponde alle FAQ e fornisce una guida locale interattiva.</p>
-        <p><strong>Prezzo di partenza:</strong> €49.00 una tantum (Modello a ricarica di minuti, nessun abbonamento)</p>
-      </article>
-
-      <article>
-        <h3>Dentis — Receptionist AI Odontoiatrica</h3>
-        <p>Assistente telefonico vocale H24 specializzato per studi dentistici. Sincronizza l'agenda Google Calendar e invia promemoria WhatsApp.</p>
-        <p><strong>Prezzo di partenza:</strong> €79.00 / mese (Piano Starter)</p>
-      </article>
-
-      <article>
-        <h3>Lexis AI — Receptionist AI Legale</h3>
-        <p>Assistente telefonico vocale formale H24 per studi legali e avvocati. Adotta il registro del 'Lei', filtra i contatti utili e fissa le consulenze.</p>
-        <p><strong>Prezzo di partenza:</strong> €79.00 / mese (Piano Starter)</p>
-      </article>
-
-      <article>
-        <h3>DriveMotion — Automotive AI Video</h3>
-        <p>Rielabora le foto amatoriali del piazzale sostituendo lo sfondo con showroom digitali fotorealistici e genera video commerciali in pochi minuti.</p>
-        <p><strong>Prezzo di partenza:</strong> €14.90 (Starter Pack, acquisto singolo)</p>
-      </article>
-
-      <article>
-        <h3>HomeTour AI — Real Estate Cinema</h3>
-        <p>Trasforma semplici fotografie di immobili in video-visite emozionali 3D dotate di parallasse, colonna sonora e dizione vocale persuasiva.</p>
-        <p><strong>Prezzo di partenza:</strong> €14.90 (Starter Pack, acquisto singolo)</p>
-      </article>
-
-      <article>
-        <h3>OmniaStudio — Privacy Offline AI</h3>
-        <p>Software monolitico locale per Windows e Mac. Esegue analisi di PDF, contratti e dati sensibili al 100% offline, senza inviare byte al cloud.</p>
-        <p><strong>Licenza a vita:</strong> €699.00 una tantum</p>
-      </article>
-
-      <article>
-        <h3>FF Edizioni — Audio & Music AI</h3>
-        <p>Produzione di colonne sonore originali, jingle pubblicitari pronti per il social broadcast e branding acustico curati da Fausto Fusetti.</p>
-      </article>
-    </main>
-
-	  <article>
-        <h3>RM Studio Master Blog & Tech Insights</h3>
-        <p>Leggi tutte le notizie, le guide operative B2B e gli aggiornamenti sull'Intelligenza Artificiale applicata ai vari settori commerciali.</p>
-        <p><a href="https://blogs.rmstudio.app/" target="_blank"><strong>Visita il Master Blog Ufficiale di RM Studio</strong></a></p>
-      </article>
-	  
-  </noscript>
-  
-
-  <!-- ─── PRELOADER CON PROGRESSO IN TEMPO REALE ─── -->
-  <div id="loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#050505] transition-opacity duration-700">
+  <!-- ─── PRELOADER CON PROGRESSO ELEGANTE ─── -->
+  <div id="loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#040406] transition-opacity duration-700">
     <div class="text-center">
-      <span class="text-[#F2D28B] text-xs tracking-[0.4em] uppercase block mb-3 font-semibold">Ecosistema AI</span>
-      <h2 class="font-serif text-3xl md:text-5xl tracking-[0.2em] uppercase text-white mb-8">RM Studio</h2>
-      <div class="w-64 h-[1px] bg-neutral-800 relative overflow-hidden mx-auto mb-4">
-        <div id="loader-bar" class="absolute h-full left-0 top-0 bg-[#F2D28B] w-0 transition-all duration-150"></div>
+      <span class="text-[#F2D28B] text-[10px] tracking-[0.4em] uppercase block mb-3 font-mono font-semibold">Laboratorio Software AI</span>
+      <h2 class="font-serif text-3xl md:text-5xl tracking-[0.25em] uppercase text-white mb-8">RM Studio</h2>
+      <div class="w-64 h-[2px] bg-neutral-800 relative overflow-hidden mx-auto mb-4 rounded-full">
+        <div id="loader-bar" class="absolute h-full left-0 top-0 bg-gradient-to-r from-[#F2D28B]/60 to-[#F2D28B] w-0 transition-all duration-150"></div>
       </div>
-      <span id="loader-text" class="text-[10px] tracking-[0.3em] text-neutral-400 uppercase">Inizializzazione...</span>
+      <span id="loader-text" class="text-[10px] tracking-[0.3em] text-neutral-400 uppercase font-mono">Inizializzazione...</span>
     </div>
   </div>
 
-<!-- ─── HEADER MINIMALISTA FISSO ─── -->
-  <header class="fixed top-0 left-0 w-full z-40 flex justify-between items-center px-6 md:px-12 py-6 border-b border-white/5 bg-black/10 backdrop-blur-md">
+  <!-- ─── HEADER FISSO CON HUD SOUND BUTTON ─── -->
+  <header class="fixed top-0 left-0 w-full z-40 flex justify-between items-center px-6 md:px-12 py-5 border-b border-white/5 bg-black/20 backdrop-blur-lg">
     <div class="flex items-center gap-3">
-      <img src="public/loghi/logo_rm.png" alt="RM Studio Logo" class="w-6 h-6 object-contain" onerror="this.style.display='none'">
+      <img src="public/loghi/logo_rm.png" alt="RM Studio" class="w-6 h-6 object-contain" onerror="this.style.display='none'">
       <span class="font-serif text-lg tracking-widest uppercase text-[#F2D28B]">RM Studio</span>
     </div>
+    
     <div class="flex items-center gap-4">
+      <!-- HUD SOUND TOGGLE SYNTHESIS (DAL PACCHETTO IMMERSIVE) -->
+      <button id="sound-toggle-btn" onclick="toggleSound()" class="hidden md:flex items-center text-[9px] font-mono tracking-widest uppercase px-3 py-1.5 rounded-full border border-white/10 text-white/70 hover:text-[#F2D28B] hover:border-[#F2D28B]/50 transition-all">
+        AUDIO OFF
+      </button>
+
       <a href="https://blogs.rmstudio.app/" target="_blank" class="text-white/70 hover:text-[#F2D28B] transition-colors text-[10px] tracking-widest uppercase font-mono hidden md:block">
         📰 MASTER BLOG
       </a>
-      <a href="#trigger-11" class="border border-[#F2D28B]/40 text-[#F2D28B] hover:bg-[#F2D28B] hover:text-black transition-all duration-300 px-5 py-2 text-[10px] tracking-widest uppercase font-mono">
+      <a href="#trigger-11" class="border border-[#F2D28B]/40 text-[#F2D28B] hover:bg-[#F2D28B] hover:text-black transition-all duration-300 px-4 py-2 text-[10px] tracking-widest uppercase font-mono rounded-lg">
         CONTATTI
       </a>
     </div>
   </header>
 
-  <!-- ─── CONTENITORE IMMERSIVO CANVAS & VIDEO HTML5 ─── -->
+  <!-- ─── CONTENITORE IMMERSIVO CANVAS & VIDEO ─── -->
   <div id="app-container" class="relative w-full bg-[#020205]">
     <div class="sticky top-0 h-screen w-full overflow-hidden z-0 bg-black">
-      <!-- Canvas: Schermo intero su tutti i dispositivi (Solo Desktop) -->
-      <canvas id="immersive-canvas" class="absolute inset-0 w-full h-full opacity-90 md:block hidden" style="will-change: transform; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"></canvas>
+      <canvas id="immersive-canvas" class="absolute inset-0 w-full h-full opacity-90 md:block hidden" style="will-change: transform;"></canvas>
       
-      <!-- Video: Schermo intero su mobile per massime performance (Solo Mobile) -->
       <video id="immersive-video" class="absolute inset-0 w-full h-full object-cover opacity-90 md:hidden block" playsinline webkit-playsinline muted loop preload="auto" style="pointer-events: none;">
         <source src="frames/background.mp4" type="video/mp4">
       </video>
       
-      <!-- Vignetta: gradiente che copre la metà inferiore su mobile, tutto su desktop -->
+      <!-- Scrims di sfumatura cinematografica (Top & Bottom) -->
       <div class="absolute inset-0 pointer-events-none"
-           style="background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.6) 100%);"></div>
+           style="background: linear-gradient(to top, rgba(4,4,6,0.92) 0%, rgba(0,0,0,0.2) 50%, rgba(4,4,6,0.7) 100%);"></div>
     </div>
 
-    <!-- Contenitore Fisso delle Schede -->
+    <!-- Contenitore Sovrapposizione Schede -->
     <div id="text-overlays" class="fixed inset-0 z-10 pointer-events-none"></div>
 
-    <!-- Triggers Invisibili per lo Scroll -->
+    <!-- Triggers per lo Scroll -->
     <style>
       .section-trigger { height: 200vh; }
-      #trigger-0 { height: 60vh; } /* Intro cortissima su desktop per mostrare subito Nexus al primo scorrimento */
+      #trigger-0 { height: 60vh; }
       @media (max-width: 767px) { 
-        .section-trigger { height: 250vh; } 
-        #trigger-0 { height: 80vh; } /* Intro cortissima su mobile per favorire la transizione immediata */
+        .section-trigger { height: 220vh; } 
+        #trigger-0 { height: 75vh; }
       }
     </style>
     <div id="scroll-triggers" class="relative z-20 w-full pointer-events-none">
@@ -468,31 +161,30 @@
       <section id="trigger-9"  class="section-trigger w-full"></section>
       <section id="trigger-10" class="section-trigger w-full"></section>
       <section id="trigger-11" class="section-trigger w-full"></section>
-      <!-- Spacer di sicurezza per consentire lo scorrimento prima del loop su Contatti -->
-      <div style="height: 110vh;" class="w-full"></div>
+      <div style="height: 100vh;" class="w-full"></div>
     </div>
   </div>
 
-<!-- ─── FLOATING DOCK IN BASSO ─── -->
-  <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 md:gap-4 bg-black/50 border border-white/10 px-5 py-3.5 rounded-full backdrop-blur-md pointer-events-auto shadow-2xl">
+  <!-- ─── FLOATING DOCK IN BASSO ─── -->
+  <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 md:gap-4 bg-black/60 border border-white/10 px-5 py-3 rounded-full backdrop-blur-md pointer-events-auto shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
     <a href="#trigger-0" class="text-[10px] font-mono text-[#F2D28B] hover:text-white uppercase tracking-widest transition-colors">Intro</a>
     <span class="text-white/10 text-[10px]">|</span>
-    <a href="#trigger-10" class="text-[10px] font-mono text-white/40 hover:text-white uppercase tracking-widest transition-colors">Ecosistemi</a>
+    <a href="#trigger-10" class="text-[10px] font-mono text-white/50 hover:text-white uppercase tracking-widest transition-colors">Ecosistema</a>
     <span class="text-white/10 text-[10px]">|</span>
     <a href="https://blogs.rmstudio.app/" target="_blank" class="text-[10px] font-mono text-[#F2D28B] hover:text-white uppercase tracking-widest transition-colors flex items-center gap-1">
       <span>📰</span> Blog
     </a>
     <span class="text-white/10 text-[10px]">|</span>
-    <a href="#trigger-11" class="text-[10px] font-mono text-white/40 hover:text-white uppercase tracking-widest transition-colors">Contatti</a>
+    <a href="#trigger-11" class="text-[10px] font-mono text-white/50 hover:text-white uppercase tracking-widest transition-colors">Contatti</a>
   </div>
 
-  <!-- ─── PIÈ DI PAGINA FISSO CON PRIVACY E TERMINI DA PUBLIC ─── -->
-  <div class="fixed bottom-6 left-10 z-40 text-[10px] text-white/20 uppercase tracking-widest hidden md:block font-mono pointer-events-auto">
-    © <span id="current-year">2026</span> Riccardo Modena • RM STUDIO • Crafted with Intention
+  <!-- Footer Info -->
+  <div class="fixed bottom-6 left-10 z-40 text-[10px] text-white/30 uppercase tracking-widest hidden md:block font-mono pointer-events-auto">
+    © <span id="current-year">2026</span> Riccardo Modena • RM STUDIO
     <span class="mx-2">|</span>
-    <a href="public/privacy.html" target="_blank" class="hover:text-white transition-colors">Privacy Policy</a>
+    <a href="public/privacy.html" target="_blank" class="hover:text-white transition-colors">Privacy</a>
     <span class="mx-2">|</span>
-    <a href="public/termini.html" target="_blank" class="hover:text-white transition-colors">Termini e Condizioni</a>
+    <a href="public/termini.html" target="_blank" class="hover:text-white transition-colors">Termini</a>
   </div>
 
   <script src="scrubber.js"></script>
@@ -501,31 +193,25 @@
     const yr = document.getElementById("current-year");
     if (yr) yr.innerText = new Date().getFullYear();
 
-    // Cache-Busting attiva per forzare il download della ruota orbitale a 9 SaaS aggiornata ad ogni caricamento
-    let orbitHTML = "";
+    // Cache-Busting per l'orbitale
     fetch("public/orbit-template.html?v=" + new Date().getTime())
-	  .then(res => res.text())
-	  .then(html => {
-		orbitHTML = html;
-		function injectOrbit() {
-		  const target = document.getElementById("orbit-container-target");
-		  if (target) {
-			target.innerHTML = html;
-		  } else {
-			// Il container non è ancora nel DOM, riprova tra 100ms
-			setTimeout(injectOrbit, 100);
-		  }
-		}
-		injectOrbit();
-	  })
-	  .catch(err => console.error("Errore nel caricamento del file orbitale:", err));
+      .then(res => res.text())
+      .then(html => {
+        function injectOrbit() {
+          const target = document.getElementById("orbit-container-target");
+          if (target) target.innerHTML = html;
+          else setTimeout(injectOrbit, 100);
+        }
+        injectOrbit();
+      })
+      .catch(err => console.error("Errore orbit template:", err));
 
     const SCENES = [
       {
         id: "hero-start",
         chapter: "Ecosistema AI",
         title: "RM Studio",
-        subtitle: "Risolviamo colli di bottiglia operativi sviluppando ecosistemi AI su misura. Riduciamo lo sforzo d'uso, azzeriamo l'errore umano ed espandiamo i tuoi canali commerciali. Scorri per iniziare.",
+        subtitle: "Lab di ingegneria del software specializzato nello sviluppo di 17 SaaS verticali e sistemi autonomi su misura per il B2B. Riduciamo lo sforzo operativo ed azzeriamo l'errore umano.",
         logo: "logo_rm.png",
         isProduct: false,
         isIntro: true
@@ -534,11 +220,11 @@
         id: "nexus",
         chapter: "Chapter I — Conversion AI",
         title: "NexusAI",
-        subtitle: "Assunzioni e vendite H24 sul tuo sito attuale senza cambiare codice. NexusAI inietta un assistente intelligente che accoglie, informa e converte i visitatori in lead profilati.",
+        subtitle: "Sales Overlay invisibile per siti web. Inietta un assistente intelligente che accoglie, risponde e converte i visitatori in lead qualificati senza modificare il codice.",
         logo: "logo_nexus.png",
-        problem: "I siti web aziendali statici registrano costantemente alti tassi di rimbalzo (bounce rate), fallendo nel convertire il traffico serale o festivo in clienti attivi.",
-        solution: "L'overlay invisibile si aggancia all'istante alla tua infrastruttura, scansiona in autonomia la conoscenza aziendale e acquisisce i dati di contatto dei visitatori in tempo reale.",
-        neuroCopy: "Il 96% degli utenti abbandona le pagine a causa del sovraccarico cognitivo. Nexus agisce sul principio biologico di fluidità, intercettando il dubbio del visitatore all'istante.",
+        problem: "I siti vetrina perdono oltre il 95% del traffico notturno e festivo per assenza di risposta immediata.",
+        solution: "Scansione autonoma del sito aziendale ed ingaggio conversazionale proattivo stile live-chat.",
+        neuroCopy: "Azzerando il sovraccarico cognitivo, convertiamo il visitatore nel picco biologico del suo interesse.",
         isProduct: true,
         url: "https://nexus.rmstudio.app"
       },
@@ -546,11 +232,11 @@
         id: "concierge24",
         chapter: "Chapter II — Hospitality",
         title: "Concierge24",
-        subtitle: "L'assistente vocale H24 multilingua che accoglie gli ospiti, risponde alle loro domande e fa up-selling dei tuoi servizi extra mentre il tuo staff riposa.",
+        subtitle: "Assistente vocale AI H24 multilingua per hotel e B&B. Acting vocale ultra-realistico, gestione check-in e ricerca turistica ibrida con fallback OpenStreetMap.",
         logo: "logo_concierge.png",
-        problem: "La reception offre di picchi di sovraccarico, con centralini intasati e turisti frustrati in attesa di risposte su Wi-Fi e check-in nelle ore notturne.",
-        solution: "Giulia risponde all'istante con un'espressivita vocale calda e umana, parlando la lingua nativa dell'ospite, proponendo servizi e inviando conferme su WhatsApp.",
-        neuroCopy: "Il cervello rettiliano percepisce l'attesa como un disservizio immediato. Giulia azzera la frizione d'ingresso, elevando la percezione di status della struttura.",
+        problem: "Centralini intasati da domande ripetitive e personale notturno con costi insostenibili.",
+        solution: "Giulia risponde nella lingua nativa dell'ospite, invia indicazioni su smartphone e gestisce le richieste.",
+        neuroCopy: "La voce empatica mitiga la frustrazione del viaggio e amplifica la percezione di lusso della struttura.",
         isProduct: true,
         url: "https://concierge24.rmstudio.app"
       },
@@ -558,11 +244,11 @@
         id: "dentis",
         chapter: "Chapter III — Dental AI",
         title: "Dentis",
-        subtitle: "Receptionist AI telefonica H24 su misura per l'odontoiatria. Sincronizza gli appuntamenti, gestisce il triage e azzera le poltrone vuote.",
+        subtitle: "Receptionist vocale AI per cliniche odontoiatriche. Gestione triage urgenze, sincronizzazione Google Calendar e promemoria automatici WhatsApp.",
         logo: "logo_dentis.png",
-        problem: "Telefonate perse fuori orario, poltrone vuote non ottimizzate e segreteria medica intasata dalle urgenze improvvise dei pazienti.",
-        solution: "Serena risponde H24, esegue il triage empatico delle problematiche cliniche e prenota le visite direttamente sul calendario sincronizzato Google Calendar.",
-        neuroCopy: "Un paziente con dolore vive uno stato di urgenza limbica. Serena risponde al primo squillo, trasformando l'ansia del paziente in fiducia verso lo studio.",
+        problem: "Linee occupate, urgenze perse durante le sedute chirurgiche e poltrone vuote per no-show.",
+        solution: "Serena risponde H24 con empatia medica, fissa gli appuntamenti e previene le disdette con WhatsApp.",
+        neuroCopy: "Il paziente odontoiatrico prova ansia pre-visita: la voce calma di Serena crea ancoraggio di sicurezza.",
         isProduct: true,
         url: "https://dentis.rmstudio.app"
       },
@@ -570,59 +256,59 @@
         id: "lexis",
         chapter: "Chapter IV — Legal AI",
         title: "Lexis AI",
-        subtitle: "Assistente telefonica AI formale ed empatica per studi legali. Gestisce prime consulenze e tutela il segreto professionale.",
+        subtitle: "Assistente vocale formale per studi legali e avvocati. Adotta il registro del 'Lei', filtra i contatti qualificati e protegge il segreto professionale.",
         logo: "logo_lexis.png",
-        problem: "Avvocati e studi legali che faticano a filtrare le richieste futili fuori orario nel rispetto del segreto professionale e del protocollo di studio.",
-        solution: "Chiara adotta un registro formale ('Lei'), risponde ai dubbi di base, prenota le prime consulenze sul calendario ed invia promemoria WhatsApp.",
-        neuroCopy: "Il cliente legale esige riservatezza e autorità fin dal primo contatto. Chiara adotta un tono distaccato ma empatico, riducendo l'attrito burocratico iniziale.",
+        problem: "Avvocati interrotti continuamente da chiamate esplorative e richieste di consulenza non qualificate.",
+        solution: "Chiara accoglie con massima solennità, inquadra la fattispecie e fissa la prima consulenza a tariffa.",
+        neuroCopy: "L'autorevolezza formale stabilisce immediato rispetto gerarchico e prepara il cliente all'onorario.",
         isProduct: true,
         url: "https://lexis.rmstudio.app"
       },
       {
         id: "drivemotion",
-        chapter: "Chapter V — Automotive",
+        chapter: "Chapter V — Automotive AI",
         title: "DriveMotion",
-        subtitle: "Sfondi fotorealistici e video virali generati in automatico. Trasforma le foto amatoriali del tuo piazzale in reel cinematografici che aumentano il valore delle vetture.",
+        subtitle: "Generazione video cinematografici per concessionari. Sostituisce i piazzali con 10 ambienti fotorealistici 3D ed esporta reel pronti per i social.",
         logo: "logo_drivemotion.png",
-        problem: "Fotografie dei veicoli scattate in piazzali disordinati con sfondi disturbanti che abbassano drasticamente il valore percepito delle auto sui portali.",
-        solution: "Rimozione automatica del piazzale e inserimento immediato delle vetture all'interno di showroom digitali 3D di lusso, riallineando fari e riflessi fisici.",
-        neuroCopy: "La valutazione estetica avviene in meno di tre decimi di secondo. Elevando lo sfondo, inneschiamo l'euristica del prestigio riducendo la trattativa sul prezzo.",
+        problem: "Foto scattate in piazzali sporchi o disordinati che svalutano il prezzo percepito dell'auto.",
+        solution: "Scontorno automatico del veicolo, inserimento in showroom di lusso e rendering con animazione fluida.",
+        neuroCopy: "La valutazione del valore avviene in 300 millisecondi: lo sfondo premium elimina le obiezioni di prezzo.",
         isProduct: true,
         url: "https://drivemotion.rmstudio.app"
       },
       {
         id: "hometour",
-        chapter: "Chapter VI — Real Estate",
+        chapter: "Chapter VI — Real Estate Cinema",
         title: "HomeTour AI",
-        subtitle: "Reel immobiliari con voce narrante emozionale, generati in automatico da semplici fotografie. Vendi l'esperienza della casa prima ancora della visita reale.",
+        subtitle: "Piattaforma per agenzie immobiliari che trasforma foto statiche in video-visite emozionali 3D con movimenti camera (Dolly/Pan) e voce persuasiva.",
         logo: "logo_hometour.jpg",
-        problem: "Annunci immobiliari piatti sui portali che faticano a catturare l'interesse emotivo dell'acquirente ed ostacolano l'acquisizione di mandati in esclusiva.",
-        solution: "Generazione di video-visite emozionali con carrellate 3D di parallasse simulato dalle foto, musica d'atmosfera e narrazione vocale persuasiva.",
-        neuroCopy: "Non si acquistano mq, ma proiezioni del proprio futuro. Attraverso il movimento 3D simuliamo l'immersione spaziale prima ancora della visita fisica.",
+        problem: "Annunci immobiliari noiosi con foto piatte che faticano ad attirare compratori qualificati.",
+        solution: "Regia tridimensionale con parallasse e copywriting neuro-emotivo focalizzato sui punti di forza.",
+        neuroCopy: "Il compratore acquista la sensazione di vivere nell'immobile: il movimento 3D attiva il possesso visivo.",
         isProduct: true,
         url: "https://hometour.rmstudio.app"
       },
       {
         id: "omniastudio",
-        chapter: "Chapter VII — Privacy AI",
+        chapter: "Chapter VII — Offline AI",
         title: "OmniaStudio",
-        subtitle: "La potenza dell'AI generativa sul tuo PC, completamente offline. Analizza contratti, PDF e dati sensibili senza inviare dati al cloud, a tutela del segreto professionale.",
+        subtitle: "Intelligenza Artificiale locale 100% privata per Windows e Mac. Analisi contratti, PDF e ricerca semantica senza inviare byte al cloud.",
         logo: "logo_omniastudio.png",
-        problem: "Restrizioni severe sul GDPR e rischio di fuga di dati sensibili inviando contratti e documenti privati ai server cloud delle intelligenze artificiali pubbliche.",
-        solution: "Un software monolitico installato localmente sul tuo hardware che analizza documenti, esegue OCR ed elabora report a connessione totalmente disattivata.",
-        neuroCopy: "La sicurezza risponde al bisogno biologico di controllo. OmniaStudio lavora isolato, offrendo zero latenza di rete e totale conformità legale.",
+        problem: "Divieto deontologico e rischi GDPR nell'inviare dati societari sensibili a OpenAI o cloud esterni.",
+        solution: "Esecuzione monolitica sul silicio locale (RTX / Apple Silicon) a velocità istantanea e zero connessione.",
+        neuroCopy: "La certezza della segretezza totale elimina ogni freno all'adozione dell'AI negli studi professionali.",
         isProduct: true,
         url: "https://omniastudio.rmstudio.app"
       },
       {
         id: "ffedizioni",
-        chapter: "Chapter VIII — Audio & Music",
+        chapter: "Chapter VIII — Sound Design",
         title: "FF Edizioni",
-        subtitle: "Identità sonora e colonne sonore AI originali. Jingle musicali pronti per il broadcast e le campagne social, creati per sintonizzarsi con l'identità del tuo brand.",
+        subtitle: "Identità sonora originale e jingle commerciali curati dal Maestro Fausto Fusetti (collaboratore storico di Franco Califano e Fred Bongusto).",
         logo: "logo_ff.png",
-        problem: "Spot e video aziendali privi di carattere acustico identitario, con elevato rischio di violazione di copyright o royalty su tracce musicali terze.",
-        solution: "Creazione di jingle originali e tracce audio proprietarie registrate, scientificamente per innescare l'ancoraggio uditivo del brand.",
-        neuroCopy: "L'udito è l'unico senso che non possiamo isolare. Applichiamo l'ancoraggio uditivo affinché il brand rimanga impresso nella memoria a lungo termine.",
+        problem: "Brand anonimi sui social con musiche stock riutilizzate da migliaia di concorrenti.",
+        solution: "Composizioni orchestrali e melodie su misura registrate in SIAE per imprimere il brand nella memoria.",
+        neuroCopy: "L'udito è il senso con l'accesso più diretto all'amigdala emotiva: un jingle unico fidelizza all'istante.",
         isProduct: true,
         url: "https://ff.rmstudio.app"
       },
@@ -630,11 +316,11 @@
         id: "vision",
         chapter: "Chapter IX — UGC Video AI",
         title: "Vision",
-        subtitle: "Generazione video UGC con presentatori virtuali iper-realistici. Crea campagne video pronte per i social in 24 ore ed abbatti del 90% i costi delle produzioni tradizionali.",
+        subtitle: "Generatore di video UGC con modelli virtuali iper-realistici e coerenti. Abbattimento del 90% dei costi di produzione attori per e-commerce e brand B2B.",
         logo: "logo_vision.png",
-        problem: "Ingaggiare attori reali, registi e montatori per produrre video di marketing social per e-commerce richiede budget sproporzionati e tempistiche estenuanti.",
-        solution: "Utilizzo di modelli virtuali iper-realistici e coerenti (come Camila) che recitano i tuoi testi e script promozionali con fluidità espressiva e dizione perfetta.",
-        neuroCopy: "Lo sguardo e l'espressione di un volto umano stimolano la dopamina e riducono lo scetticismo d'acquisto. Vision replica la vicinanza umana a costo zero.",
+        problem: "Costi di migliaia di euro e settimane di attesa per ingaggiare influencer e troupe video.",
+        solution: "Generazione multimodale avanzata con perfetta coerenza del volto e sincronizzazione labiale.",
+        neuroCopy: "I volti creano fiducia biologica immediata: l'avatar virtuale demolisce lo scetticismo d'acquisto.",
         isProduct: true,
         url: "https://vision.rmstudio.app"
       },
@@ -642,7 +328,7 @@
         id: "the-union",
         chapter: "The Synthesis",
         title: "Ecosistema Connesso",
-        subtitle: "La convergenza di nove canali autonomi integrati sotto un'unica direzione tecnica. Sincronizzazione automatica tramite database relazionali per azzerare ogni forma di frizione logica ed operativa.",
+        subtitle: "17 Micro-SaaS orchestrati da una cabina di regia unica (Supabase, n8n, Vapi e Stripe On-The-Fly). Zero canoni infrastrutturali e massima scalabilità.",
         logo: "logo_rm.png",
         isProduct: false,
         isTheUnion: true
@@ -650,21 +336,19 @@
       {
         id: "contacts-end",
         chapter: "The Connection",
-        title: "Parliamo del tuo Progetto",
-        subtitle: "Compila il modulo contatti per richiedere un'analisi di fattibilità e integrare la tua azienda nell'ecosistema autonomo di RM Studio.",
+        title: "Iniziamo la Collaborazione",
+        subtitle: "Richiedi un audit operativo per automatizzare i processi della tua azienda con l'infrastruttura AI proprietaria di RM Studio.",
         logo: "logo_rm.png",
         isProduct: false,
         isContact: true
       }
     ];
 
-    // ─── GENERAZIONE DINAMICA SCHEDE EDITORIALI CON ALLINEAMENTO RESPONSIVO ADATTATO ───
+    // ─── RENDERING SCHEDE RESPONSIVE ───
     const overlayContainer = document.getElementById("text-overlays");
 
     SCENES.forEach((scene, index) => {
       const cardWrapper = document.createElement("div");
-      
-      // Allineamento: Su desktop pl-24 a sinistra, su mobile centrato verticalmente
       let alignmentClass = "justify-center items-center md:justify-start md:items-center md:pl-24 text-left";
       if (scene.isIntro || scene.isTheUnion || scene.isContact) {
         alignmentClass = "justify-center items-center text-center";
@@ -675,27 +359,25 @@
       const isEven = index % 2 === 0;
       const flexDirClass = isEven ? "md:flex-row" : "md:flex-row-reverse";
 
-      // Colonna Logo per i Prodotti (Nascondiamo su mobile per evitare affollamento verticale)
       const logoColumn = `
-        <div class="hidden md:flex flex-shrink-0 items-center justify-center bg-black/50 border border-white/10 rounded-[2rem] p-6 w-32 h-32 md:w-44 md:h-44 shadow-inner">
-          <img src="public/loghi/${scene.logo}" alt="${scene.title} Logo" class="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]">
+        <div class="hidden md:flex flex-shrink-0 items-center justify-center bg-black/60 border border-white/10 rounded-[2rem] p-6 w-32 h-32 md:w-44 md:h-44 shadow-2xl">
+          <img src="public/loghi/${scene.logo}" alt="${scene.title}" class="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]">
         </div>
       `;
 
-      // Colonna Foto per l'Intro (Un cerchio elegante e visibile per mobile, grande su desktop)
       let rickyPhotoColumn = `
-        <div class="flex-shrink-0 flex items-center justify-center border-2 border-[#F2D28B]/30 rounded-full md:rounded-[2.5rem] p-0.5 md:p-1.5 w-20 h-20 md:w-80 md:h-80 bg-[#050505] shadow-[0_0_40px_rgba(242,210,139,0.20)]">
-          <img src="public/loghi/foto_riccardo.jpeg" alt="Riccardo Modena" class="w-full h-full object-cover rounded-full md:rounded-[2rem]">
+        <div class="flex-shrink-0 flex items-center justify-center border-2 border-[#F2D28B]/40 rounded-full md:rounded-[2.5rem] p-1 w-20 h-20 md:w-72 md:h-72 bg-[#050505] shadow-[0_0_40px_rgba(242,210,139,0.25)]">
+          <img src="public/loghi/foto_riccardo.jpeg" alt="Riccardo Modena" class="w-full h-full object-cover rounded-full md:rounded-[2.2rem]">
         </div>
       `;
 
       let editorialBody = "";
       if (scene.isProduct) {
         editorialBody = `
-          <div class="hidden md:block mt-6 space-y-4 border-t border-white/5 pt-6 text-base text-neutral-300 font-light leading-relaxed">
-            <p>${scene.problem}</p>
-            <p>${scene.solution}</p>
-            <div class="relative bg-gradient-to-r from-[#F2D28B]/10 to-transparent p-5 rounded-2xl border-l-2 border-[#F2D28B] text-[15px] italic text-[#F2D28B]/95 font-light leading-relaxed">
+          <div class="hidden md:block mt-5 space-y-3 border-t border-white/10 pt-5 text-sm text-neutral-300 font-light leading-relaxed">
+            <p><strong class="text-white font-medium">Problema:</strong> ${scene.problem}</p>
+            <p><strong class="text-white font-medium">Soluzione:</strong> ${scene.solution}</p>
+            <div class="relative bg-gradient-to-r from-[#F2D28B]/10 to-transparent p-4 rounded-xl border-l-2 border-[#F2D28B] text-[13px] italic text-[#F2D28B] font-light">
               "${scene.neuroCopy}"
             </div>
           </div>
@@ -705,8 +387,8 @@
       let introButton = "";
       if (scene.isIntro) {
         introButton = `
-          <button onclick="handleVCardClick()" class="inline-flex items-center justify-center gap-3 bg-white text-black text-sm tracking-wider font-extrabold uppercase px-8 py-5 rounded-full hover:scale-105 hover:bg-neutral-100 active:scale-95 transition-all duration-300 mt-8 cursor-pointer pointer-events-auto shadow-[0_0_30px_rgba(255,255,255,0.25)] focus:outline-none">
-            <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <button onclick="handleVCardClick()" class="inline-flex items-center justify-center gap-3 bg-white text-black text-xs font-mono font-bold tracking-widest uppercase px-8 py-4 rounded-full hover:bg-[#F2D28B] hover:scale-105 active:scale-95 transition-all duration-300 mt-6 cursor-pointer pointer-events-auto shadow-[0_0_25px_rgba(255,255,255,0.2)]">
+            <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
             <span>SALVA CONTATTO (vCard)</span>
@@ -717,8 +399,8 @@
       let siteLinkButton = "";
       if (scene.isProduct && scene.url) {
         siteLinkButton = `
-          <div class="mt-5 text-left text-sm text-[#F2D28B] font-mono font-bold tracking-wider underline decoration-dotted underline-offset-4 decoration-[#F2D28B]/60">
-            VISITA IL SITO UFFICIALE
+          <div class="mt-4 text-left text-xs text-[#F2D28B] font-mono font-semibold tracking-wider flex items-center gap-2">
+            <span>ESPLORA SAAS</span> ➔
           </div>
         `;
       }
@@ -726,60 +408,45 @@
       let contactForm = "";
       if (scene.isContact) {
         contactForm = `
-          <form class="flex flex-col gap-4 mt-6 text-left pointer-events-auto w-full max-w-lg" onsubmit="handleContactSubmit(event)">
+          <form class="flex flex-col gap-3 mt-5 text-left pointer-events-auto w-full max-w-lg" onsubmit="handleContactSubmit(event)">
             <input type="hidden" name="access_key" value="9013a8d5-0901-42a0-b9e6-4c45553f960d">
             <input type="hidden" name="subject" value="Nuovo Lead da RMStudio Suite">
-            
-            <input type="text" name="name" required placeholder="Nome Completo" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-[#F2D28B]/50 text-base font-light">
-            <input type="email" name="email" required placeholder="Email Aziendale" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-[#F2D28B]/50 text-base font-light">
-            <textarea name="message" required rows="3" placeholder="Quale processo vuoi automatizzare?" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-[#F2D28B]/50 text-base font-light resize-none"></textarea>
-            
-            <button type="submit" class="bg-[#F2D28B] text-black text-xs tracking-widest font-black uppercase py-5 rounded-2xl hover:bg-white transition-all duration-300 cursor-pointer w-full font-mono">
-              Invia Messaggio Aziendale
+            <input type="text" name="name" required placeholder="Nome e Azienda" class="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 text-white outline-none focus:border-[#F2D28B]/60 text-sm">
+            <input type="email" name="email" required placeholder="Email Aziendale" class="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 text-white outline-none focus:border-[#F2D28B]/60 text-sm">
+            <textarea name="message" required rows="3" placeholder="Descrivi il processo o SaaS che desideri sviluppare..." class="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 text-white outline-none focus:border-[#F2D28B]/60 text-sm resize-none"></textarea>
+            <button type="submit" class="bg-[#F2D28B] text-black text-xs font-mono tracking-widest font-bold uppercase py-4 rounded-xl hover:bg-white transition-all duration-300 cursor-pointer w-full">
+              Invia Richiesta Diretta
             </button>
           </form>
         `;
       }
 
-      // ─── COLONNA DESTRA (SISTEMA ORBITALE - NASCOSTO SU SMARTPHONE) ───
       let rightColumnContent = logoColumn;
-      if (scene.isIntro) {
-        rightColumnContent = rickyPhotoColumn;
-      } else if (scene.isTheUnion) {
-		  rightColumnContent = `
-			<div id="orbit-container-target" class="hidden md:flex relative w-[380px] h-[380px] items-center justify-center scale-90 md:scale-100 mt-6 md:mt-0 pointer-events-auto">
-			  <!-- orbit verrà iniettata via fetch -->
-			</div>
-		  `;
-		}
+      if (scene.isIntro) rightColumnContent = rickyPhotoColumn;
+      else if (scene.isTheUnion) {
+        rightColumnContent = `
+          <div id="orbit-container-target" class="hidden md:flex relative w-[360px] h-[360px] items-center justify-center scale-95 mt-4 md:mt-0 pointer-events-auto">
+          </div>
+        `;
+      }
 
       const tagType = scene.isProduct ? "a" : "div";
       const hrefAttr = scene.isProduct ? `href="${scene.url}" target="_blank" rel="noopener noreferrer"` : "";
-      const cursorClass = scene.isProduct ? "cursor-pointer hover:border-[#F2D28B]/30 hover:shadow-[0_40px_100px_rgba(242,210,139,0.05)] transition-all duration-300" : "";
+      const cursorClass = scene.isProduct ? "cursor-pointer hover:border-[#F2D28B]/40 transition-all duration-300" : "";
 
-      // Layout compatto per mobile, grande per desktop
-      let cardSizeClass = "max-w-3xl";
-      if (scene.isIntro || scene.isTheUnion) {
-		  cardSizeClass = "max-w-5xl p-5 md:p-14 gap-14 lg:gap-20";
-		} else if (scene.isContact) {
-		  cardSizeClass = "max-w-3xl p-5 md:p-12";
-		} else {
-		  cardSizeClass = "max-w-3xl p-5 md:p-14";
-		}
+      let cardSizeClass = (scene.isIntro || scene.isTheUnion) ? "max-w-5xl p-6 md:p-12 gap-10 lg:gap-16" : "max-w-3xl p-6 md:p-10";
 
-      // Costruzione finale della scheda
       cardWrapper.innerHTML = `
-        <${tagType} ${hrefAttr} class="scene-card w-full ${cardSizeClass} bg-[#07070a]/92 backdrop-blur-3xl border border-white/10 rounded-2xl md:rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.95)] preserve-3d opacity-0 pointer-events-none flex flex-col ${flexDirClass} gap-4 md:gap-12 items-center justify-between ${cursorClass}">
+        <${tagType} ${hrefAttr} class="scene-card w-full ${cardSizeClass} bg-[#07070a]/94 backdrop-blur-2xl border border-white/10 rounded-2xl md:rounded-[2.5rem] shadow-[0_30px_90px_rgba(0,0,0,0.9)] preserve-3d opacity-0 pointer-events-none flex flex-col ${flexDirClass} gap-6 md:gap-10 items-center justify-between ${cursorClass}">
           <div class="flex-1 text-left w-full max-w-xl">
-            <!-- Logo nell'intestazione della scheda -->
-            <div class="flex items-center gap-4 mb-4">
-              <img src="public/loghi/${scene.logo}" alt="${scene.title} Logo" class="w-10 h-10 object-contain rounded-xl bg-black/40 p-1 border border-white/10" onerror="this.style.display='none'">
+            <div class="flex items-center gap-3.5 mb-3">
+              <img src="public/loghi/${scene.logo}" alt="${scene.title}" class="w-8 h-8 object-contain rounded-lg bg-black/50 p-1 border border-white/10" onerror="this.style.display='none'">
               <div>
-                <span class="text-[9px] uppercase tracking-[0.4em] text-[#F2D28B] block mb-2 font-semibold font-mono">${scene.chapter}</span>
-                <h2 class="font-serif text-2xl md:text-4xl text-[#F6F3F0] tracking-wide leading-tight">${scene.title}</h2>
+                <span class="text-[9px] uppercase tracking-[0.35em] text-[#F2D28B] block font-mono font-semibold">${scene.chapter}</span>
+                <h2 class="font-serif text-2xl md:text-3xl text-white tracking-wide leading-tight">${scene.title}</h2>
               </div>
             </div>
-            <p class="text-base tracking-wide text-neutral-300 leading-relaxed font-light">${scene.subtitle}</p>
+            <p class="text-sm tracking-wide text-neutral-300 leading-relaxed font-light">${scene.subtitle}</p>
             ${editorialBody}
             ${introButton}
             ${siteLinkButton}
@@ -792,7 +459,6 @@
       overlayContainer.appendChild(cardWrapper);
     });
 
-    // ─── FUNZIONI INTERATTIVE (VCARD & CONTATTI) ───
     function handleVCardClick() {
       const link = document.createElement("a");
       link.href = "public/contact.vcf";
@@ -807,199 +473,125 @@
       const form = e.target;
       const formData = new FormData(form);
       const button = form.querySelector("button[type='submit']");
-      const originalText = button.innerText;
-      button.innerText = "Invia in corso...";
+      button.innerText = "Invio...";
       button.disabled = true;
 
       try {
-        const res = await fetch("https://api.web3forms.com/submit", {
-          method: "POST",
-          body: formData,
-        });
-
+        const res = await fetch("https://api.web3forms.com/submit", { method: "POST", body: formData });
         if (res.ok) {
-          alert("Messaggio inviato con successo! Ti risponderò entro 24 ore.");
+          alert("Richiesta inviata! Ti risponderò entro poche ore.");
           form.reset();
         } else {
-          alert("Errore nell'invio. Riprova più tardi.");
+          alert("Errore durante l'invio. Riprova.");
         }
       } catch {
-        alert("Errore di rete. Controlla la connessione.");
+        alert("Errore di connessione.");
       } finally {
-        button.innerText = originalText;
+        button.innerText = "Invia Richiesta Diretta";
         button.disabled = false;
       }
     }
 
-    // ─── LOOP PULITO: warp silenzioso senza rompere ScrollTrigger ───
-    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-    let loopLocked = false;
-    window.addEventListener('scroll', () => {
-      if (loopLocked) return;
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      if (window.scrollY >= maxScroll - 4) {
-        loopLocked = true;
-        // Reset istantaneo standard per evitare incompatibilità su mobile Safari/iOS
-        window.scrollTo(0, 2);
-        
-        // Reset istantaneo della timeline video mobile
-        const mobVideo = document.getElementById("immersive-video");
-        if (mobVideo) mobVideo.currentTime = 0;
-        
-        setTimeout(() => { loopLocked = false; }, 150);
-      }
-    });
-
-    // ─── SCENOPHONIC 3D TRANSITIONS FORZATE CON INTEGRATIVO AUTOALPHA ───
+    // ─── TRANSIZIONI 3D PROPS ───
     function getSceneProps(index) {
       switch (index) {
-        case 0: // Intro / Hero
+        case 0:
           return {
-            init: { autoAlpha: 0, opacity: 0, scale: 0.7, z: -400, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, scale: 1.1, z: 100, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, scale: 0.8, z: -300, pointerEvents: "none" },
+            mid: { autoAlpha: 1, scale: 1, z: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, scale: 1.05, z: 80, pointerEvents: "none" }
           };
-        case 1: // NexusAI
+        case 1:
           return {
-            init: { autoAlpha: 0, opacity: 0, rotateY: 90, x: 250, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, x: 0, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, rotateY: -90, x: -250, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, rotateY: 70, x: 200, pointerEvents: "none" },
+            mid: { autoAlpha: 1, rotateY: 0, x: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, rotateY: -70, x: -200, pointerEvents: "none" }
           };
-        case 2: // Concierge24
+        case 2:
           return {
-            init: { autoAlpha: 0, opacity: 0, y: -300, rotateX: 45, scale: 1, z: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, y: 0, rotateX: 0, scale: 1, z: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, y: 150, rotateX: -15, scale: 1, z: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, y: -200, rotateX: 30, pointerEvents: "none" },
+            mid: { autoAlpha: 1, y: 0, rotateX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, y: 120, rotateX: -15, pointerEvents: "none" }
           };
-        case 3: // Dentis
+        case 3:
           return {
-            init: { autoAlpha: 0, opacity: 0, scale: 0.3, z: -700, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, scale: 1.5, z: 250, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, scale: 0.4, z: -500, pointerEvents: "none" },
+            mid: { autoAlpha: 1, scale: 1, z: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, scale: 1.3, z: 200, pointerEvents: "none" }
           };
-        case 4: // Lexis AI
+        case 4:
           return {
-            init: { autoAlpha: 0, opacity: 0, rotateY: -60, rotateX: 20, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, x: 0, scale: 1, z: 0, rotateX: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, rotateY: 60, rotateX: -20, scale: 1, z: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, rotateY: -50, rotateX: 15, pointerEvents: "none" },
+            mid: { autoAlpha: 1, rotateY: 0, rotateX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, rotateY: 50, rotateX: -15, pointerEvents: "none" }
           };
-        case 5: // DriveMotion
+        case 5:
           return {
-            init: { autoAlpha: 0, opacity: 0, scale: 0.1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, scale: 0.1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, scale: 0.2, pointerEvents: "none" },
+            mid: { autoAlpha: 1, scale: 1, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, scale: 0.2, pointerEvents: "none" }
           };
-        case 6: // HomeTour AI
+        case 6:
           return {
-            init: { autoAlpha: 0, opacity: 0, x: 350, skewX: -12, scale: 1, z: 0, rotateX: 0, rotateY: 0, y: 0, rotateZ: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, x: 0, skewX: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, y: 0, rotateZ: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, x: -350, skewX: 12, scale: 1, z: 0, rotateX: 0, rotateY: 0, y: 0, rotateZ: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, x: 250, skewX: -8, pointerEvents: "none" },
+            mid: { autoAlpha: 1, x: 0, skewX: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, x: -250, skewX: 8, pointerEvents: "none" }
           };
-        case 7: // OmniaStudio
+        case 7:
           return {
-            init: { autoAlpha: 0, opacity: 0, rotateZ: -180, scale: 0.5, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, rotateZ: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, rotateZ: 180, scale: 0.5, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, rotateZ: -90, scale: 0.6, pointerEvents: "none" },
+            mid: { autoAlpha: 1, rotateZ: 0, scale: 1, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, rotateZ: 90, scale: 0.6, pointerEvents: "none" }
           };
-        case 8: // FF Edizioni
+        case 8:
           return {
-            init: { autoAlpha: 0, opacity: 0, scale: 1.4, z: 200, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, scale: 0.7, z: -200, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, scale: 1.3, z: 150, pointerEvents: "none" },
+            mid: { autoAlpha: 1, scale: 1, z: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, scale: 0.8, z: -150, pointerEvents: "none" }
           };
-        case 9: // Vision (Nuovo inserimento alla fine)
+        case 9:
           return {
-            init: { autoAlpha: 0, opacity: 0, scale: 1.2, z: 150, rotateX: -10, rotateY: 10, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, scale: 0.8, z: -150, rotateX: 10, rotateY: -10, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, scale: 1.1, rotateY: 15, pointerEvents: "none" },
+            mid: { autoAlpha: 1, scale: 1, rotateY: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, scale: 0.9, rotateY: -15, pointerEvents: "none" }
           };
-        case 10: // The Union (Synthesis)
+        case 10:
           return {
-            init: { autoAlpha: 0, opacity: 0, rotateY: -180, z: -500, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, rotateY: 0, z: 0, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, rotateY: 180, z: 500, scale: 1, rotateX: 0, x: 0, y: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, rotateY: -90, z: -300, pointerEvents: "none" },
+            mid: { autoAlpha: 1, rotateY: 0, z: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, rotateY: 90, z: 300, pointerEvents: "none" }
           };
-        case 11: // Contacts / Outro
+        case 11:
           return {
-            init: { autoAlpha: 0, opacity: 0, y: 150, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" },
-            mid: { autoAlpha: 1, opacity: 1, y: 0, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "auto" },
-            exit: { autoAlpha: 0, opacity: 0, y: -150, scale: 1, z: 0, rotateX: 0, rotateY: 0, x: 0, rotateZ: 0, skewX: 0, pointerEvents: "none" }
+            init: { autoAlpha: 0, y: 100, pointerEvents: "none" },
+            mid: { autoAlpha: 1, y: 0, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, y: -100, pointerEvents: "none" }
+          };
+        default:
+          return {
+            init: { autoAlpha: 0, pointerEvents: "none" },
+            mid: { autoAlpha: 1, pointerEvents: "auto" },
+            exit: { autoAlpha: 0, pointerEvents: "none" }
           };
       }
     }
 
-    // ─── CARD ANIMATIONS ────────────────────────────────────────────────────────
     window.getSceneProps = getSceneProps;
 
     function initCardAnimations() {
       const cards = gsap.utils.toArray(".scene-card");
-
-      // Imposta lo stato iniziale nascosto (verrà forzato dinamicamente in registerCards)
       cards.forEach((card, i) => {
         const props = getSceneProps(i);
-        if (!props) return;
-        gsap.set(card, props.init);
+        if (props) gsap.set(card, props.init);
       });
-
-      // Registra i riferimenti nel scrubber per le transizioni frame-based
       if (typeof window.registerCards === "function") {
         window.registerCards(cards);
       }
     }
   </script>
 
-  <script>
-    // Intercettazione dei click di ancoraggio con prevenzione dei conflitti della timeline
-    document.addEventListener("DOMContentLoaded", () => {
-      window.isAutoScrolling = false;
-
-      document.querySelectorAll('a[href^="#trigger-"]').forEach(anchor => {
-        anchor.addEventListener("click", function (e) {
-          e.preventDefault();
-          const targetId = this.getAttribute("href");
-          const targetEl = document.querySelector(targetId);
-          if (targetEl) {
-            const idx = parseInt(targetId.replace("#trigger-", ""), 10);
-            
-            // Attiva il blocco di aggiornamento per impedire sfarfallii intermedi
-            window.isAutoScrolling = true;
-
-            const targetScrollY = targetEl.getBoundingClientRect().top + window.scrollY;
-            const targetHeight = targetEl.offsetHeight;
-            
-            // Spostamento calibrato all'interno della zona ottimale del trigger
-            const scrollOffset = idx === 0 ? 0 : (targetHeight * 0.35);
-            const finalScrollPosition = targetScrollY + scrollOffset;
-
-            window.scrollTo({
-              top: finalScrollPosition,
-              behavior: "smooth"
-            });
-
-            // Rilevamento della fine dello scorrimento fluido
-            let lastScrollY = window.scrollY;
-            function checkScrollEnd() {
-              if (Math.abs(window.scrollY - finalScrollPosition) < 3 || window.scrollY === lastScrollY) {
-                // Scorrimento terminato: rimuove il blocco ed esegue il rendering forzato della card corretta
-                window.isAutoScrolling = false;
-                if (typeof window.forceUpdateCard === "function") {
-                  window.forceUpdateCard(idx);
-                }
-              } else {
-                lastScrollY = window.scrollY;
-                setTimeout(checkScrollEnd, 50);
-              }
-            }
-            setTimeout(checkScrollEnd, 100);
-          }
-        });
-      });
-    });
-  </script>
-
-  <!-- Collegamento nativo al chatbot e al cookie banner nella cartella public -->
+  <!-- Script esterni e Chatbot -->
   <script src="public/cookie-banner.js"></script>
   <script src="public/chatbot.js"></script>
-  
 </body>
 </html>
