@@ -1,47 +1,65 @@
 /**
- * scrubber.js — RM Studio High-Performance Engine
- * Sincronizzazione 1:1, Ricerca Frame Intelligente & Infinite Loop
+ * scrubber.js — RM Studio Hybrid Canvas & Video Engine v9.1 (Restored & Optimized)
+ * Sincronizzato con Lenis Smooth Scroll + Single RAF Loop + Procedural WebAudio + Infinite Loop
  */
 
 (function () {
   "use strict";
 
   const IS_MOBILE = window.innerWidth < 768;
+  const TOTAL_FRAMES = IS_MOBILE ? 720 : 1440;
+  const SCENES_COUNT = 12; // 0 .. 11
 
-  // ─── TABELLA INTERVALLI ESATTI PER OGNI SAAS (12 SCENE) ───
-  const SCENE_RANGES = [
-    { start: 0,    end: 30,   timeStart: 0.0,  timeEnd: 1.0 },   // 0: Intro RM Studio
-    { start: 30,   end: 120,  timeStart: 1.0,  timeEnd: 4.0 },   // 1: NexusAI
-    { start: 120,  end: 240,  timeStart: 4.0,  timeEnd: 8.0 },   // 2: Concierge24
-    { start: 240,  end: 360,  timeStart: 8.0,  timeEnd: 12.0 },  // 3: Dentis
-    { start: 360,  end: 480,  timeStart: 12.0, timeEnd: 16.0 },  // 4: Lexis AI
-    { start: 480,  end: 600,  timeStart: 16.0, timeEnd: 20.0 },  // 5: DriveMotion
-    { start: 600,  end: 720,  timeStart: 20.0, timeEnd: 24.0 },  // 6: HomeTour AI
-    { start: 720,  end: 840,  timeStart: 24.0, timeEnd: 28.0 },  // 7: OmniaStudio
-    { start: 840,  end: 960,  timeStart: 28.0, timeEnd: 32.0 },  // 8: FF Edizioni
-    { start: 960,  end: 1080, timeStart: 32.0, timeEnd: 36.0 },  // 9: Vision
-    { start: 1080, end: 1200, timeStart: 36.0, timeEnd: 40.0 },  // 10: Ecosistema
-    { start: 1200, end: 1439, timeStart: 40.0, timeEnd: 47.9 }   // 11: Contatti
-  ];
-
-  const TOTAL_FRAMES = 1440;
-  const SCENES_COUNT = SCENE_RANGES.length;
-
-  function getFramePath(i) {
-    const frameNumber = Math.min(Math.max(1, i + 1), TOTAL_FRAMES);
-    return `frames/frame_${String(frameNumber).padStart(4, "0")}.jpg`;
+  // ─── STILI DINAMICI MOBILE ───
+  if (IS_MOBILE) {
+    const style = document.createElement("style");
+    style.innerHTML = `
+      @media (max-width: 767px) {
+        .section-trigger { height: 120vh !important; }
+        #trigger-0 { height: 50vh !important; }
+        .scene-card {
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          background-color: rgba(7, 7, 10, 0.98) !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
   }
 
-  // ─── STATO MOTORE GRAFICO ───
+  function getFramePath(i) {
+    const n = IS_MOBILE ? (i * 2 + 1) : (i + 1);
+    return `frames/frame_${String(n).padStart(4, "0")}.jpg`;
+  }
+
+  function getSceneTimeRange(index) {
+    const ranges = [
+      [0.0, 1.0], [1.0, 4.0], [4.0, 8.0], [8.0, 12.0],
+      [12.0, 16.0], [16.0, 20.0], [20.0, 24.0], [24.0, 28.0],
+      [28.0, 32.0], [32.0, 36.0], [36.0, 40.0], [40.0, 47.9]
+    ];
+    return { start: ranges[index][0], end: ranges[index][1] };
+  }
+
+  function getSceneFrameRange(index) {
+    const ranges = [
+      [0, 30], [30, 120], [120, 240], [240, 360],
+      [360, 480], [480, 600], [600, 720], [720, 840],
+      [840, 960], [960, 1080], [1080, 1200], [1200, 1439]
+    ];
+    return { start: ranges[index][0], end: ranges[index][1] };
+  }
+
+  // ─── STATO ───
   const images = new Array(TOTAL_FRAMES).fill(null);
-  let targetFrame = 0;
-  let currentRenderedFrame = -1;
-  let lastValidImage = null;
+  let lastLoadedImg = null;
+  const scrollTracker = { frame: 0 };
   let canvasW = 1, canvasH = 1, dpr = 1;
-  
-  let cards = null;
-  let activeCardIndex = -1;
-  let lenisInstance = null;
+  let videoReady = false;
+  let isLooping = false;
+  let currentTargetTime = 0;
+  let lastProgress = 0, scrollVelocity = 0;
+  let lenis = null;
 
   // ─── DOM ───
   const canvas = document.getElementById("immersive-canvas");
@@ -49,8 +67,76 @@
   const loader = document.getElementById("loader");
   const loaderBar = document.getElementById("loader-bar");
   const loaderText = document.getElementById("loader-text");
+  let loadedCount = 0;
 
-  // ─── RESIZE CANVAS ───
+  // ─── PROCEDURAL WEBAUDIO (SOUND SYNTHESIS) ───
+  let audioCtx = null, windGain = null, windOn = false, windTarget = 0;
+
+  function initSoundEngine() {
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const len = audioCtx.sampleRate * 4;
+      const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+      const d = buf.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < len; i++) {
+        const white = Math.random() * 2 - 1;
+        last = (last + 0.02 * white) / 1.02;
+        d[i] = last * 2.8;
+      }
+      const src = audioCtx.createBufferSource();
+      src.buffer = buf;
+      src.loop = true;
+
+      const lp = audioCtx.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.value = 360;
+      lp.Q.value = 0.5;
+
+      windGain = audioCtx.createGain();
+      windGain.gain.value = 0;
+
+      src.connect(lp).connect(windGain).connect(audioCtx.destination);
+      src.start();
+
+      setInterval(() => {
+        if (!windOn || !windGain) return;
+        const cur = windGain.gain.value;
+        windGain.gain.value = cur + (windTarget - cur) * 0.08;
+      }, 40);
+    } catch (e) {
+      console.warn("Audio synthesis not supported", e);
+    }
+  }
+
+  function updateSoundVelocity(v) {
+    if (!windOn) return;
+    windTarget = Math.min(0.04 + v * 35, 0.28);
+  }
+
+  window.toggleSound = function () {
+    if (!audioCtx) initSoundEngine();
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    windOn = !windOn;
+    windTarget = windOn ? 0.06 : 0;
+    if (!windOn && windGain) windGain.gain.value = 0;
+    const btn = document.getElementById("sound-toggle-btn");
+    if (btn) {
+      btn.innerHTML = windOn 
+        ? `<span class="w-2 h-2 rounded-full bg-[#F2D28B] animate-pulse inline-block mr-1"></span> AUDIO ON` 
+        : `AUDIO OFF`;
+    }
+  };
+
+  // ─── PROGRESSO LOADER ───
+  function updateLoaderProgress() {
+    loadedCount++;
+    const pct = Math.min(100, Math.round((loadedCount / 60) * 100));
+    if (loaderBar) loaderBar.style.width = `${pct}%`;
+    if (loaderText) loaderText.innerText = `Calibrazione Ecosistema... ${pct}%`;
+  }
+
+  // ─── CANVAS SIZING & RENDER O(1) FLUIDO ───
   function updateCanvasSize() {
     if (!canvas || !ctx) return;
     const rect = canvas.getBoundingClientRect();
@@ -62,41 +148,25 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  // ─── RICERCA FRAME INTELLIGENTE (RISOLVE IL BLOCCO IN AVANTI) ───
-  function getBestImage(idx) {
-    if (images[idx] && images[idx].complete && images[idx].naturalWidth > 0) {
-      return images[idx];
-    }
-    // Cerca il frame disponibile più vicino in avanti o indietro nel raggio di 25 frame
-    for (let offset = 1; offset < 25; offset++) {
-      const forward = idx + offset;
-      if (forward < TOTAL_FRAMES && images[forward] && images[forward].complete && images[forward].naturalWidth > 0) {
-        return images[forward];
-      }
-      const backward = idx - offset;
-      if (backward >= 0 && images[backward] && images[backward].complete && images[backward].naturalWidth > 0) {
-        return images[backward];
-      }
-    }
-    return lastValidImage;
+  function resizeCanvas() {
+    updateCanvasSize();
+    drawFrame(Math.max(0, Math.min(Math.round(scrollTracker.frame), TOTAL_FRAMES - 1)));
   }
 
-  // ─── RENDER LOOP RAF A 60FPS ───
-  function renderLoop() {
-    const frameToDraw = Math.round(targetFrame);
-    if (frameToDraw !== currentRenderedFrame) {
-      drawCanvasFrame(frameToDraw);
-    }
-    requestAnimationFrame(renderLoop);
-  }
-
-  function drawCanvasFrame(idx) {
+  function drawFrame(idx) {
     if (!ctx) return;
-    idx = Math.max(0, Math.min(idx, TOTAL_FRAMES - 1));
-
-    const img = getBestImage(idx);
-    if (!img) return;
-    lastValidImage = img;
+    let img = images[idx];
+    
+    // Ricerca istantanea O(1) del frame disponibile più vicino
+    if (!img || !img.complete || img.naturalWidth === 0) {
+      if (lastLoadedImg) {
+        img = lastLoadedImg;
+      } else {
+        return;
+      }
+    } else {
+      lastLoadedImg = img;
+    }
 
     const iw = img.naturalWidth, ih = img.naturalHeight;
     const ir = iw / ih, cr = canvasW / canvasH;
@@ -108,13 +178,16 @@
     }
 
     ctx.drawImage(img, dx, dy, dw, dh);
-    currentRenderedFrame = idx;
   }
 
-  // ─── SINCRONIZZAZIONE SCHEDE (SENZA SFARFALLII) ───
-  function setActiveCard(sceneIdx) {
+  // ─── CARD SYNC & SCENE PROPS ───
+  let cards = null;
+  let activeCardIndex = 0;
+
+  function updateCardTimelineDirect(sceneIdx, force = false) {
+    if (window.isAutoScrolling && !force) return;
     if (!cards || cards.length === 0) return;
-    if (sceneIdx === activeCardIndex) return;
+    if (sceneIdx === activeCardIndex && !force) return;
 
     const prevIdx = activeCardIndex;
     activeCardIndex = sceneIdx;
@@ -122,169 +195,227 @@
     const exitDur = IS_MOBILE ? 0.2 : 0.35;
     const enterDur = IS_MOBILE ? 0.25 : 0.45;
 
-    // Chiudi la scheda precedente
     if (prevIdx >= 0 && prevIdx < cards.length) {
-      const prevCard = cards[prevIdx];
-      const prevProps = window.getSceneProps ? window.getSceneProps(prevIdx) : null;
+      const prev = cards[prevIdx];
+      const prevProps = window.getSceneProps && window.getSceneProps(prevIdx);
       if (prevProps) {
-        gsap.killTweensOf(prevCard);
-        gsap.to(prevCard, { ...prevProps.exit, duration: exitDur, ease: "power2.in" });
+        gsap.killTweensOf(prev);
+        gsap.to(prev, { ...prevProps.exit, duration: exitDur, ease: "power2.in" });
       }
     }
 
-    // Apri la nuova scheda
     if (sceneIdx >= 0 && sceneIdx < cards.length) {
-      const nextCard = cards[sceneIdx];
-      const nextProps = window.getSceneProps ? window.getSceneProps(sceneIdx) : null;
-      if (nextProps) {
-        gsap.killTweensOf(nextCard);
-        gsap.fromTo(nextCard, nextProps.init, { ...nextProps.mid, duration: enterDur, ease: "power3.out" });
-      }
-    }
-  }
-
-  // ─── CARICAMENTO FRAME CON PARALLELISMO DIRETTO ───
-  function preloadImages(onInitialReady) {
-    let loadedCount = 0;
-    let initialKeyframesCount = 45;
-
-    function loadSingleFrame(i, cb) {
-      if (images[i] !== null) {
-        if (cb) cb();
-        return;
-      }
-      const img = new Image();
-      images[i] = img;
-
-      const onDone = () => {
-        loadedCount++;
-        const pct = Math.min(100, Math.round((loadedCount / initialKeyframesCount) * 100));
-        if (loaderBar) loaderBar.style.width = `${pct}%`;
-        if (loaderText) loaderText.innerText = `Sincronizzazione Ecosistema... ${pct}%`;
-
-        if (i === 0 && !lastValidImage) {
-          lastValidImage = img;
-          drawCanvasFrame(0);
-        }
-
-        if (loadedCount >= initialKeyframesCount && onInitialReady) {
-          onInitialReady();
-          onInitialReady = null;
-          // Scarica l'intera sequenza rimanente in modo continuo
-          loadRemainingStream();
-        }
-        if (cb) cb();
-      };
-
-      if (img.decode) {
-        img.src = getFramePath(i);
-        img.decode().then(onDone).catch(onDone);
-      } else {
-        img.onload = img.onerror = onDone;
-        img.src = getFramePath(i);
-      }
-    }
-
-    // Carica prioritariamente i primi 45 frame per avvio istantaneo
-    for (let i = 0; i < initialKeyframesCount; i++) {
-      loadSingleFrame(i);
-    }
-
-    // Flusso continuo di caricamento sequenziale verso il fondo
-    function loadRemainingStream() {
-      let currentIndex = initialKeyframesCount;
-      const concurrency = 6; // 6 connessioni parallele contemporanee
-
-      function loadNext() {
-        if (currentIndex >= TOTAL_FRAMES) return;
-        const indexToLoad = currentIndex++;
-        loadSingleFrame(indexToLoad, () => {
-          loadNext();
-        });
-      }
-
-      for (let c = 0; c < concurrency; c++) {
-        loadNext();
-      }
-    }
-  }
-
-  // ─── REGISTRAZIONE CARDS ───
-  window.registerCards = function (cardElements) {
-    cards = cardElements;
-    cards.forEach((card, i) => {
-      const props = window.getSceneProps && window.getSceneProps(i);
+      const card = cards[sceneIdx];
+      const props = window.getSceneProps && window.getSceneProps(sceneIdx);
       if (props) {
-        gsap.set(card, i === 0 ? props.mid : props.init);
+        gsap.killTweensOf(card);
+        gsap.fromTo(card, props.init, { ...props.mid, duration: enterDur, ease: "power3.out" });
       }
-    });
-    activeCardIndex = 0;
+    }
+  }
+
+  window.forceUpdateCard = function(sceneIdx) {
+    updateCardTimelineDirect(sceneIdx, true);
   };
 
-  // ─── SCROLL ENGINE CON INFINITE LOOP ───
-  function initTriggers() {
-    if (IS_MOBILE) {
-      // Mobile: IntersectionObserver
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const idx = parseInt(entry.target.id.replace("trigger-", ""), 10);
-            if (!isNaN(idx)) {
-              setActiveCard(idx);
-              const range = SCENE_RANGES[idx];
-              if (range) targetFrame = range.start;
-            }
+  // ─── MOBILE VIDEO PLAYBACK ENGINE ───
+  function playMobileVideoSegment(index) {
+    const videoEl = document.getElementById("immersive-video");
+    if (!videoEl || !videoReady) return;
+    const times = getSceneTimeRange(index);
+    try {
+      if (videoEl.currentTime >= times.start && videoEl.currentTime < times.end && !videoEl.paused) {
+        currentTargetTime = times.end;
+        return;
+      }
+      videoEl.pause();
+      if (Math.abs(videoEl.currentTime - times.start) > 0.4) {
+        videoEl.currentTime = times.start;
+      }
+      currentTargetTime = times.end;
+      const playPromise = videoEl.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          if (!isLooping) {
+            isLooping = true;
+            requestAnimationFrame(monitorVideoPlayback);
           }
+        }).catch(() => {
+          try { videoEl.currentTime = times.end; } catch (e) {}
         });
-      }, { rootMargin: "-30% 0px -30% 0px", threshold: 0.05 });
+      }
+    } catch (err) {
+      console.warn("Mobile video sync fallback", err);
+    }
+  }
 
-      for (let i = 0; i < SCENES_COUNT; i++) {
-        const el = document.getElementById(`trigger-${i}`);
-        if (el) observer.observe(el);
+  function monitorVideoPlayback() {
+    if (!isLooping) return;
+    const videoEl = document.getElementById("immersive-video");
+    if (!videoEl || videoEl.currentTime >= currentTargetTime) {
+      if (videoEl) videoEl.pause();
+      isLooping = false;
+      return;
+    }
+    requestAnimationFrame(monitorVideoPlayback);
+  }
+
+  window.registerCards = function (cardElements) {
+    cards = cardElements;
+    let initialActiveIndex = 0;
+    for (let i = 0; i < SCENES_COUNT; i++) {
+      const trigger = document.getElementById(`trigger-${i}`);
+      if (trigger) {
+        const rect = trigger.getBoundingClientRect();
+        if (rect.top <= window.innerHeight * 0.5 && rect.bottom >= window.innerHeight * 0.5) {
+          initialActiveIndex = i;
+          break;
+        }
+      }
+    }
+    activeCardIndex = initialActiveIndex;
+
+    cards.forEach((card, i) => {
+      const props = window.getSceneProps && window.getSceneProps(i);
+      if (props) gsap.set(card, i === activeCardIndex ? props.mid : props.init);
+    });
+
+    if (IS_MOBILE) {
+      const videoEl = document.getElementById("immersive-video");
+      if (videoEl) {
+        let setupDone = false;
+        const setupMobileVideo = () => {
+          if (setupDone) return;
+          setupDone = true;
+          videoReady = true;
+          playMobileVideoSegment(activeCardIndex);
+        };
+        setTimeout(setupMobileVideo, 300);
+        if (videoEl.readyState >= 1) setupMobileVideo();
+        else videoEl.addEventListener("loadeddata", setupMobileVideo, { once: true });
+      }
+    }
+  };
+
+  // ─── PRELOAD ASINCRONO ISTANTANEO (COME NEL TUO ORIGINALE) ───
+  function loadFrame(i, cb) {
+    if (images[i] !== null) { cb && cb(); return; }
+    const img = new Image();
+    images[i] = img;
+    img.onload = img.onerror = () => {
+      if (!lastLoadedImg && i === 0) lastLoadedImg = img;
+      updateLoaderProgress();
+      cb && cb();
+    };
+    img.src = getFramePath(i);
+  }
+
+  function loadBatch(from, size) {
+    if (from >= TOTAL_FRAMES) return;
+    const to = Math.min(from + size, TOTAL_FRAMES);
+    let done = 0, n = to - from;
+    for (let i = from; i < to; i++) {
+      loadFrame(i, () => {
+        if (++done === n) setTimeout(() => loadBatch(to, size), 10);
+      });
+    }
+  }
+
+  function preloadImages() {
+    if (IS_MOBILE) {
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", startApp);
+      } else {
+        setTimeout(startApp, 50);
       }
     } else {
-      // Desktop: Sincronizzazione frame continua su tutti i 12 capitoli
+      // Carica il Frame 0 e APRE SUBITO IL SITO senza attese
+      loadFrame(0, () => {
+        updateCanvasSize();
+        drawFrame(0);
+        startApp();
+        // Carica le prime 60 immagini prioritariamente e poi scarica a flusso continuo
+        const PRI = Math.min(60, TOTAL_FRAMES);
+        for (let i = 1; i < PRI; i++) loadFrame(i, null);
+        setTimeout(() => loadBatch(PRI, 50), 50);
+      });
+    }
+  }
+
+  // ─── INITIALIZATION CON LENIS + SCROLLTRIGGER + INFINITE LOOP ───
+  function initTriggers(lenisInstance) {
+    if (IS_MOBILE) {
+      const videoEl = document.getElementById("immersive-video");
+      try {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const idx = parseInt(entry.target.id.replace("trigger-", ""), 10);
+              if (!isNaN(idx)) {
+                updateCardTimelineDirect(idx);
+                if (videoEl && videoReady) playMobileVideoSegment(idx);
+              }
+            }
+          });
+        }, { root: null, rootMargin: "-25% 0px -25% 0px", threshold: 0.01 });
+
+        for (let i = 0; i < SCENES_COUNT; i++) {
+          const el = document.getElementById(`trigger-${i}`);
+          if (el) observer.observe(el);
+        }
+      } catch (err) {
+        console.warn("IntersectionObserver init fallback", err);
+      }
+    } else {
+      // DESKTOP: Sincronizzazione 1:1 per ciascuna delle 12 scene
       for (let i = 0; i < SCENES_COUNT; i++) {
-        const range = SCENE_RANGES[i];
+        const range = getSceneFrameRange(i);
 
         ScrollTrigger.create({
           trigger: `#trigger-${i}`,
           start: "top top",
           end: "bottom top",
-          scrub: 0.15,
+          scrub: 0.2,
           onUpdate(self) {
-            const currentF = range.start + self.progress * (range.end - range.start);
-            targetFrame = currentF;
+            const currentFrame = range.start + self.progress * (range.end - range.start);
+            scrollTracker.frame = currentFrame;
+            drawFrame(Math.max(0, Math.min(Math.round(currentFrame), TOTAL_FRAMES - 1)));
+
+            // Calcolo velocità per WebAudio Sound Design
+            const curP = self.progress;
+            scrollVelocity = scrollVelocity * 0.85 + Math.abs(curP - lastProgress) * 0.15;
+            lastProgress = curP;
+            updateSoundVelocity(scrollVelocity);
 
             if (self.isActive) {
-              if (self.progress >= 0.15) {
-                setActiveCard(i);
+              if (self.progress >= 0.15 && self.progress <= 0.95) {
+                updateCardTimelineDirect(i);
               } else if (self.progress < 0.15 && i > 0) {
-                setActiveCard(i - 1);
+                updateCardTimelineDirect(i - 1);
               }
             }
           },
           onToggle(self) {
-            if (self.isActive && i === 0) {
-              setActiveCard(0);
+            if (self.isActive) {
+              updateCardTimelineDirect(i);
             }
           }
         });
       }
 
-      // ─── INFINITE LOOP TRIGGER (QUANDO ARRIVI ALLA FINE) ───
+      // ─── INFINITE LOOP TRIGGER (FINE SCENA 11 -> RITORNO ALL'INIZIO) ───
       ScrollTrigger.create({
         trigger: "#trigger-11",
         start: "bottom bottom",
         onEnter: () => {
-          // Quando raggiunge il fondo, riavvolge istantaneamente all'inizio
           if (lenisInstance) {
             lenisInstance.scrollTo(0, { immediate: true });
           } else {
             window.scrollTo({ top: 0, behavior: "instant" });
           }
-          targetFrame = 0;
-          setActiveCard(0);
+          scrollTracker.frame = 0;
+          drawFrame(0);
+          updateCardTimelineDirect(0, true);
         }
       });
     }
@@ -294,7 +425,7 @@
     }
   }
 
-  // ─── AVVIO APPLICAZIONE ───
+  // ─── START APP & LENIS SETUP ───
   function startApp() {
     if (loader) {
       loader.style.transition = "opacity 0.4s ease";
@@ -303,29 +434,34 @@
     }
 
     if (!IS_MOBILE && typeof Lenis !== "undefined") {
-      lenisInstance = new Lenis({
+      lenis = new Lenis({
         lerp: 0.08,
         smoothWheel: true,
-        wheelMultiplier: 1.0
+        wheelMultiplier: 1.0,
       });
 
-      lenisInstance.on("scroll", ScrollTrigger.update);
+      lenis.on("scroll", ScrollTrigger.update);
+
       gsap.ticker.add((time) => {
-        lenisInstance.raf(time * 1000);
+        lenis.raf(time * 1000);
       });
       gsap.ticker.lagSmoothing(0);
     }
 
-    updateCanvasSize();
-    window.addEventListener("resize", () => {
-      updateCanvasSize();
-      drawCanvasFrame(Math.round(targetFrame));
-      ScrollTrigger.refresh();
-    });
+    if (!IS_MOBILE) {
+      resizeCanvas();
+      let rsTimer;
+      window.addEventListener("resize", () => {
+        clearTimeout(rsTimer);
+        rsTimer = setTimeout(() => {
+          resizeCanvas();
+          ScrollTrigger.refresh();
+        }, 80);
+      });
+    }
 
-    initTriggers();
-    requestAnimationFrame(renderLoop);
+    initTriggers(lenis);
   }
 
-  preloadImages(startApp);
+  preloadImages();
 })();
