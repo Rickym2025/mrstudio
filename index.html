@@ -88,7 +88,7 @@
 </head>
 <body>
 
-  <!-- ─── PRELOADER CON PROGRESSO ─── -->
+  <!-- ─── PRELOADER CON PROGRESSO ELEGANTE ─── -->
   <div id="loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#040406] transition-opacity duration-500">
     <div class="text-center">
       <span class="text-[#F2D28B] text-[10px] tracking-[0.4em] uppercase block mb-3 font-mono font-semibold">Laboratorio Software AI</span>
@@ -121,17 +121,19 @@
     </div>
   </header>
 
-  <!-- ─── CONTENITORE IMMERSIVO VIDEO SCRUB ─── -->
+  <!-- ─── CONTENITORE IMMERSIVO: CANVAS DRIVEN BY VIDEO ─── -->
   <div id="app-container" class="relative w-full bg-[#020205]">
     <div class="sticky top-0 h-screen w-full overflow-hidden z-0 bg-black">
-      <video id="immersive-video" 
+      <!-- Sorgente video hardware in background (14 MB) -->
+      <video id="video-source" 
              src="frames/background_scrub.mp4" 
-             class="absolute inset-0 w-full h-full object-cover opacity-90" 
-             playsinline webkit-playsinline muted 
-             preload="auto" 
-             style="pointer-events: none;"></video>
+             playsinline webkit-playsinline muted preload="auto" 
+             style="display: none;"></video>
       
-      <!-- Scrims di sfumatura cinematografica (Top & Bottom) -->
+      <!-- Canvas hardware render -->
+      <canvas id="immersive-canvas" class="absolute inset-0 w-full h-full opacity-90 block" style="will-change: transform;"></canvas>
+      
+      <!-- Scrims di sfumatura cinematografica -->
       <div class="absolute inset-0 pointer-events-none"
            style="background: linear-gradient(to top, rgba(4,4,6,0.92) 0%, rgba(0,0,0,0.2) 50%, rgba(4,4,6,0.7) 100%);"></div>
     </div>
@@ -590,7 +592,7 @@
     window.initCardAnimations = initCardAnimations;
   </script>
 
-  <!-- ─── SCRIPT SCRUBBER (Motore di Scroll & Video) ─── -->
+  <!-- ─── SCRIPT SCRUBBER (Motore di Video-to-Canvas Stream) ─── -->
   <script src="scrubber.js"></script>
 
   <!-- ─── SCRIPT ESTERNI & CHATBOT ─── -->
