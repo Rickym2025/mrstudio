@@ -1,5 +1,5 @@
 /**
- * scrubber.js — RM Studio Pure Video Scrubbing Engine (Apple-Grade Non-Blocking)
+ * scrubber.js — RM Studio Pure Video Scrubbing Engine (Direct GSAP & Lenis Sync)
  */
 
 (function () {
@@ -32,8 +32,6 @@
   let cards = null;
   let activeCardIndex = 0;
   let lenisInstance = null;
-  let targetTime = 0;
-  let isSeeking = false;
 
   // ─── PROCEDURAL WEBAUDIO (SOUND) ───
   let audioCtx = null, windGain = null, windOn = false;
@@ -117,47 +115,15 @@
     });
   };
 
-  // ─── GESTORE FLUIDO DELLO SCRUB VIDEO (NO SEEK-THRASHING) ───
-  function applyVideoSeek() {
-    if (!video || video.readyState < 2) return;
-    
-    // Se la GPU sta già decodificando un frame, non sovraccaricarla
-    if (!isSeeking && Math.abs(video.currentTime - targetTime) > 0.03) {
-      isSeeking = true;
-      if (video.fastSeek) {
-        video.fastSeek(targetTime);
-      } else {
-        video.currentTime = targetTime;
-      }
-    }
-  }
-
-  if (video) {
-    video.addEventListener("seeked", () => {
-      isSeeking = false;
-      // Se durante la decodifica l'utente si è spostato ulteriormente, aggiorna subito
-      if (Math.abs(video.currentTime - targetTime) > 0.03) {
-        applyVideoSeek();
-      }
-    });
-  }
-
-  // ─── INIZIALIZZAZIONE ───
+  // ─── INIZIALIZZAZIONE MOTORE DI SCROLL ───
   function startEngine() {
     const loader = document.getElementById("loader");
     if (loader) {
       loader.style.opacity = "0";
-      setTimeout(() => loader.style.display = "none", 300);
+      setTimeout(() => { if (loader) loader.style.display = "none"; }, 300);
     }
 
-    // Inizializza e sveglia la pipeline GPU del video
-    if (video) {
-      video.play().then(() => {
-        video.pause();
-        video.currentTime = 0;
-      }).catch(() => {});
-    }
-
+    // Lenis Smooth Scroll
     if (typeof Lenis !== "undefined") {
       lenisInstance = new Lenis({
         lerp: 0.08,
@@ -168,12 +134,11 @@
       lenisInstance.on("scroll", ScrollTrigger.update);
       gsap.ticker.add((time) => {
         lenisInstance.raf(time * 1000);
-        applyVideoSeek();
       });
       gsap.ticker.lagSmoothing(0);
     }
 
-    // ScrollTriggers per le 12 sezioni
+    // ScrollTriggers per ciascuna delle 12 scene (Sincronizzazione video 1:1)
     for (let i = 0; i < SCENES_COUNT; i++) {
       const times = SCENE_TIMES[i];
 
@@ -181,10 +146,14 @@
         trigger: `#trigger-${i}`,
         start: "top top",
         end: "bottom top",
-        scrub: 0.1,
+        scrub: 0.15,
         onUpdate(self) {
-          targetTime = times.start + self.progress * (times.end - times.start);
-          applyVideoSeek();
+          if (video) {
+            const targetTime = times.start + self.progress * (times.end - times.start);
+            try {
+              video.currentTime = targetTime;
+            } catch (err) {}
+          }
 
           if (self.isActive) {
             if (self.progress >= 0.15 && self.progress <= 0.95) {
@@ -202,15 +171,19 @@
       });
     }
 
-    // Infinite Loop al fondo
+    // Infinite Loop al termine del capitolo 11 (Contatti)
     ScrollTrigger.create({
       trigger: "#trigger-11",
       start: "bottom bottom",
       onEnter: () => {
-        if (lenisInstance) lenisInstance.scrollTo(0, { immediate: true });
-        else window.scrollTo(0, 0);
-        targetTime = 0;
-        if (video) video.currentTime = 0;
+        if (lenisInstance) {
+          lenisInstance.scrollTo(0, { immediate: true });
+        } else {
+          window.scrollTo(0, 0);
+        }
+        if (video) {
+          try { video.currentTime = 0; } catch (e) {}
+        }
         updateActiveCard(0, true);
       }
     });
@@ -220,13 +193,10 @@
     }
   }
 
-  if (video) {
-    if (video.readyState >= 1) {
-      startEngine();
-    } else {
-      video.addEventListener("loadedmetadata", startEngine, { once: true });
-    }
-  } else {
+  // Avvio immediato
+  if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", startEngine);
+  } else {
+    startEngine();
   }
 })();
