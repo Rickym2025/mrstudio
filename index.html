@@ -88,15 +88,15 @@
 </head>
 <body>
 
-  <!-- ─── PRELOADER CON PERCENTUALE (1–2 SECONDI) ─── -->
-  <div id="loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#040406] transition-opacity duration-500">
+  <!-- ─── PRELOADER CON PROGRESSO LAMPOS (0.3s) ─── -->
+  <div id="loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#040406] transition-opacity duration-300">
     <div class="text-center">
       <span class="text-[#F2D28B] text-[10px] tracking-[0.4em] uppercase block mb-3 font-mono font-semibold">Laboratorio Software AI</span>
       <h2 class="font-serif text-3xl md:text-5xl tracking-[0.25em] uppercase text-white mb-8">RM Studio</h2>
       <div class="w-64 h-[2px] bg-neutral-800 relative overflow-hidden mx-auto mb-4 rounded-full">
         <div id="loader-bar" class="absolute h-full left-0 top-0 bg-gradient-to-r from-[#F2D28B]/60 to-[#F2D28B] w-0 transition-all duration-75"></div>
       </div>
-      <span id="loader-text" class="text-[10px] tracking-[0.3em] text-neutral-400 uppercase font-mono">Calibrazione Ecosistema... 0%</span>
+      <span id="loader-text" class="text-[10px] tracking-[0.3em] text-neutral-400 uppercase font-mono">Calibrazione Ecosistema...</span>
     </div>
   </div>
 
@@ -121,7 +121,7 @@
     </div>
   </header>
 
-  <!-- ─── CONTENITORE IMMERSIVO: CANVAS APPLE-GRADE ─── -->
+  <!-- ─── CONTENITORE IMMERSIVO CANVAS ─── -->
   <div id="app-container" class="relative w-full bg-[#020205]">
     <div class="sticky top-0 h-screen w-full overflow-hidden z-0 bg-black">
       <canvas id="immersive-canvas" class="absolute inset-0 w-full h-full opacity-90 block" style="will-change: transform;"></canvas>
@@ -134,7 +134,7 @@
     <!-- Contenitore Sovrapposizione Schede -->
     <div id="text-overlays" class="fixed inset-0 z-10 pointer-events-none"></div>
 
-    <!-- Triggers per lo Scroll (12 Scene) -->
+    <!-- Triggers per lo Scroll (12 Scene Pulite, senza spazi vuoti finali) -->
     <style>
       .section-trigger { height: 200vh; }
       #trigger-0 { height: 60vh; }
@@ -156,7 +156,6 @@
       <section id="trigger-9"  class="section-trigger w-full"></section>
       <section id="trigger-10" class="section-trigger w-full"></section>
       <section id="trigger-11" class="section-trigger w-full"></section>
-      <div style="height: 100vh;" class="w-full"></div>
     </div>
   </div>
 
@@ -585,7 +584,7 @@
     window.initCardAnimations = initCardAnimations;
   </script>
 
-  <!-- ─── SCRIPT SCRUBBER (Motore Canvas a 60 FPS) ─── -->
+  <!-- ─── SCRIPT SCRUBBER (Motore Canvas Subsampling 720 Frame) ─── -->
   <script src="scrubber.js"></script>
 
   <!-- ─── SCRIPT ESTERNI & CHATBOT ─── -->
