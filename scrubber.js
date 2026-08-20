@@ -1,6 +1,5 @@
 /**
- * scrubber.js — RM Studio Video-to-Canvas Engine (Awwwards/Apple Production Standard)
- * Decodifica hardware a 14 MB proiettata su Canvas a 60 FPS senza blocco del browser.
+ * scrubber.js — RM Studio Pure Canvas Engine (Apple-Grade 360 Frames @ 60 FPS)
  */
 
 (function () {
@@ -11,32 +10,47 @@
   }
   window.scrollTo(0, 0);
 
-  const video = document.getElementById("video-source");
-  const canvas = document.getElementById("immersive-canvas");
-  const ctx = canvas ? canvas.getContext("2d", { alpha: false }) : null;
+  // Subsampling 1:4 (360 frame totali caricati in RAM istantaneamente)
+  const STEP = 4;
+  const TOTAL_FRAMES = 1440;
+  const TOTAL_SAMPLES = Math.floor(TOTAL_FRAMES / STEP); // 360 immagini
   const SCENES_COUNT = 12;
 
-  // Tempi esatti (in secondi) per ciascuna delle 12 presentazioni SaaS nel video
-  const SCENE_TIMES = [
-    { start: 0.0,  end: 1.0 },   // 0: Intro RM Studio
-    { start: 1.0,  end: 4.0 },   // 1: NexusAI
-    { start: 4.0,  end: 8.0 },   // 2: Concierge24
-    { start: 8.0,  end: 12.0 },  // 3: Dentis
-    { start: 12.0, end: 16.0 },  // 4: Lexis AI
-    { start: 16.0, end: 20.0 },  // 5: DriveMotion
-    { start: 20.0, end: 24.0 },  // 6: HomeTour AI
-    { start: 24.0, end: 28.0 },  // 7: OmniaStudio
-    { start: 28.0, end: 32.0 },  // 8: FF Edizioni
-    { start: 32.0, end: 36.0 },  // 9: Vision
-    { start: 36.0, end: 40.0 },  // 10: Ecosistema
-    { start: 40.0, end: 47.9 }   // 11: Contatti
+  // Intervalli esatti per le 12 presentazioni
+  const SCENE_RANGES = [
+    { start: 0,    end: 30 },    // 0: Intro RM Studio
+    { start: 30,   end: 120 },   // 1: NexusAI
+    { start: 120,  end: 240 },   // 2: Concierge24
+    { start: 240,  end: 360 },   // 3: Dentis
+    { start: 360,  end: 480 },   // 4: Lexis AI
+    { start: 480,  end: 600 },   // 5: DriveMotion
+    { start: 600,  end: 720 },   // 6: HomeTour AI
+    { start: 720,  end: 840 },   // 7: OmniaStudio
+    { start: 840,  end: 960 },   // 8: FF Edizioni
+    { start: 960,  end: 1080 },  // 9: Vision
+    { start: 1080, end: 1200 },  // 10: Ecosistema
+    { start: 1200, end: 1439 }   // 11: Contatti
   ];
 
+  function getFramePathBySample(sampleIndex) {
+    const frameNumber = Math.min(TOTAL_FRAMES, (sampleIndex * STEP) + 1);
+    return `frames/frame_${String(frameNumber).padStart(4, "0")}.jpg`;
+  }
+
+  // ─── STATO ───
+  const images = new Array(TOTAL_SAMPLES).fill(null);
+  let canvasW = 1, canvasH = 1, dpr = 1;
+  let targetFrame = 0;
   let cards = null;
   let activeCardIndex = 0;
   let lenisInstance = null;
-  let canvasW = 1, canvasH = 1, dpr = 1;
-  let targetTime = 0;
+
+  // ─── DOM ───
+  const canvas = document.getElementById("immersive-canvas");
+  const ctx = canvas ? canvas.getContext("2d", { alpha: false }) : null;
+  const loader = document.getElementById("loader");
+  const loaderBar = document.getElementById("loader-bar");
+  const loaderText = document.getElementById("loader-text");
 
   // ─── PROCEDURAL WEBAUDIO (SOUND) ───
   let audioCtx = null, windGain = null, windOn = false;
@@ -82,7 +96,7 @@
     }
   };
 
-  // ─── RESIZE CANVAS FISSO CON DPR RETINA ───
+  // ─── RESIZE CANVAS CON SCALING RETINA ───
   function updateCanvasSize() {
     if (!canvas || !ctx) return;
     const rect = canvas.getBoundingClientRect();
@@ -94,26 +108,23 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  // ─── RENDERING VIDEO SU CANVAS (FORZA IL REPAINT A 60 FPS) ───
-  function drawVideoFrame() {
-    if (!ctx || !video || video.readyState < 2) return;
+  // ─── RENDERING CANVAS (0.1ms DALLA MEMORIA RAM) ───
+  function drawSample(sampleIdx) {
+    if (!ctx) return;
+    sampleIdx = Math.max(0, Math.min(sampleIdx, TOTAL_SAMPLES - 1));
+    const img = images[sampleIdx];
+    if (!img || !img.complete || img.naturalWidth === 0) return;
 
-    const vw = video.videoWidth || 1280;
-    const vh = video.videoHeight || 720;
-    const vr = vw / vh, cr = canvasW / canvasH;
+    const iw = img.naturalWidth, ih = img.naturalHeight;
+    const ir = iw / ih, cr = canvasW / canvasH;
     let dw, dh, dx, dy;
-    if (vr > cr) {
-      dh = canvasH; dw = dh * vr; dx = (canvasW - dw) / 2; dy = 0;
+    if (ir > cr) {
+      dh = canvasH; dw = dh * ir; dx = (canvasW - dw) / 2; dy = 0;
     } else {
-      dw = canvasW; dh = dw / vr; dx = 0; dy = (canvasH - dh) / 2;
+      dw = canvasW; dh = dw / ir; dx = 0; dy = (canvasH - dh) / 2;
     }
 
-    ctx.drawImage(video, dx, dy, dw, dh);
-  }
-
-  function renderLoop() {
-    drawVideoFrame();
-    requestAnimationFrame(renderLoop);
+    ctx.drawImage(img, dx, dy, dw, dh);
   }
 
   // ─── TRANSIZIONI SCHEDE ───
@@ -154,41 +165,52 @@
     });
   };
 
-  // ─── INIZIALIZZAZIONE APPLICAZIONE ───
+  // ─── PRELOAD ASINCRONO PARALLELO (1–2 SECONDI) ───
+  function preloadImages(onComplete) {
+    let loadedCount = 0;
+
+    for (let i = 0; i < TOTAL_SAMPLES; i++) {
+      const img = new Image();
+      images[i] = img;
+
+      img.onload = img.onerror = () => {
+        loadedCount++;
+        const pct = Math.round((loadedCount / TOTAL_SAMPLES) * 100);
+        if (loaderBar) loaderBar.style.width = `${pct}%`;
+        if (loaderText) loaderText.innerText = `Calibrazione Ecosistema... ${pct}%`;
+
+        if (loadedCount === 1) {
+          updateCanvasSize();
+          drawSample(0);
+        }
+
+        if (loadedCount >= TOTAL_SAMPLES) {
+          if (onComplete) onComplete();
+        }
+      };
+
+      img.src = getFramePathBySample(i);
+    }
+  }
+
+  // ─── AVVIO SCROLL ENGINE ───
   function startEngine() {
-    const loader = document.getElementById("loader");
     if (loader) {
       loader.style.opacity = "0";
-      setTimeout(() => { if (loader) loader.style.display = "none"; }, 300);
+      setTimeout(() => { if (loader) loader.style.display = "none"; }, 400);
     }
 
     updateCanvasSize();
     window.addEventListener("resize", () => {
       updateCanvasSize();
-      drawVideoFrame();
+      const currentSample = Math.floor(targetFrame / STEP);
+      drawSample(currentSample);
       ScrollTrigger.refresh();
     });
 
-    // Inizializza il video risvegliando il primo frame
-    if (video) {
-      video.muted = true;
-      video.playsInline = true;
-      video.load();
-      video.play().then(() => {
-        video.pause();
-        video.currentTime = 0;
-        drawVideoFrame();
-      }).catch(() => {
-        video.currentTime = 0;
-        drawVideoFrame();
-      });
-      video.addEventListener("seeked", drawVideoFrame);
-    }
-
-    // Lenis Smooth Scroll
     if (typeof Lenis !== "undefined") {
       lenisInstance = new Lenis({
-        lerp: 0.08,
+        lerp: 0.09,
         smoothWheel: true,
         wheelMultiplier: 1.0,
       });
@@ -200,22 +222,20 @@
       gsap.ticker.lagSmoothing(0);
     }
 
-    // ScrollTriggers per le 12 sezioni
+    // ScrollTrigger sulle 12 scene (Sincronizzazione millimetrica)
     for (let i = 0; i < SCENES_COUNT; i++) {
-      const times = SCENE_TIMES[i];
+      const range = SCENE_RANGES[i];
 
       ScrollTrigger.create({
         trigger: `#trigger-${i}`,
         start: "top top",
         end: "bottom top",
-        scrub: 0.15,
+        scrub: 0.1,
         onUpdate(self) {
-          if (video) {
-            targetTime = times.start + self.progress * (times.end - times.start);
-            try {
-              video.currentTime = Math.min(47.9, Math.max(0, targetTime));
-            } catch (err) {}
-          }
+          const currentFrame = range.start + self.progress * (range.end - range.start);
+          targetFrame = currentFrame;
+          const sampleToDraw = Math.floor(currentFrame / STEP);
+          drawSample(sampleToDraw);
 
           if (self.isActive) {
             if (self.progress >= 0.15 && self.progress <= 0.95) {
@@ -233,19 +253,15 @@
       });
     }
 
-    // Infinite Loop al termine del capitolo 11 (Contatti)
+    // Infinite Loop: al fondo torna in cima all'istante
     ScrollTrigger.create({
       trigger: "#trigger-11",
       start: "bottom bottom",
       onEnter: () => {
-        if (lenisInstance) {
-          lenisInstance.scrollTo(0, { immediate: true });
-        } else {
-          window.scrollTo(0, 0);
-        }
-        if (video) {
-          try { video.currentTime = 0; } catch (e) {}
-        }
+        if (lenisInstance) lenisInstance.scrollTo(0, { immediate: true });
+        else window.scrollTo(0, 0);
+        targetFrame = 0;
+        drawSample(0);
         updateActiveCard(0, true);
       }
     });
@@ -253,21 +269,7 @@
     if (window.initCardAnimations) {
       window.initCardAnimations();
     }
-
-    // Avvia il render loop hardware permanente
-    requestAnimationFrame(renderLoop);
   }
 
-  // Avvio sicuro
-  if (video) {
-    if (video.readyState >= 1) {
-      startEngine();
-    } else {
-      video.addEventListener("loadedmetadata", startEngine, { once: true });
-      // Fallback timeout di sicurezza
-      setTimeout(startEngine, 600);
-    }
-  } else {
-    document.addEventListener("DOMContentLoaded", startEngine);
-  }
+  preloadImages(startEngine);
 })();
