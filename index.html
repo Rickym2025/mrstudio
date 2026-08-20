@@ -21,7 +21,7 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Google Fonts: Cormorant Garamond, Inter & SF Mono -->
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
   <!-- GSAP & Lenis Smooth Scroll -->
@@ -88,15 +88,15 @@
 </head>
 <body>
 
-  <!-- ─── PRELOADER CON PROGRESSO ELEGANTE ─── -->
+  <!-- ─── PRELOADER CON PERCENTUALE (1–2 SECONDI) ─── -->
   <div id="loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#040406] transition-opacity duration-500">
     <div class="text-center">
       <span class="text-[#F2D28B] text-[10px] tracking-[0.4em] uppercase block mb-3 font-mono font-semibold">Laboratorio Software AI</span>
       <h2 class="font-serif text-3xl md:text-5xl tracking-[0.25em] uppercase text-white mb-8">RM Studio</h2>
       <div class="w-64 h-[2px] bg-neutral-800 relative overflow-hidden mx-auto mb-4 rounded-full">
-        <div id="loader-bar" class="absolute h-full left-0 top-0 bg-gradient-to-r from-[#F2D28B]/60 to-[#F2D28B] w-0 transition-all duration-150"></div>
+        <div id="loader-bar" class="absolute h-full left-0 top-0 bg-gradient-to-r from-[#F2D28B]/60 to-[#F2D28B] w-0 transition-all duration-75"></div>
       </div>
-      <span id="loader-text" class="text-[10px] tracking-[0.3em] text-neutral-400 uppercase font-mono">Calibrazione Ecosistema...</span>
+      <span id="loader-text" class="text-[10px] tracking-[0.3em] text-neutral-400 uppercase font-mono">Calibrazione Ecosistema... 0%</span>
     </div>
   </div>
 
@@ -121,16 +121,9 @@
     </div>
   </header>
 
-  <!-- ─── CONTENITORE IMMERSIVO: CANVAS DRIVEN BY VIDEO ─── -->
+  <!-- ─── CONTENITORE IMMERSIVO: CANVAS APPLE-GRADE ─── -->
   <div id="app-container" class="relative w-full bg-[#020205]">
     <div class="sticky top-0 h-screen w-full overflow-hidden z-0 bg-black">
-      <!-- Sorgente video hardware in background (14 MB) -->
-      <video id="video-source" 
-             src="frames/background_scrub.mp4" 
-             playsinline webkit-playsinline muted preload="auto" 
-             style="display: none;"></video>
-      
-      <!-- Canvas hardware render -->
       <canvas id="immersive-canvas" class="absolute inset-0 w-full h-full opacity-90 block" style="will-change: transform;"></canvas>
       
       <!-- Scrims di sfumatura cinematografica -->
@@ -189,7 +182,7 @@
     <a href="public/termini.html" target="_blank" class="hover:text-white transition-colors">Termini</a>
   </div>
 
-  <!-- ─── SCRIPT CREAZIONE SCHEDE (Eseguito prima di scrubber.js) ─── -->
+  <!-- ─── SCRIPT CREAZIONE SCHEDE ─── -->
   <script>
     const yr = document.getElementById("current-year");
     if (yr) yr.innerText = new Date().getFullYear();
@@ -592,7 +585,7 @@
     window.initCardAnimations = initCardAnimations;
   </script>
 
-  <!-- ─── SCRIPT SCRUBBER (Motore di Video-to-Canvas Stream) ─── -->
+  <!-- ─── SCRIPT SCRUBBER (Motore Canvas a 60 FPS) ─── -->
   <script src="scrubber.js"></script>
 
   <!-- ─── SCRIPT ESTERNI & CHATBOT ─── -->
