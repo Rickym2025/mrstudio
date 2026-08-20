@@ -1,5 +1,5 @@
 /**
- * scrubber.js — RM Studio Pure Video Scrubbing Engine (Apple-Grade)
+ * scrubber.js — RM Studio Pure Video Scrubbing Engine (Apple-Grade Non-Blocking)
  */
 
 (function () {
@@ -82,17 +82,28 @@
   // ─── SINCRONIZZAZIONE SCHEDE ───
   function updateActiveCard(idx, force = false) {
     if (!cards || (!force && idx === activeCardIndex)) return;
-    const prev = cards[activeCardIndex];
-    const next = cards[idx];
+    const prevIdx = activeCardIndex;
     activeCardIndex = idx;
 
-    if (prev && window.getSceneProps) {
-      gsap.killTweensOf(prev);
-      gsap.to(prev, { ...window.getSceneProps(activeCardIndex).exit, duration: 0.3 });
+    const exitDur = 0.3;
+    const enterDur = 0.4;
+
+    if (prevIdx >= 0 && prevIdx < cards.length) {
+      const prev = cards[prevIdx];
+      const prevProps = window.getSceneProps ? window.getSceneProps(prevIdx) : null;
+      if (prevProps) {
+        gsap.killTweensOf(prev);
+        gsap.to(prev, { ...prevProps.exit, duration: exitDur, ease: "power2.in" });
+      }
     }
-    if (next && window.getSceneProps) {
-      gsap.killTweensOf(next);
-      gsap.fromTo(next, window.getSceneProps(idx).init, { ...window.getSceneProps(idx).mid, duration: 0.4 });
+
+    if (idx >= 0 && idx < cards.length) {
+      const next = cards[idx];
+      const nextProps = window.getSceneProps ? window.getSceneProps(idx) : null;
+      if (nextProps) {
+        gsap.killTweensOf(next);
+        gsap.fromTo(next, nextProps.init, { ...nextProps.mid, duration: enterDur, ease: "power3.out" });
+      }
     }
   }
 
@@ -106,14 +117,29 @@
     });
   };
 
-  // ─── RENDER LOOP RAF PER IL VIDEO ───
-  function renderVideoScrub() {
-    if (video && video.readyState >= 2 && !isSeeking) {
-      if (Math.abs(video.currentTime - targetTime) > 0.03) {
+  // ─── GESTORE FLUIDO DELLO SCRUB VIDEO (NO SEEK-THRASHING) ───
+  function applyVideoSeek() {
+    if (!video || video.readyState < 2) return;
+    
+    // Se la GPU sta già decodificando un frame, non sovraccaricarla
+    if (!isSeeking && Math.abs(video.currentTime - targetTime) > 0.03) {
+      isSeeking = true;
+      if (video.fastSeek) {
+        video.fastSeek(targetTime);
+      } else {
         video.currentTime = targetTime;
       }
     }
-    requestAnimationFrame(renderVideoScrub);
+  }
+
+  if (video) {
+    video.addEventListener("seeked", () => {
+      isSeeking = false;
+      // Se durante la decodifica l'utente si è spostato ulteriormente, aggiorna subito
+      if (Math.abs(video.currentTime - targetTime) > 0.03) {
+        applyVideoSeek();
+      }
+    });
   }
 
   // ─── INIZIALIZZAZIONE ───
@@ -122,6 +148,14 @@
     if (loader) {
       loader.style.opacity = "0";
       setTimeout(() => loader.style.display = "none", 300);
+    }
+
+    // Inizializza e sveglia la pipeline GPU del video
+    if (video) {
+      video.play().then(() => {
+        video.pause();
+        video.currentTime = 0;
+      }).catch(() => {});
     }
 
     if (typeof Lenis !== "undefined") {
@@ -134,6 +168,7 @@
       lenisInstance.on("scroll", ScrollTrigger.update);
       gsap.ticker.add((time) => {
         lenisInstance.raf(time * 1000);
+        applyVideoSeek();
       });
       gsap.ticker.lagSmoothing(0);
     }
@@ -149,6 +184,8 @@
         scrub: 0.1,
         onUpdate(self) {
           targetTime = times.start + self.progress * (times.end - times.start);
+          applyVideoSeek();
+
           if (self.isActive) {
             if (self.progress >= 0.15 && self.progress <= 0.95) {
               updateActiveCard(i);
@@ -181,8 +218,6 @@
     if (window.initCardAnimations) {
       window.initCardAnimations();
     }
-
-    requestAnimationFrame(renderVideoScrub);
   }
 
   if (video) {
