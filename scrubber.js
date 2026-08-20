@@ -1,5 +1,6 @@
 /**
- * scrubber.js — RM Studio Pure Video Engine (GSAP Master Timeline Sync)
+ * scrubber.js — RM Studio Video-to-Canvas Engine (Awwwards/Apple Production Standard)
+ * Decodifica hardware a 14 MB proiettata su Canvas a 60 FPS senza blocco del browser.
  */
 
 (function () {
@@ -10,12 +11,32 @@
   }
   window.scrollTo(0, 0);
 
-  const video = document.getElementById("immersive-video");
+  const video = document.getElementById("video-source");
+  const canvas = document.getElementById("immersive-canvas");
+  const ctx = canvas ? canvas.getContext("2d", { alpha: false }) : null;
   const SCENES_COUNT = 12;
+
+  // Tempi esatti (in secondi) per ciascuna delle 12 presentazioni SaaS nel video
+  const SCENE_TIMES = [
+    { start: 0.0,  end: 1.0 },   // 0: Intro RM Studio
+    { start: 1.0,  end: 4.0 },   // 1: NexusAI
+    { start: 4.0,  end: 8.0 },   // 2: Concierge24
+    { start: 8.0,  end: 12.0 },  // 3: Dentis
+    { start: 12.0, end: 16.0 },  // 4: Lexis AI
+    { start: 16.0, end: 20.0 },  // 5: DriveMotion
+    { start: 20.0, end: 24.0 },  // 6: HomeTour AI
+    { start: 24.0, end: 28.0 },  // 7: OmniaStudio
+    { start: 28.0, end: 32.0 },  // 8: FF Edizioni
+    { start: 32.0, end: 36.0 },  // 9: Vision
+    { start: 36.0, end: 40.0 },  // 10: Ecosistema
+    { start: 40.0, end: 47.9 }   // 11: Contatti
+  ];
 
   let cards = null;
   let activeCardIndex = 0;
   let lenisInstance = null;
+  let canvasW = 1, canvasH = 1, dpr = 1;
+  let targetTime = 0;
 
   // ─── PROCEDURAL WEBAUDIO (SOUND) ───
   let audioCtx = null, windGain = null, windOn = false;
@@ -61,6 +82,40 @@
     }
   };
 
+  // ─── RESIZE CANVAS FISSO CON DPR RETINA ───
+  function updateCanvasSize() {
+    if (!canvas || !ctx) return;
+    const rect = canvas.getBoundingClientRect();
+    canvasW = rect.width || window.innerWidth;
+    canvasH = rect.height || window.innerHeight;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(canvasW * dpr);
+    canvas.height = Math.round(canvasH * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  // ─── RENDERING VIDEO SU CANVAS (FORZA IL REPAINT A 60 FPS) ───
+  function drawVideoFrame() {
+    if (!ctx || !video || video.readyState < 2) return;
+
+    const vw = video.videoWidth || 1280;
+    const vh = video.videoHeight || 720;
+    const vr = vw / vh, cr = canvasW / canvasH;
+    let dw, dh, dx, dy;
+    if (vr > cr) {
+      dh = canvasH; dw = dh * vr; dx = (canvasW - dw) / 2; dy = 0;
+    } else {
+      dw = canvasW; dh = dw / vr; dx = 0; dy = (canvasH - dh) / 2;
+    }
+
+    ctx.drawImage(video, dx, dy, dw, dh);
+  }
+
+  function renderLoop() {
+    drawVideoFrame();
+    requestAnimationFrame(renderLoop);
+  }
+
   // ─── TRANSIZIONI SCHEDE ───
   function updateActiveCard(idx, force = false) {
     if (!cards || (!force && idx === activeCardIndex)) return;
@@ -99,17 +154,35 @@
     });
   };
 
-  // ─── SETUP MOTORE VIDEO SCRUBBING ───
-  function initApp() {
+  // ─── INIZIALIZZAZIONE APPLICAZIONE ───
+  function startEngine() {
     const loader = document.getElementById("loader");
     if (loader) {
       loader.style.opacity = "0";
       setTimeout(() => { if (loader) loader.style.display = "none"; }, 300);
     }
 
-    // Forza il browser a risvegliare il frame iniziale
+    updateCanvasSize();
+    window.addEventListener("resize", () => {
+      updateCanvasSize();
+      drawVideoFrame();
+      ScrollTrigger.refresh();
+    });
+
+    // Inizializza il video risvegliando il primo frame
     if (video) {
-      video.currentTime = 0.001;
+      video.muted = true;
+      video.playsInline = true;
+      video.load();
+      video.play().then(() => {
+        video.pause();
+        video.currentTime = 0;
+        drawVideoFrame();
+      }).catch(() => {
+        video.currentTime = 0;
+        drawVideoFrame();
+      });
+      video.addEventListener("seeked", drawVideoFrame);
     }
 
     // Lenis Smooth Scroll
@@ -127,42 +200,52 @@
       gsap.ticker.lagSmoothing(0);
     }
 
-    // ── 1. TIMELINE MASTER PER IL VIDEO (FLUIDITÀ CONTINUA) ──
-    const videoDuration = (video && video.duration && !isNaN(video.duration)) ? video.duration : 47.9;
-
-    gsap.fromTo(video, 
-      { currentTime: 0 }, 
-      {
-        currentTime: videoDuration,
-        ease: "none",
-        scrollTrigger: {
-          trigger: "#scroll-triggers",
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 0.15 // Scrub ultra reattivo
-        }
-      }
-    );
-
-    // ── 2. TRIGGER DEDICATI ALLE 12 SCHEDE ──
+    // ScrollTriggers per le 12 sezioni
     for (let i = 0; i < SCENES_COUNT; i++) {
+      const times = SCENE_TIMES[i];
+
       ScrollTrigger.create({
         trigger: `#trigger-${i}`,
-        start: "top center",
-        end: "bottom center",
-        onEnter: () => updateActiveCard(i),
-        onEnterBack: () => updateActiveCard(i)
+        start: "top top",
+        end: "bottom top",
+        scrub: 0.15,
+        onUpdate(self) {
+          if (video) {
+            targetTime = times.start + self.progress * (times.end - times.start);
+            try {
+              video.currentTime = Math.min(47.9, Math.max(0, targetTime));
+            } catch (err) {}
+          }
+
+          if (self.isActive) {
+            if (self.progress >= 0.15 && self.progress <= 0.95) {
+              updateActiveCard(i);
+            } else if (self.progress < 0.15 && i > 0) {
+              updateActiveCard(i - 1);
+            }
+          }
+        },
+        onToggle(self) {
+          if (self.isActive) {
+            updateActiveCard(i);
+          }
+        }
       });
     }
 
-    // ── 3. INFINITE LOOP ──
+    // Infinite Loop al termine del capitolo 11 (Contatti)
     ScrollTrigger.create({
       trigger: "#trigger-11",
       start: "bottom bottom",
       onEnter: () => {
-        if (lenisInstance) lenisInstance.scrollTo(0, { immediate: true });
-        else window.scrollTo(0, 0);
-        if (video) video.currentTime = 0;
+        if (lenisInstance) {
+          lenisInstance.scrollTo(0, { immediate: true });
+        } else {
+          window.scrollTo(0, 0);
+        }
+        if (video) {
+          try { video.currentTime = 0; } catch (e) {}
+        }
         updateActiveCard(0, true);
       }
     });
@@ -170,16 +253,21 @@
     if (window.initCardAnimations) {
       window.initCardAnimations();
     }
+
+    // Avvia il render loop hardware permanente
+    requestAnimationFrame(renderLoop);
   }
 
-  // Assicura che i metadati del video siano pronti prima di avviare GSAP
+  // Avvio sicuro
   if (video) {
     if (video.readyState >= 1) {
-      initApp();
+      startEngine();
     } else {
-      video.addEventListener("loadedmetadata", initApp, { once: true });
+      video.addEventListener("loadedmetadata", startEngine, { once: true });
+      // Fallback timeout di sicurezza
+      setTimeout(startEngine, 600);
     }
   } else {
-    document.addEventListener("DOMContentLoaded", initApp);
+    document.addEventListener("DOMContentLoaded", startEngine);
   }
 })();
