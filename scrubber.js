@@ -1,5 +1,6 @@
 /**
- * scrubber.js — RM Studio High-Performance Engine (Synchronized & Lag-Free)
+ * scrubber.js — RM Studio High-Performance Engine
+ * Sincronizzazione 1:1, Ricerca Frame Intelligente & Infinite Loop
  */
 
 (function () {
@@ -40,7 +41,7 @@
   
   let cards = null;
   let activeCardIndex = -1;
-  let isTransitioning = false;
+  let lenisInstance = null;
 
   // ─── DOM ───
   const canvas = document.getElementById("immersive-canvas");
@@ -61,7 +62,26 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  // ─── RENDER LOOP RAF (Nessun blocco del browser) ───
+  // ─── RICERCA FRAME INTELLIGENTE (RISOLVE IL BLOCCO IN AVANTI) ───
+  function getBestImage(idx) {
+    if (images[idx] && images[idx].complete && images[idx].naturalWidth > 0) {
+      return images[idx];
+    }
+    // Cerca il frame disponibile più vicino in avanti o indietro nel raggio di 25 frame
+    for (let offset = 1; offset < 25; offset++) {
+      const forward = idx + offset;
+      if (forward < TOTAL_FRAMES && images[forward] && images[forward].complete && images[forward].naturalWidth > 0) {
+        return images[forward];
+      }
+      const backward = idx - offset;
+      if (backward >= 0 && images[backward] && images[backward].complete && images[backward].naturalWidth > 0) {
+        return images[backward];
+      }
+    }
+    return lastValidImage;
+  }
+
+  // ─── RENDER LOOP RAF A 60FPS ───
   function renderLoop() {
     const frameToDraw = Math.round(targetFrame);
     if (frameToDraw !== currentRenderedFrame) {
@@ -74,14 +94,9 @@
     if (!ctx) return;
     idx = Math.max(0, Math.min(idx, TOTAL_FRAMES - 1));
 
-    let img = images[idx];
-    if (img && img.complete && img.naturalWidth > 0) {
-      lastValidImage = img;
-    } else if (lastValidImage) {
-      img = lastValidImage;
-    } else {
-      return;
-    }
+    const img = getBestImage(idx);
+    if (!img) return;
+    lastValidImage = img;
 
     const iw = img.naturalWidth, ih = img.naturalHeight;
     const ir = iw / ih, cr = canvasW / canvasH;
@@ -96,7 +111,7 @@
     currentRenderedFrame = idx;
   }
 
-  // ─── SINCRONIZZAZIONE PRECISA CARD <-> SCENA ───
+  // ─── SINCRONIZZAZIONE SCHEDE (SENZA SFARFALLII) ───
   function setActiveCard(sceneIdx) {
     if (!cards || cards.length === 0) return;
     if (sceneIdx === activeCardIndex) return;
@@ -128,25 +143,22 @@
     }
   }
 
-  // ─── PRELOAD ASINCRONO AD ALTA PRIORITÀ ───
+  // ─── CARICAMENTO FRAME CON PARALLELISMO DIRETTO ───
   function preloadImages(onInitialReady) {
     let loadedCount = 0;
-    const initialKeyframes = [];
+    let initialKeyframesCount = 45;
 
-    // 1. Carica subito i primi frame chiave di ciascuna delle 12 scene
-    SCENE_RANGES.forEach(range => {
-      initialKeyframes.push(range.start);
-      initialKeyframes.push(Math.floor((range.start + range.end) / 2));
-    });
-
-    function loadImage(i, isPriority = false) {
-      if (images[i] !== null) return;
+    function loadSingleFrame(i, cb) {
+      if (images[i] !== null) {
+        if (cb) cb();
+        return;
+      }
       const img = new Image();
       images[i] = img;
 
       const onDone = () => {
         loadedCount++;
-        const pct = Math.min(100, Math.round((loadedCount / (initialKeyframes.length + 60)) * 100));
+        const pct = Math.min(100, Math.round((loadedCount / initialKeyframesCount) * 100));
         if (loaderBar) loaderBar.style.width = `${pct}%`;
         if (loaderText) loaderText.innerText = `Sincronizzazione Ecosistema... ${pct}%`;
 
@@ -155,12 +167,13 @@
           drawCanvasFrame(0);
         }
 
-        if (loadedCount >= initialKeyframes.length && onInitialReady) {
+        if (loadedCount >= initialKeyframesCount && onInitialReady) {
           onInitialReady();
           onInitialReady = null;
-          // Continua a scaricare il resto dei frame in background in modo non bloccante
-          loadRemainingFrames();
+          // Scarica l'intera sequenza rimanente in modo continuo
+          loadRemainingStream();
         }
+        if (cb) cb();
       };
 
       if (img.decode) {
@@ -172,24 +185,27 @@
       }
     }
 
-    // Carica prioritari
-    initialKeyframes.forEach(idx => loadImage(idx, true));
-    for (let i = 0; i < 40; i++) loadImage(i, true);
+    // Carica prioritariamente i primi 45 frame per avvio istantaneo
+    for (let i = 0; i < initialKeyframesCount; i++) {
+      loadSingleFrame(i);
+    }
 
-    // Caricamento progressivo delle rimanenti immagini a batch
-    function loadRemainingFrames() {
-      let currentBatchIndex = 0;
-      function nextBatch() {
-        const end = Math.min(currentBatchIndex + 30, TOTAL_FRAMES);
-        for (let i = currentBatchIndex; i < end; i++) {
-          loadImage(i, false);
-        }
-        currentBatchIndex = end;
-        if (currentBatchIndex < TOTAL_FRAMES) {
-          setTimeout(nextBatch, 25);
-        }
+    // Flusso continuo di caricamento sequenziale verso il fondo
+    function loadRemainingStream() {
+      let currentIndex = initialKeyframesCount;
+      const concurrency = 6; // 6 connessioni parallele contemporanee
+
+      function loadNext() {
+        if (currentIndex >= TOTAL_FRAMES) return;
+        const indexToLoad = currentIndex++;
+        loadSingleFrame(indexToLoad, () => {
+          loadNext();
+        });
       }
-      nextBatch();
+
+      for (let c = 0; c < concurrency; c++) {
+        loadNext();
+      }
     }
   }
 
@@ -205,10 +221,10 @@
     activeCardIndex = 0;
   };
 
-  // ─── SCROLLTRIGGER & LENIS SETUP ───
-  function initTriggers(lenisInstance) {
+  // ─── SCROLL ENGINE CON INFINITE LOOP ───
+  function initTriggers() {
     if (IS_MOBILE) {
-      // Setup Mobile con IntersectionObserver leggero
+      // Mobile: IntersectionObserver
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
@@ -227,7 +243,7 @@
         if (el) observer.observe(el);
       }
     } else {
-      // Setup Desktop: ScrollTrigger dedicato per ogni capitolo con calcolo esatto
+      // Desktop: Sincronizzazione frame continua su tutti i 12 capitoli
       for (let i = 0; i < SCENES_COUNT; i++) {
         const range = SCENE_RANGES[i];
 
@@ -235,13 +251,11 @@
           trigger: `#trigger-${i}`,
           start: "top top",
           end: "bottom top",
-          scrub: 0.1, // Scrub ultra reattivo
+          scrub: 0.15,
           onUpdate(self) {
-            // Calcolo frame continuo e privo di scatti
             const currentF = range.start + self.progress * (range.end - range.start);
             targetFrame = currentF;
 
-            // Transizione card al punto aureo del capitolo (20% dello scroll della sezione)
             if (self.isActive) {
               if (self.progress >= 0.15) {
                 setActiveCard(i);
@@ -257,6 +271,22 @@
           }
         });
       }
+
+      // ─── INFINITE LOOP TRIGGER (QUANDO ARRIVI ALLA FINE) ───
+      ScrollTrigger.create({
+        trigger: "#trigger-11",
+        start: "bottom bottom",
+        onEnter: () => {
+          // Quando raggiunge il fondo, riavvolge istantaneamente all'inizio
+          if (lenisInstance) {
+            lenisInstance.scrollTo(0, { immediate: true });
+          } else {
+            window.scrollTo({ top: 0, behavior: "instant" });
+          }
+          targetFrame = 0;
+          setActiveCard(0);
+        }
+      });
     }
 
     if (typeof window.initCardAnimations === "function") {
@@ -272,17 +302,16 @@
       setTimeout(() => { if (loader) loader.style.display = "none"; }, 400);
     }
 
-    let lenis = null;
     if (!IS_MOBILE && typeof Lenis !== "undefined") {
-      lenis = new Lenis({
-        lerp: 0.09,
+      lenisInstance = new Lenis({
+        lerp: 0.08,
         smoothWheel: true,
         wheelMultiplier: 1.0
       });
 
-      lenis.on("scroll", ScrollTrigger.update);
+      lenisInstance.on("scroll", ScrollTrigger.update);
       gsap.ticker.add((time) => {
-        lenis.raf(time * 1000);
+        lenisInstance.raf(time * 1000);
       });
       gsap.ticker.lagSmoothing(0);
     }
@@ -294,11 +323,9 @@
       ScrollTrigger.refresh();
     });
 
-    initTriggers(lenis);
-    // Avvia il loop RAF separato
+    initTriggers();
     requestAnimationFrame(renderLoop);
   }
 
-  // Avvio con pre-caricamento intelligente
   preloadImages(startApp);
 })();
