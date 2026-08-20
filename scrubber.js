@@ -1,6 +1,6 @@
 /**
  * scrubber.js — RM Studio Ultra-Smooth Canvas Engine (720 Frames @ 60 FPS)
- * Caricamento immediato (<0.3s), zero blocchi di sintassi, loop infinito corretto.
+ * Loop Rigoroso: 11 (Contatti) ➔ 0 (Intro RM Studio)
  */
 
 (function () {
@@ -17,7 +17,7 @@
   const TOTAL_SAMPLES = Math.floor(TOTAL_FRAMES / STEP); // 720 immagini
   const SCENES_COUNT = 12;
 
-  // Intervalli esatti per le 12 presentazioni
+  // Intervalli esatti per le 12 presentazioni (0 = Intro, 11 = Contatti)
   const SCENE_RANGES = [
     { start: 0,    end: 30 },    // 0: Intro RM Studio
     { start: 30,   end: 120 },   // 1: NexusAI
@@ -48,6 +48,7 @@
   let activeCardIndex = 0;
   let lenisInstance = null;
   let isAppRunning = false;
+  let isLooping = false;
 
   // ─── DOM ───
   const canvas = document.getElementById("immersive-canvas");
@@ -117,7 +118,6 @@
     if (isLoaded[sampleIdx] && images[sampleIdx]) {
       return images[sampleIdx];
     }
-    // Cerca il fotogramma più vicino nel raggio di 30 frame
     for (let offset = 1; offset < 30; offset++) {
       const back = sampleIdx - offset;
       if (back >= 0 && isLoaded[back] && images[back]) {
@@ -131,7 +131,7 @@
     return lastDrawnImg;
   }
 
-  // ─── RENDERING CANVAS ISTANTANEO (0.1ms) ───
+  // ─── RENDERING CANVAS (0.1ms DALLA RAM) ───
   function drawSample(sampleIdx) {
     if (!ctx) return;
     sampleIdx = Math.max(0, Math.min(sampleIdx, TOTAL_SAMPLES - 1));
@@ -152,7 +152,7 @@
     ctx.drawImage(img, dx, dy, dw, dh);
   }
 
-  // ─── TRANSIZIONI SCHEDE PULITE (ZERO CONFLITTI) ───
+  // ─── TRANSIZIONI SCHEDE PULITE ───
   function updateActiveCard(idx, force = false) {
     if (!cards || (!force && idx === activeCardIndex)) return;
     const prevIdx = activeCardIndex;
@@ -203,13 +203,12 @@
       if (cb) cb();
     };
     img.onerror = () => {
-      // In caso di errore non bloccare la coda
       if (cb) cb();
     };
     img.src = getFramePathBySample(i);
   }
 
-  // ─── STREAMING IN BACKGROUND CONTINUO ───
+  // ─── STREAMING IN BACKGROUND ───
   function startBackgroundStreaming() {
     let currentIdx = 15;
     const concurrency = 6;
@@ -225,6 +224,27 @@
     for (let c = 0; c < concurrency; c++) {
       worker();
     }
+  }
+
+  // ─── ESECUZIONE DEL LOOP: DA 11 (CONTATTI) A 0 (INTRO) ───
+  function loopToIntro() {
+    if (isLooping) return;
+    isLooping = true;
+
+    // Riavvolge lo scroll a zero istantaneamente
+    if (lenisInstance) {
+      lenisInstance.scrollTo(0, { immediate: true });
+    } else {
+      window.scrollTo(0, 0);
+    }
+
+    targetFrame = 0;
+    drawSample(0);
+    updateActiveCard(0, true); // Attiva Scheda 0 (Intro RM Studio)
+
+    setTimeout(() => {
+      isLooping = false;
+    }, 250);
   }
 
   // ─── AVVIO SCROLL ENGINE ───
@@ -254,14 +274,33 @@
         wheelMultiplier: 1.0,
       });
 
-      lenisInstance.on("scroll", ScrollTrigger.update);
+      lenisInstance.on("scroll", () => {
+        ScrollTrigger.update();
+      });
+
       gsap.ticker.add((time) => {
         lenisInstance.raf(time * 1000);
       });
       gsap.ticker.lagSmoothing(0);
     }
 
-    // ScrollTrigger sulle 12 scene (Sincronizzazione esatta)
+    // Rilevatore continuo: se sei al fondo (Scheda 11) e scorri ancora verso il basso -> Loop a Scheda 0
+    window.addEventListener("wheel", (e) => {
+      if (e.deltaY > 0) {
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        if (window.scrollY >= maxScroll - 40 || activeCardIndex === 11) {
+          const trigger11 = document.getElementById("trigger-11");
+          if (trigger11) {
+            const rect = trigger11.getBoundingClientRect();
+            if (rect.bottom <= window.innerHeight + 20) {
+              loopToIntro();
+            }
+          }
+        }
+      }
+    }, { passive: true });
+
+    // ScrollTrigger sulle 12 scene
     for (let i = 0; i < SCENES_COUNT; i++) {
       const range = SCENE_RANGES[i];
 
@@ -288,31 +327,15 @@
       });
     }
 
-    // ─── INFINITE LOOP PULITO: AL FONDO RIPARTE DA CAPO SENZA DOPPI ───
-    ScrollTrigger.create({
-      trigger: "#trigger-11",
-      start: "bottom bottom",
-      onEnter: () => {
-        if (lenisInstance) {
-          lenisInstance.scrollTo(0, { immediate: true });
-        } else {
-          window.scrollTo(0, 0);
-        }
-        targetFrame = 0;
-        drawSample(0);
-        updateActiveCard(0, true);
-      }
-    });
-
     if (window.initCardAnimations) {
       window.initCardAnimations();
     }
 
-    // Avvia il caricamento fluido in background
+    // Avvia il caricamento in background
     startBackgroundStreaming();
   }
 
-  // ─── AVVIO IMMEDIATO CON I PRIMI 15 FRAME ───
+  // ─── AVVIO RAPIDO CON I PRIMI 15 FRAME ───
   let initialLoaded = 0;
   const initialCritical = 15;
 
@@ -334,7 +357,6 @@
     });
   }
 
-  // Fallback di sicurezza: avvia il sito entro 1 secondo in ogni caso
   setTimeout(() => {
     startEngine();
   }, 1000);
