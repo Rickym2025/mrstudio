@@ -1,5 +1,6 @@
 /**
- * scrubber.js — RM Studio Pure Canvas Engine (Apple-Grade 360 Frames @ 60 FPS)
+ * scrubber.js — RM Studio Ultra-Smooth Progressive Canvas Engine
+ * 720 Frames (2x Fluidity) + Instant Site Launch + Background Streaming
  */
 
 (function () {
@@ -10,10 +11,10 @@
   }
   window.scrollTo(0, 0);
 
-  // Subsampling 1:4 (360 frame totali caricati in RAM istantaneamente)
-  const STEP = 4;
+  // 1 frame ogni 2 = 720 frame totali (doppia fluidità rispetto a prima)
+  const STEP = 2;
   const TOTAL_FRAMES = 1440;
-  const TOTAL_SAMPLES = Math.floor(TOTAL_FRAMES / STEP); // 360 immagini
+  const TOTAL_SAMPLES = Math.floor(TOTAL_FRAMES / STEP); // 720 immagini
   const SCENES_COUNT = 12;
 
   // Intervalli esatti per le 12 presentazioni
@@ -39,6 +40,8 @@
 
   // ─── STATO ───
   const images = new Array(TOTAL_SAMPLES).fill(null);
+  const isLoaded = new Array(TOTAL_SAMPLES).fill(false);
+  let lastDrawnImg = null;
   let canvasW = 1, canvasH = 1, dpr = 1;
   let targetFrame = 0;
   let cards = null;
@@ -49,8 +52,6 @@
   const canvas = document.getElementById("immersive-canvas");
   const ctx = canvas ? canvas.getContext("2d", { alpha: false }) : null;
   const loader = document.getElementById("loader");
-  const loaderBar = document.getElementById("loader-bar");
-  const loaderText = document.getElementById("loader-text");
 
   // ─── PROCEDURAL WEBAUDIO (SOUND) ───
   let audioCtx = null, windGain = null, windOn = false;
@@ -108,12 +109,33 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  // ─── RENDERING CANVAS (0.1ms DALLA MEMORIA RAM) ───
+  // ─── RICERCA FRAME INTELLIGENTE PER SCROLL ULTRA-RAPIDO ───
+  function getBestAvailableImage(sampleIdx) {
+    if (isLoaded[sampleIdx] && images[sampleIdx]) {
+      return images[sampleIdx];
+    }
+    // Cerca il fotogramma più vicino nel raggio di 25 frame
+    for (let offset = 1; offset < 25; offset++) {
+      const back = sampleIdx - offset;
+      if (back >= 0 && isLoaded[back] && images[back]) {
+        return images[back];
+      }
+      const fwd = sampleIdx + offset;
+      if (fwd < TOTAL_SAMPLES && isLoaded[fwd] && images[fwd]) {
+        return images[fwd];
+      }
+    }
+    return lastDrawnImg;
+  }
+
+  // ─── RENDERING CANVAS (0.1ms DALLA RAM) ───
   function drawSample(sampleIdx) {
     if (!ctx) return;
     sampleIdx = Math.max(0, Math.min(sampleIdx, TOTAL_SAMPLES - 1));
-    const img = images[sampleIdx];
+    
+    const img = getBestAvailableImage(sampleIdx);
     if (!img || !img.complete || img.naturalWidth === 0) return;
+    lastDrawnImg = img;
 
     const iw = img.naturalWidth, ih = img.naturalHeight;
     const ir = iw / ih, cr = canvasW / canvasH;
@@ -165,31 +187,39 @@
     });
   };
 
-  // ─── PRELOAD ASINCRONO PARALLELO (1–2 SECONDI) ───
-  function preloadImages(onComplete) {
-    let loadedCount = 0;
+  // ─── CARICAMENTO SINGOLO FRAME ───
+  function loadSingleSample(i, cb) {
+    if (images[i] !== null) {
+      if (cb) cb();
+      return;
+    }
+    const img = new Image();
+    images[i] = img;
+    img.onload = () => {
+      isLoaded[i] = true;
+      if (cb) cb();
+    };
+    img.onerror = () => {
+      if (cb) cb();
+    };
+    img.src = getFramePathBySample(i);
+  }
 
-    for (let i = 0; i < TOTAL_SAMPLES; i++) {
-      const img = new Image();
-      images[i] = img;
+  // ─── STREAMING IN BACKGROUND CONTINUO ───
+  function startBackgroundStreaming() {
+    let currentIdx = 20; // Inizia dal 20° frame (i primi 20 sono già pronti)
+    const concurrency = 6;
 
-      img.onload = img.onerror = () => {
-        loadedCount++;
-        const pct = Math.round((loadedCount / TOTAL_SAMPLES) * 100);
-        if (loaderBar) loaderBar.style.width = `${pct}%`;
-        if (loaderText) loaderText.innerText = `Calibrazione Ecosistema... ${pct}%`;
+    function worker() {
+      if (currentIdx >= TOTAL_SAMPLES) return;
+      const idx = currentIdx++;
+      loadSingleSample(idx, () => {
+        worker();
+      });
+    }
 
-        if (loadedCount === 1) {
-          updateCanvasSize();
-          drawSample(0);
-        }
-
-        if (loadedCount >= TOTAL_SAMPLES) {
-          if (onComplete) onComplete();
-        }
-      };
-
-      img.src = getFramePathBySample(i);
+    for (let c = 0; c < concurrency; c++) {
+      worker();
     }
   }
 
@@ -197,7 +227,7 @@
   function startEngine() {
     if (loader) {
       loader.style.opacity = "0";
-      setTimeout(() => { if (loader) loader.style.display = "none"; }, 400);
+      setTimeout(() => { if (loader) loader.style.display = "none"; }, 300);
     }
 
     updateCanvasSize();
@@ -222,7 +252,7 @@
       gsap.ticker.lagSmoothing(0);
     }
 
-    // ScrollTrigger sulle 12 scene (Sincronizzazione millimetrica)
+    // ScrollTrigger sulle 12 scene
     for (let i = 0; i < SCENES_COUNT; i++) {
       const range = SCENE_RANGES[i];
 
@@ -232,44 +262,4 @@
         end: "bottom top",
         scrub: 0.1,
         onUpdate(self) {
-          const currentFrame = range.start + self.progress * (range.end - range.start);
-          targetFrame = currentFrame;
-          const sampleToDraw = Math.floor(currentFrame / STEP);
-          drawSample(sampleToDraw);
-
-          if (self.isActive) {
-            if (self.progress >= 0.15 && self.progress <= 0.95) {
-              updateActiveCard(i);
-            } else if (self.progress < 0.15 && i > 0) {
-              updateActiveCard(i - 1);
-            }
-          }
-        },
-        onToggle(self) {
-          if (self.isActive) {
-            updateActiveCard(i);
-          }
-        }
-      });
-    }
-
-    // Infinite Loop: al fondo torna in cima all'istante
-    ScrollTrigger.create({
-      trigger: "#trigger-11",
-      start: "bottom bottom",
-      onEnter: () => {
-        if (lenisInstance) lenisInstance.scrollTo(0, { immediate: true });
-        else window.scrollTo(0, 0);
-        targetFrame = 0;
-        drawSample(0);
-        updateActiveCard(0, true);
-      }
-    });
-
-    if (window.initCardAnimations) {
-      window.initCardAnimations();
-    }
-  }
-
-  preloadImages(startEngine);
-})();
+          const currentFrame = range.start + self.progress * (range.end - ran
