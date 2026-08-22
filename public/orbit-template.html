@@ -1,4 +1,16 @@
 <style>
+  /* ─── PROPRIETÀ E ANIMAZIONI ROTATING GLOW BORDER ─── */
+  @property --glow-angle {
+      syntax: "<angle>";
+      initial-value: 0deg;
+      inherits: true;
+  }
+
+  @keyframes spin-orbit-glow {
+      0% { --glow-angle: 0deg; }
+      100% { --glow-angle: 360deg; }
+  }
+
   /* ─── ANIMAZIONI DI ROTAZIONE E CONTRO-ROTAZIONE NATIVE ─── */
   @keyframes orbit-spin {
       0% { transform: rotate(0deg); }
@@ -25,7 +37,7 @@
       justify-content: center !important;
   }
 
-  /* 1. FOTO CENTRALE DI RICCARDO */
+  /* 1. FOTO CENTRALE DI RICCARDO CON ROTATING GLOW */
   .orbit-center-photo {
       position: absolute !important;
       top: 50% !important;
@@ -34,17 +46,62 @@
       width: 88px !important;
       height: 88px !important;
       border-radius: 50% !important;
-      border: 3px solid #9333ea !important;
-      box-shadow: 0 0 25px rgba(147, 51, 234, 0.6) !important;
+      border: none !important;
       z-index: 2 !important;
-      overflow: hidden !important;
       background: #000 !important;
+      animation: spin-orbit-glow 4.5s linear infinite !important;
   }
   .orbit-center-photo img {
       width: 100% !important;
       height: 100% !important;
       object-fit: cover !important;
       border-radius: 50% !important;
+      position: relative;
+      z-index: 2;
+  }
+  /* Fascio Laser Foto Centrale */
+  .orbit-center-photo::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      padding: 3px;
+      background: conic-gradient(
+          from var(--glow-angle),
+          transparent 0%,
+          transparent 40%,
+          #06b6d4 65%,
+          #9333ea 85%,
+          #ec4899 95%,
+          #06b6d4 100%
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: spin-orbit-glow 4.5s linear infinite;
+      pointer-events: none;
+      z-index: 10;
+  }
+  /* Aura Soffusa Foto Centrale */
+  .orbit-center-photo::after {
+      content: '';
+      position: absolute;
+      inset: -5px;
+      border-radius: 50%;
+      background: conic-gradient(
+          from var(--glow-angle),
+          transparent 0%,
+          transparent 40%,
+          #06b6d4 65%,
+          #9333ea 85%,
+          #ec4899 95%,
+          #06b6d4 100%
+      );
+      filter: blur(14px);
+      opacity: 0.85;
+      animation: spin-orbit-glow 4.5s linear infinite;
+      pointer-events: none;
+      z-index: 1;
   }
 
   /* 2. ANELLO DI ROTAZIONE PRINCIPALE */
@@ -88,7 +145,7 @@
       animation: counter-spin 45s linear infinite !important;
   }
 
-  /* Link e Stile Grafico Cerchio */
+  /* Link e Stile Grafico Cerchio con Rotating Glow su Hover */
   .orbit-link {
       display: flex !important;
       align-items: center !important;
@@ -96,46 +153,102 @@
       width: 100% !important;
       height: 100% !important;
       background: #0a0a0c !important;
-      border: 1px solid rgba(147, 51, 234, 0.4) !important;
       border-radius: 50% !important;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7) !important;
-      transition: border-color 0.2s, box-shadow 0.2s !important;
-      overflow: hidden !important;
+      transition: all 0.3s ease !important;
       text-decoration: none !important;
+      position: relative !important;
+      border: 1px solid rgba(147, 51, 234, 0.35) !important;
+      animation: spin-orbit-glow 4s linear infinite !important;
   }
+  
   .orbit-link:hover {
-      border-color: #00e5ff !important;
-      box-shadow: 0 0 18px rgba(0, 229, 255, 0.6) !important;
+      border-color: transparent !important;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.5) !important;
   }
+
+  /* Bordo laser sui mini cerchi dei SaaS su Hover */
+  .orbit-link:hover::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 50%;
+      padding: 2px;
+      background: conic-gradient(
+          from var(--glow-angle),
+          transparent 0%,
+          transparent 40%,
+          #06b6d4 70%,
+          #9333ea 88%,
+          #ec4899 96%,
+          #06b6d4 100%
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: spin-orbit-glow 3s linear infinite;
+      pointer-events: none;
+      z-index: 10;
+  }
+
   .orbit-img {
       width: 28px !important;
       height: 28px !important;
       object-fit: contain !important;
       border-radius: 50% !important;
+      position: relative;
+      z-index: 2;
   }
 
-  /* 3. FUMETTO TOOLTIP LUMINOSO */
+  /* 3. FUMETTO TOOLTIP LUMINOSO CON ROTATING GLOW */
   .orbit-tooltip {
       position: absolute !important;
       bottom: 65px !important;
       left: 50% !important;
       transform: translateX(-50%) !important;
       width: 210px !important;
-      background: #080812 !important;
-      border: 1px solid rgba(147, 51, 234, 0.4) !important;
+      background: rgba(8, 8, 18, 0.96) !important;
+      backdrop-filter: blur(16px) !important;
       color: #cbd5e1 !important;
       font-size: 12px !important;
-      border-radius: 10px !important;
+      border-radius: 12px !important;
       padding: 10px 12px !important;
       opacity: 0 !important;
       pointer-events: none !important;
       transition: opacity 0.2s ease, transform 0.2s ease !important;
       text-align: center !important;
       z-index: 99999 !important;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 15px rgba(147, 51, 234, 0.2) !important;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.9), 0 0 20px rgba(6, 182, 212, 0.25) !important;
       line-height: 1.4 !important;
       font-family: 'DM Sans', system-ui, sans-serif !important;
+      border: none !important;
+      animation: spin-orbit-glow 5s linear infinite !important;
   }
+
+  /* Bordo Laser Tooltip */
+  .orbit-tooltip::before {
+      content: '';
+      position: absolute;
+      inset: -1.5px;
+      border-radius: inherit;
+      padding: 1.5px;
+      background: conic-gradient(
+          from var(--glow-angle),
+          transparent 0%,
+          transparent 50%,
+          #06b6d4 75%,
+          #9333ea 88%,
+          #ec4899 96%,
+          #06b6d4 100%
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: spin-orbit-glow 5s linear infinite;
+      pointer-events: none;
+      z-index: 10;
+  }
+
   .orbit-tooltip b {
       color: #ffffff !important;
       display: block !important;
