@@ -58,7 +58,7 @@
 
     .preserve-3d { transform-style: preserve-3d; }
     
-    /* ─── PREMIUM ROTATING GLOW BORDER (RM STUDIO GOLD BRAND PALETTE) ─── */
+    /* ─── PREMIUM ROTATING GLOW BORDER ANIMATO (RM STUDIO GOLD) ─── */
     @property --glow-angle {
       syntax: "<angle>";
       initial-value: 0deg;
@@ -66,8 +66,8 @@
     }
 
     @keyframes spin-glow-gold {
-      from { --glow-angle: 0deg; }
-      to { --glow-angle: 360deg; }
+      0% { --glow-angle: 0deg; }
+      100% { --glow-angle: 360deg; }
     }
 
     .scene-card { 
@@ -75,10 +75,11 @@
       opacity: 0; 
       visibility: hidden; 
       pointer-events: none; 
-      border: 1px solid rgba(242, 210, 139, 0.1) !important;
+      border: none !important;
+      animation: spin-glow-gold 5s linear infinite; /* Animazione sul genitore per forzare il ciclo */
     }
 
-    /* Fascio Laser Oro & Bianco Diamante */
+    /* Fascio Laser Oro 24K & Diamante Bianco */
     .scene-card::before {
       content: '';
       position: absolute;
@@ -88,10 +89,11 @@
       background: conic-gradient(
         from var(--glow-angle),
         transparent 0%,
-        transparent 55%,
-        rgba(242, 210, 139, 0.25) 75%,
-        #E5B869 88%,
-        #FFFFFF 96%,
+        transparent 40%,
+        rgba(242, 210, 139, 0.15) 60%,
+        #C59B27 75%,
+        #F2D28B 90%,
+        #FFFFFF 98%,
         #F2D28B 100%
       );
       -webkit-mask: 
@@ -99,7 +101,7 @@
         linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
-      animation: spin-glow-gold 8s linear infinite;
+      animation: spin-glow-gold 5s linear infinite;
       pointer-events: none;
       z-index: 10;
     }
@@ -108,20 +110,20 @@
     .scene-card::after {
       content: '';
       position: absolute;
-      inset: -4px;
+      inset: -5px;
       border-radius: inherit;
       background: conic-gradient(
         from var(--glow-angle),
         transparent 0%,
-        transparent 55%,
-        rgba(242, 210, 139, 0.2) 75%,
-        #E5B869 88%,
-        #F2D28B 96%,
-        #F2D28B 100%
+        transparent 40%,
+        rgba(242, 210, 139, 0.2) 65%,
+        #C59B27 80%,
+        #F2D28B 95%,
+        #FFFFFF 100%
       );
-      filter: blur(20px);
-      opacity: 0.55;
-      animation: spin-glow-gold 8s linear infinite;
+      filter: blur(22px);
+      opacity: 0.75;
+      animation: spin-glow-gold 5s linear infinite;
       pointer-events: none;
       z-index: -1;
     }
