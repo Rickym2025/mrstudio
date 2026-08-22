@@ -57,7 +57,74 @@
     }
 
     .preserve-3d { transform-style: preserve-3d; }
-    .scene-card { opacity: 0; visibility: hidden; pointer-events: none; }
+    
+    /* ─── PREMIUM ROTATING GLOW BORDER (RM STUDIO GOLD BRAND PALETTE) ─── */
+    @property --glow-angle {
+      syntax: "<angle>";
+      initial-value: 0deg;
+      inherits: true;
+    }
+
+    @keyframes spin-glow-gold {
+      from { --glow-angle: 0deg; }
+      to { --glow-angle: 360deg; }
+    }
+
+    .scene-card { 
+      position: relative;
+      opacity: 0; 
+      visibility: hidden; 
+      pointer-events: none; 
+      border: 1px solid rgba(242, 210, 139, 0.1) !important;
+    }
+
+    /* Fascio Laser Oro & Bianco Diamante */
+    .scene-card::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: inherit;
+      padding: 2px;
+      background: conic-gradient(
+        from var(--glow-angle),
+        transparent 0%,
+        transparent 55%,
+        rgba(242, 210, 139, 0.25) 75%,
+        #E5B869 88%,
+        #FFFFFF 96%,
+        #F2D28B 100%
+      );
+      -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: spin-glow-gold 8s linear infinite;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Aura Soffusa Oro Caldo Esterna */
+    .scene-card::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: inherit;
+      background: conic-gradient(
+        from var(--glow-angle),
+        transparent 0%,
+        transparent 55%,
+        rgba(242, 210, 139, 0.2) 75%,
+        #E5B869 88%,
+        #F2D28B 96%,
+        #F2D28B 100%
+      );
+      filter: blur(20px);
+      opacity: 0.55;
+      animation: spin-glow-gold 8s linear infinite;
+      pointer-events: none;
+      z-index: -1;
+    }
 
     /* ─── SISTEMA ORBITALE ─── */
     @keyframes orbit-rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -430,7 +497,7 @@
       let cardSizeClass = (scene.isIntro || scene.isTheUnion) ? "max-w-5xl p-6 md:p-12 gap-10 lg:gap-16" : "max-w-3xl p-6 md:p-10";
 
       cardWrapper.innerHTML = `
-        <${tagType} ${hrefAttr} class="scene-card w-full ${cardSizeClass} bg-[#07070a]/94 backdrop-blur-2xl border border-white/10 rounded-2xl md:rounded-[2.5rem] shadow-[0_30px_90px_rgba(0,0,0,0.9)] preserve-3d opacity-0 pointer-events-none flex flex-col ${flexDirClass} gap-6 md:gap-10 items-center justify-between ${cursorClass}">
+        <${tagType} ${hrefAttr} class="scene-card w-full ${cardSizeClass} bg-[#07070a]/94 backdrop-blur-2xl rounded-2xl md:rounded-[2.5rem] shadow-[0_30px_90px_rgba(0,0,0,0.9)] preserve-3d opacity-0 pointer-events-none flex flex-col ${flexDirClass} gap-6 md:gap-10 items-center justify-between ${cursorClass}">
           <div class="flex-1 text-left w-full max-w-xl">
             <div class="flex items-center gap-3.5 mb-3">
               <img src="public/loghi/${scene.logo}" alt="${scene.title}" class="w-8 h-8 object-contain rounded-lg bg-black/50 p-1 border border-white/10" onerror="this.style.display='none'">
