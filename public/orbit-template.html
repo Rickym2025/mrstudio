@@ -11,7 +11,7 @@
       100% { --glow-angle: 360deg; }
   }
 
-  /* ─── ANIMAZIONI DI ROTAZIONE E CONTRO-ROTAZIONE NATIVE ─── */
+  /* ─── ANIMAZIONI ANELLO ESTERNO (ORARIO) ─── */
   @keyframes orbit-spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
@@ -20,6 +20,18 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(-360deg); }
   }
+
+  /* ─── ANIMAZIONI ANELLO INTERNO (ANTIORARIO) ─── */
+  @keyframes orbit-spin-reverse {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(-360deg); }
+  }
+  @keyframes counter-spin-reverse {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+  }
+
+  /* Impulso centrale */
   @keyframes pulse-ring-anim {
       0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.6; }
       50% { transform: translate(-50%, -50%) scale(1.35); opacity: 0; }
@@ -47,7 +59,7 @@
       height: 88px !important;
       border-radius: 50% !important;
       border: none !important;
-      z-index: 2 !important;
+      z-index: 5 !important;
       background: #000 !important;
       animation: spin-orbit-glow 4.5s linear infinite !important;
   }
@@ -104,7 +116,7 @@
       z-index: 1;
   }
 
-  /* 2. ANELLO DI ROTAZIONE PRINCIPALE */
+  /* 2. ANELLO ESTERNO (320px - 12 SAAS - ORARIO) */
   .orbit-ring {
       position: relative !important;
       width: 320px !important;
@@ -117,17 +129,42 @@
       z-index: 10 !important;
   }
 
-  /* Mette in pausa la rotazione quando l'utente passa sopra il mouse */
+  /* 3. ANELLO INTERNO (200px - 8 SAAS - ANTIORARIO) */
+  .orbit-ring-inner {
+      position: absolute !important;
+      top: 50% !important;
+      left: 50% !important;
+      width: 200px !important;
+      height: 200px !important;
+      margin: -100px 0 0 -100px !important;
+      border: 1px dashed rgba(6, 182, 212, 0.4) !important;
+      border-radius: 50% !important;
+      animation: orbit-spin-reverse 32s linear infinite !important;
+      transform-style: preserve-3d !important;
+      perspective: 1000px !important;
+      z-index: 8 !important;
+  }
+
+  /* Mette in pausa TUTTO quando l'utente passa sopra il mouse */
   .orbit-container-inner:hover .orbit-ring,
-  .orbit-container-inner:hover .orbit-item {
+  .orbit-container-inner:hover .orbit-ring-inner,
+  .orbit-container-inner:hover .orbit-item,
+  .orbit-container-inner:hover .orbit-item-inner {
       animation-play-state: paused !important;
   }
 
-  /* Wrapper dell'icona nell'orbita */
+  .orbit-ring:hover {
+      z-index: 50 !important;
+  }
+  .orbit-ring-inner:hover {
+      z-index: 50 !important;
+  }
+
+  /* ─── WRAPPER & ICONE ESTERNE (48px) ─── */
   .orbit-wrapper {
       position: absolute !important;
-      width: 52px !important;
-      height: 52px !important;
+      width: 48px !important;
+      height: 48px !important;
       transform: translate(-50%, -50%) !important;
       transform-style: preserve-3d !important;
       transition: transform 0.3s ease-in-out !important;
@@ -136,8 +173,6 @@
       z-index: 1000 !important;
       transform: translate(-50%, -50%) translateZ(120px) scale(1.15) !important;
   }
-
-  /* Icona contro-ruotata per rimanere dritta */
   .orbit-item {
       position: relative !important;
       width: 100% !important;
@@ -145,7 +180,27 @@
       animation: counter-spin 45s linear infinite !important;
   }
 
-  /* Link e Stile Grafico Cerchio con Rotating Glow su Hover */
+  /* ─── WRAPPER & ICONE INTERNE (38px) ─── */
+  .orbit-wrapper-inner {
+      position: absolute !important;
+      width: 38px !important;
+      height: 38px !important;
+      transform: translate(-50%, -50%) !important;
+      transform-style: preserve-3d !important;
+      transition: transform 0.3s ease-in-out !important;
+  }
+  .orbit-wrapper-inner:hover {
+      z-index: 1000 !important;
+      transform: translate(-50%, -50%) translateZ(120px) scale(1.2) !important;
+  }
+  .orbit-item-inner {
+      position: relative !important;
+      width: 100% !important;
+      height: 100% !important;
+      animation: counter-spin-reverse 32s linear infinite !important;
+  }
+
+  /* ─── LINK E DESIGN CERCHI ─── */
   .orbit-link {
       display: flex !important;
       align-items: center !important;
@@ -161,13 +216,16 @@
       border: 1px solid rgba(147, 51, 234, 0.35) !important;
       animation: spin-orbit-glow 4s linear infinite !important;
   }
+  .orbit-link-inner {
+      border-color: rgba(6, 182, 212, 0.4) !important;
+  }
   
   .orbit-link:hover {
       border-color: transparent !important;
       box-shadow: 0 0 20px rgba(6, 182, 212, 0.5) !important;
   }
 
-  /* Bordo laser sui mini cerchi dei SaaS su Hover */
+  /* Bordo laser sui cerchi su Hover */
   .orbit-link:hover::before {
       content: '';
       position: absolute;
@@ -192,18 +250,26 @@
   }
 
   .orbit-img {
-      width: 28px !important;
-      height: 28px !important;
+      width: 26px !important;
+      height: 26px !important;
+      object-fit: contain !important;
+      border-radius: 50% !important;
+      position: relative;
+      z-index: 2;
+  }
+  .orbit-img-inner {
+      width: 20px !important;
+      height: 20px !important;
       object-fit: contain !important;
       border-radius: 50% !important;
       position: relative;
       z-index: 2;
   }
 
-  /* 3. FUMETTO TOOLTIP LUMINOSO CON ROTATING GLOW */
+  /* 4. FUMETTO TOOLTIP LUMINOSO CON ROTATING GLOW */
   .orbit-tooltip {
       position: absolute !important;
-      bottom: 65px !important;
+      bottom: 58px !important;
       left: 50% !important;
       transform: translateX(-50%) !important;
       width: 210px !important;
@@ -225,7 +291,6 @@
       animation: spin-orbit-glow 5s linear infinite !important;
   }
 
-  /* Bordo Laser Tooltip */
   .orbit-tooltip::before {
       content: '';
       position: absolute;
@@ -258,7 +323,9 @@
   }
 
   .orbit-item:hover .orbit-tooltip,
-  .orbit-wrapper:hover .orbit-tooltip {
+  .orbit-wrapper:hover .orbit-tooltip,
+  .orbit-item-inner:hover .orbit-tooltip,
+  .orbit-wrapper-inner:hover .orbit-tooltip {
       opacity: 1 !important;
       transform: translateX(-50%) translateY(-6px) !important;
   }
@@ -268,8 +335,8 @@
       top: 50% !important;
       left: 50% !important;
       transform: translate(-50%, -50%) !important;
-      width: 100px !important;
-      height: 100px !important;
+      width: 96px !important;
+      height: 96px !important;
       border-radius: 50% !important;
       background: rgba(147, 51, 234, 0.12) !important;
       animation: pulse-ring-anim 2.5s infinite !important;
@@ -289,17 +356,132 @@
   
   <div class="pulse-ring-element"></div>
 
+  <!-- FOTO CENTRALE DI RICCARDO -->
   <div class="orbit-center-photo">
     <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/foto_riccardo.jpeg" onerror="this.src='https://rmstudio.app/logo.png'" alt="Riccardo Modena" />
   </div>
 
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ANELLO INTERNO: 8 SAAS (200px - ROTAZIONE ANTIORARIA 32s)       -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <div class="orbit-ring-inner">
+
+    <!-- I-1. VELOMOTION (0.0° - Top) -->
+    <div class="orbit-wrapper-inner" style="top: 0.0%; left: 50.0%;">
+      <div class="orbit-item-inner">
+        <a href="https://velomotion.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link orbit-link-inner">
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_velomotion.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="VeloMotion" class="orbit-img-inner" />
+        </a>
+        <div class="orbit-tooltip">
+          <b>VeloMotion</b>
+          Sblocco software sicuro e invisibile a 32 km/h per e-bike Bosch BES3.
+        </div>
+      </div>
+    </div>
+
+    <!-- I-2. SITEENGINE PRO (45.0° - Top Right) -->
+    <div class="orbit-wrapper-inner" style="top: 14.6%; left: 85.4%;">
+      <div class="orbit-item-inner">
+        <a href="https://sitengine.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link orbit-link-inner">
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_sitengine.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="SiteEngine Pro" class="orbit-img-inner" />
+        </a>
+        <div class="orbit-tooltip">
+          <b>SiteEngine Pro</b>
+          Landing page multi-tenant ad alta conversione con blog integrato.
+        </div>
+      </div>
+    </div>
+
+    <!-- I-3. FREE ENERGY (90.0° - Right) -->
+    <div class="orbit-wrapper-inner" style="top: 50.0%; left: 100.0%;">
+      <div class="orbit-item-inner">
+        <a href="https://free-energy.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link orbit-link-inner">
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_free_energy.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="Free Energy" class="orbit-img-inner" />
+        </a>
+        <div class="orbit-tooltip">
+          <b>Free Energy</b>
+          CRM e CAD satellitare per installatori di impianti fotovoltaici.
+        </div>
+      </div>
+    </div>
+
+    <!-- I-4. TASTE ENGINE (135.0° - Bottom Right) -->
+    <div class="orbit-wrapper-inner" style="top: 85.4%; left: 85.4%;">
+      <div class="orbit-item-inner">
+        <a href="https://experience.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link orbit-link-inner">
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_experience.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="Taste Engine" class="orbit-img-inner" />
+        </a>
+        <div class="orbit-tooltip">
+          <b>Taste Engine</b>
+          Smart Experience ed e-menu narrativo con Maître AI per ristoranti.
+        </div>
+      </div>
+    </div>
+
+    <!-- I-5. SOCIALENGINE (180.0° - Bottom) -->
+    <div class="orbit-wrapper-inner" style="top: 100.0%; left: 50.0%;">
+      <div class="orbit-item-inner">
+        <a href="https://social.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link orbit-link-inner">
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_social.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="SocialEngine" class="orbit-img-inner" />
+        </a>
+        <div class="orbit-tooltip">
+          <b>SocialEngine</b>
+          Generatore autonomo di caroselli e post kit grafici persuasivi.
+        </div>
+      </div>
+    </div>
+
+    <!-- I-6. LOCANDA DIGITALE (225.0° - Bottom Left) -->
+    <div class="orbit-wrapper-inner" style="top: 85.4%; left: 14.6%;">
+      <div class="orbit-item-inner">
+        <a href="https://locandadigitale.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link orbit-link-inner">
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_locanda_digitale_no_bg.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="Locanda Digitale" class="orbit-img-inner" />
+        </a>
+        <div class="orbit-tooltip">
+          <b>Locanda Digitale</b>
+          Living 3D Menu a 60 FPS al tavolo e comande WhatsApp 1-Click.
+        </div>
+      </div>
+    </div>
+
+    <!-- I-7. AURA PROXIMITY (270.0° - Left) -->
+    <div class="orbit-wrapper-inner" style="top: 50.0%; left: 0.0%;">
+      <div class="orbit-item-inner">
+        <a href="https://aura.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link orbit-link-inner">
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_aura_3d.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="AURA Proximity" class="orbit-img-inner" />
+        </a>
+        <div class="orbit-tooltip">
+          <b>AURA Proximity</b>
+          Radar tattico di prossimità vettoriale e Chat Mesh P2P off-grid.
+        </div>
+      </div>
+    </div>
+
+    <!-- I-8. DRIVEMOTION RADAR (315.0° - Top Left) -->
+    <div class="orbit-wrapper-inner" style="top: 14.6%; left: 14.6%;">
+      <div class="orbit-item-inner">
+        <a href="https://drivemotion-radar.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link orbit-link-inner">
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_drivemotion_radar.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="DriveMotion RADAR" class="orbit-img-inner" />
+        </a>
+        <div class="orbit-tooltip">
+          <b>DriveMotion RADAR</b>
+          Sourcing predittivo auto da privati per concessionari con perizia AI.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ANELLO ESTERNO: 12 SAAS (320px - ROTAZIONE ORARIA 45s)          -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
   <div class="orbit-ring">
 
     <!-- 1. CONCIERGE24 (0.0°) -->
     <div class="orbit-wrapper" style="top: 0.0%; left: 50.0%;">
       <div class="orbit-item">
         <a href="https://concierge24.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_concierge.png" alt="Concierge24" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_concierge.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="Concierge24" class="orbit-img" />
         </a>
         <div class="orbit-tooltip">
           <b>Concierge24</b>
@@ -312,7 +494,7 @@
     <div class="orbit-wrapper" style="top: 6.7%; left: 75.0%;">
       <div class="orbit-item">
         <a href="https://drivemotion.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_drivemotion.png" alt="DriveMotion" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_drivemotion.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="DriveMotion" class="orbit-img" />
         </a>
         <div class="orbit-tooltip">
           <b>DriveMotion AI</b>
@@ -325,7 +507,7 @@
     <div class="orbit-wrapper" style="top: 25.0%; left: 93.3%;">
       <div class="orbit-item">
         <a href="https://nexus.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_nexus.png" alt="Nexus AI" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_nexus.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="Nexus AI" class="orbit-img" />
         </a>
         <div class="orbit-tooltip">
           <b>Nexus AI</b>
@@ -338,7 +520,7 @@
     <div class="orbit-wrapper" style="top: 50.0%; left: 100.0%;">
       <div class="orbit-item">
         <a href="https://omniastudio.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_omniastudio.png" alt="OmniaStudio" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_omniastudio.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="OmniaStudio" class="orbit-img" />
         </a>
         <div class="orbit-tooltip">
           <b>OmniaStudio</b>
@@ -351,7 +533,7 @@
     <div class="orbit-wrapper" style="top: 75.0%; left: 93.3%;">
       <div class="orbit-item">
         <a href="https://dentis.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_dentis.png" alt="Dentis AI" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_dentis.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="Dentis AI" class="orbit-img" />
         </a>
         <div class="orbit-tooltip">
           <b>Dentis AI</b>
@@ -364,7 +546,7 @@
     <div class="orbit-wrapper" style="top: 93.3%; left: 75.0%;">
       <div class="orbit-item">
         <a href="https://lexis.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_lexis.png" alt="Lexis AI" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_lexis.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="Lexis AI" class="orbit-img" />
         </a>
         <div class="orbit-tooltip">
           <b>Lexis AI</b>
@@ -377,7 +559,7 @@
     <div class="orbit-wrapper" style="top: 100.0%; left: 50.0%;">
       <div class="orbit-item">
         <a href="https://ff-edizioni.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_ff.png" alt="FF Edizioni" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_ff.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="FF Edizioni" class="orbit-img" />
         </a>
         <div class="orbit-tooltip">
           <b>FF Edizioni</b>
@@ -390,7 +572,7 @@
     <div class="orbit-wrapper" style="top: 93.3%; left: 25.0%;">
       <div class="orbit-item">
         <a href="https://hometour.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_hometour.jpg" alt="HomeTour" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_hometour.jpg" onerror="this.src='https://rmstudio.app/logo.png'" alt="HomeTour" class="orbit-img" />
         </a>
         <div class="orbit-tooltip">
           <b>HomeTour AI</b>
@@ -403,7 +585,7 @@
     <div class="orbit-wrapper" style="top: 75.0%; left: 6.7%;">
       <div class="orbit-item">
         <a href="https://vision.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_vision.png" alt="Vision UGC" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_vision.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="Vision UGC" class="orbit-img" />
         </a>
         <div class="orbit-tooltip">
           <b>Vision UGC</b>
@@ -416,7 +598,7 @@
     <div class="orbit-wrapper" style="top: 50.0%; left: 0.0%;">
       <div class="orbit-item">
         <a href="https://ares.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_ares.png" alt="AresAI" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_ares.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="AresAI" class="orbit-img" />
         </a>
         <div class="orbit-tooltip">
           <b>AresAI</b>
@@ -429,7 +611,7 @@
     <div class="orbit-wrapper" style="top: 25.0%; left: 6.7%;">
       <div class="orbit-item">
         <a href="https://love.rmstudio.app" target="_blank" rel="noopener noreferrer" class="orbit-link">
-          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_love.png" alt="LOVE" class="orbit-img" />
+          <img src="https://raw.githubusercontent.com/Rickym2025/mrstudio/main/public/loghi/logo_love.png" onerror="this.src='https://rmstudio.app/logo.png'" alt="LOVE" class="orbit-img" />
         </a>
         <div class="orbit-tooltip">
           <b>LOVE</b>
