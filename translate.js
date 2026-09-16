@@ -1,26 +1,24 @@
 /**
- * RM Studio - Universal Translation Engine (Brand Shield & Active State Sync)
+ * RM Studio - Universal Translation Engine (React Reconciliation Safe & Brand Shield)
  */
 (function () {
   function initTranslator() {
     if (document.getElementById('rm-lang-switcher')) return;
 
-    // 1. BRAND SHIELD: Protegge automaticamente i loghi e i nomi SaaS da traduzioni errate
+    // 1. BRAND SHIELD: Protezione nomi e marchi
     const BRAND_NAMES = [
       'Lexis', 'Lexis AI', 'Dentis', 'Dentis AI', 'Concierge24',
       'DriveMotion', 'HomeTour', 'OmniaStudio', 'Vision', 'Ares',
       'LOVE', 'ETERNIA', 'Locanda Digitale', 'AURA', 'VeloMotion',
-      'SiteEngine', 'Free Energy', 'RM Studio', 'FF Edizioni', 'Nexus'
+      'SiteEngine', 'SiteEngine AI', 'Free Energy', 'RM Studio', 'FF Edizioni', 'Nexus'
     ];
 
     function protectBrands() {
-      // Protegge tutti i contenitori logo e brand
       document.querySelectorAll('[class*="logo"], [id*="logo"], [class*="brand"], [id*="brand"], header a:first-child, nav a:first-child').forEach(el => {
         el.classList.add('notranslate');
         el.setAttribute('translate', 'no');
       });
 
-      // Protegge i tag di testo che contengono i nomi dei tuoi SaaS
       document.querySelectorAll('h1, h2, h3, h4, h5, span, p, a, b, strong').forEach(el => {
         if (el.children.length === 0) {
           const text = el.textContent.trim();
@@ -34,7 +32,7 @@
 
     protectBrands();
 
-    // 2. Iniezione Stili Dark / Neon RM Studio
+    // 2. Stili Dark / Neon
     const style = document.createElement('style');
     style.id = 'rm-translate-styles';
     style.textContent = `
@@ -115,7 +113,7 @@
     `;
     document.head.appendChild(style);
 
-    // 3. Lingue Gestite
+    // 3. Lingue Supportate
     const languages = [
       { code: 'it', label: 'IT', title: 'Italiano' },
       { code: 'en', label: 'GB', title: 'English' },
@@ -158,7 +156,7 @@
       switcher.appendChild(btn);
     });
 
-    // 5. Scansione Geometrica Navbar
+    // 5. Scansione Navbar con soglia minima adatta a max-w-6xl
     function findTrueTopNavbar() {
       const manualSlot = document.getElementById('rm-lang-slot') || document.getElementById('rm-translate-slot');
       if (manualSlot) return { target: manualSlot, method: 'append' };
@@ -178,15 +176,16 @@
 
       let trueNavbar = null;
       const elements = document.querySelectorAll(selectors.join(', '));
+      const minWidthThreshold = Math.min(window.innerWidth * 0.45, 600);
 
       for (const el of elements) {
         const rect = el.getBoundingClientRect();
         if (
-          rect.top >= -10 &&
-          rect.top <= 60 &&
-          rect.height >= 35 &&
+          rect.top >= -15 &&
+          rect.top <= 65 &&
+          rect.height >= 30 &&
           rect.height <= 130 &&
-          rect.width >= window.innerWidth * 0.5
+          rect.width >= minWidthThreshold
         ) {
           trueNavbar = el;
           break;
@@ -247,20 +246,27 @@
     let attempts = 0;
     const tryMount = setInterval(() => {
       attempts++;
-      if (mountSwitcher() || attempts > 30) {
+      if (mountSwitcher() || attempts > 35) {
         clearInterval(tryMount);
         if (!switcher.parentElement) {
           switcher.classList.add('rm-floating-top');
           document.body.appendChild(switcher);
         }
       }
-    }, 50);
+    }, 60);
 
-    // 6. Cambio Lingua e Sincronizzazione Attiva del Pulsante
+    // 6. Anti-Wipe MutationObserver: Se React re-renderizza e cancella lo switcher, lo rimonta subito
+    const observer = new MutationObserver(() => {
+      if (!document.body.contains(switcher)) {
+        mountSwitcher();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // 7. Cambio Lingua
     window.rmChangeLanguage = function (code, isUserClick = false) {
       const domain = location.hostname;
       
-      // Aggiorna IMMEDIATAMENTE la grafica dei pulsanti
       document.querySelectorAll('.rm-lang-btn').forEach(btn => {
         if (btn.getAttribute('data-lang') === code) {
           btn.classList.add('active');
@@ -299,12 +305,11 @@
         location.reload();
       }
 
-      // Ripete la protezione brand dopo il rendering dei testi tradotti
       setTimeout(protectBrands, 300);
       setTimeout(protectBrands, 800);
     };
 
-    // 7. Iniezione Core Google Translate
+    // 8. Core Google Translate
     window.googleTranslateElementInit = function () {
       new google.translate.TranslateElement({
         pageLanguage: 'it',
@@ -325,7 +330,7 @@
       document.body.appendChild(gtScript);
     }
 
-    // 8. Supporto parametri ?lang=...
+    // 9. Query param ?lang=...
     const urlParams = new URLSearchParams(window.location.search);
     const langParam = urlParams.get('lang');
     if (langParam && languages.some(l => l.code === langParam) && langParam !== currentLang) {
