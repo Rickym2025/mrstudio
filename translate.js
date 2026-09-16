@@ -1,11 +1,40 @@
 /**
- * RM Studio - Universal Translation Engine (Anti-Loop & Isolated Namespace)
+ * RM Studio - Universal Translation Engine (Brand Shield & Active State Sync)
  */
 (function () {
   function initTranslator() {
     if (document.getElementById('rm-lang-switcher')) return;
 
-    // 1. Stili Dark / Neon RM Studio
+    // 1. BRAND SHIELD: Protegge automaticamente i loghi e i nomi SaaS da traduzioni errate
+    const BRAND_NAMES = [
+      'Lexis', 'Lexis AI', 'Dentis', 'Dentis AI', 'Concierge24',
+      'DriveMotion', 'HomeTour', 'OmniaStudio', 'Vision', 'Ares',
+      'LOVE', 'ETERNIA', 'Locanda Digitale', 'AURA', 'VeloMotion',
+      'SiteEngine', 'Free Energy', 'RM Studio', 'FF Edizioni', 'Nexus'
+    ];
+
+    function protectBrands() {
+      // Protegge tutti i contenitori logo e brand
+      document.querySelectorAll('[class*="logo"], [id*="logo"], [class*="brand"], [id*="brand"], header a:first-child, nav a:first-child').forEach(el => {
+        el.classList.add('notranslate');
+        el.setAttribute('translate', 'no');
+      });
+
+      // Protegge i tag di testo che contengono i nomi dei tuoi SaaS
+      document.querySelectorAll('h1, h2, h3, h4, h5, span, p, a, b, strong').forEach(el => {
+        if (el.children.length === 0) {
+          const text = el.textContent.trim();
+          if (BRAND_NAMES.some(brand => text === brand || text.startsWith(brand + ' '))) {
+            el.classList.add('notranslate');
+            el.setAttribute('translate', 'no');
+          }
+        }
+      });
+    }
+
+    protectBrands();
+
+    // 2. Iniezione Stili Dark / Neon RM Studio
     const style = document.createElement('style');
     style.id = 'rm-translate-styles';
     style.textContent = `
@@ -86,7 +115,7 @@
     `;
     document.head.appendChild(style);
 
-    // 2. Lingue Gestite
+    // 3. Lingue Gestite
     const languages = [
       { code: 'it', label: 'IT', title: 'Italiano' },
       { code: 'en', label: 'GB', title: 'English' },
@@ -96,20 +125,25 @@
     ];
 
     function getStoredLang() {
+      const local = localStorage.getItem('rm_selected_lang');
+      if (local && languages.some(l => l.code === local)) return local;
+
       const match = document.cookie.match(/(^|;) ?googtrans=([^;]*)(;|$)/);
       if (match) {
         const parts = match[2].split('/');
-        return parts[parts.length - 1] || 'it';
+        const code = parts[parts.length - 1];
+        if (code && languages.some(l => l.code === code)) return code;
       }
-      return localStorage.getItem('rm_selected_lang') || 'it';
+      return 'it';
     }
 
     const currentLang = getStoredLang();
 
-    // 3. Creazione Elemento
+    // 4. Creazione Elemento
     const switcher = document.createElement('div');
     switcher.id = 'rm-lang-switcher';
     switcher.className = 'notranslate';
+    switcher.setAttribute('translate', 'no');
 
     languages.forEach(lang => {
       const btn = document.createElement('button');
@@ -124,7 +158,7 @@
       switcher.appendChild(btn);
     });
 
-    // 4. Scansione Geometrica: Navbar reale
+    // 5. Scansione Geometrica Navbar
     function findTrueTopNavbar() {
       const manualSlot = document.getElementById('rm-lang-slot') || document.getElementById('rm-translate-slot');
       if (manualSlot) return { target: manualSlot, method: 'append' };
@@ -222,10 +256,19 @@
       }
     }, 50);
 
-    // 5. Cambio Lingua PROTETTO (Nessun reload automatico a vuoto)
+    // 6. Cambio Lingua e Sincronizzazione Attiva del Pulsante
     window.rmChangeLanguage = function (code, isUserClick = false) {
       const domain = location.hostname;
       
+      // Aggiorna IMMEDIATAMENTE la grafica dei pulsanti
+      document.querySelectorAll('.rm-lang-btn').forEach(btn => {
+        if (btn.getAttribute('data-lang') === code) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
       if (code === 'it') {
         document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
@@ -255,9 +298,13 @@
       } else if (isUserClick) {
         location.reload();
       }
+
+      // Ripete la protezione brand dopo il rendering dei testi tradotti
+      setTimeout(protectBrands, 300);
+      setTimeout(protectBrands, 800);
     };
 
-    // 6. Google Translate Init
+    // 7. Iniezione Core Google Translate
     window.googleTranslateElementInit = function () {
       new google.translate.TranslateElement({
         pageLanguage: 'it',
@@ -278,7 +325,7 @@
       document.body.appendChild(gtScript);
     }
 
-    // 7. Supporto parametro ?lang=...
+    // 8. Supporto parametri ?lang=...
     const urlParams = new URLSearchParams(window.location.search);
     const langParam = urlParams.get('lang');
     if (langParam && languages.some(l => l.code === langParam) && langParam !== currentLang) {
