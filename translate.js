@@ -1,5 +1,5 @@
 /**
- * RM Studio - Universal Translation Engine (Smart Right-Cluster Docking)
+ * RM Studio - Universal Translation Engine (Viewport Geometry Docking)
  */
 (function () {
   function initTranslator() {
@@ -23,7 +23,7 @@
         font-family: system-ui, -apple-system, sans-serif !important;
         transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
         flex-shrink: 0 !important;
-        margin: 0 4px !important;
+        margin: 0 6px !important;
         z-index: 50 !important;
       }
       #rm-lang-switcher:hover {
@@ -31,7 +31,7 @@
         box-shadow: 0 2px 18px rgba(6, 182, 212, 0.4) !important;
       }
 
-      /* Fallback fluttuante se la landing non ha navbar */
+      /* Fallback fluttuante solo se non esiste alcuna barra di navigazione */
       #rm-lang-switcher.rm-floating-top {
         position: fixed !important;
         top: 18px !important;
@@ -65,7 +65,7 @@
       .rm-lang-btn.active {
         opacity: 1 !important;
         color: #ffffff !important;
-        background: #9333ea !important; /* Badge solido viola come da tuo screenshot */
+        background: #9333ea !important;
         box-shadow: 0 0 10px rgba(147, 51, 234, 0.6) !important;
       }
 
@@ -73,7 +73,7 @@
         #rm-lang-switcher {
           padding: 2px 5px !important;
           gap: 1px !important;
-          margin: 0 2px !important;
+          margin: 0 3px !important;
         }
         .rm-lang-btn {
           font-size: 10px !important;
@@ -81,7 +81,7 @@
         }
       }
 
-      /* Nasconde banner Google Translate */
+      /* Nasconde i banner nativi e frame di Google Translate */
       .goog-te-banner-frame, .skiptranslate, #goog-gt-tt, .goog-te-balloon-frame { 
         display: none !important; 
       }
@@ -92,7 +92,7 @@
     `;
     document.head.appendChild(style);
 
-    // 2. Lingue Supportate
+    // 2. Lingue Gestite
     const languages = [
       { code: 'it', label: 'IT', title: 'Italiano' },
       { code: 'en', label: 'GB', title: 'English' },
@@ -130,37 +130,63 @@
       switcher.appendChild(btn);
     });
 
-    // 4. Algoritmo di Aggancio Intelligente Universale
-    function mountSwitcher() {
-      // Priorità 1: Se hai messo un contenitore manuale <div id="rm-lang-slot"></div>
+    // 4. Scansione Geometrica: Trova la VERA Navbar in cima allo schermo
+    function findTrueTopNavbar() {
       const manualSlot = document.getElementById('rm-lang-slot') || document.getElementById('rm-translate-slot');
-      if (manualSlot) {
-        manualSlot.appendChild(switcher);
-        return true;
-      }
+      if (manualSlot) return { target: manualSlot, method: 'append' };
 
-      // Priorità 2: Trova l'elemento header o nav
-      const navRoot = document.querySelector('header') || document.querySelector('nav');
-      if (!navRoot) return false;
+      // Selettori plausibili per la barra di navigazione principale
+      const selectors = [
+        'header',
+        'nav',
+        '[role="navigation"]',
+        '.fixed.top-0',
+        '.sticky.top-0',
+        '[class*="fixed"][class*="top-0"]',
+        '[class*="sticky"][class*="top-0"]',
+        'div[class*="nav"]',
+        '#navbar',
+        '#header'
+      ];
 
-      // Cerca il vero contenitore orizzontale (flex con almeno 2 figli: logo e azioni)
-      let flexRow = null;
-      const candidates = [navRoot, ...navRoot.querySelectorAll('.flex, [class*="justify-between"], [class*="items-center"]')];
-      
-      for (const el of candidates) {
-        const validChildren = Array.from(el.children).filter(c => 
-          c.tagName !== 'SCRIPT' && 
-          c.tagName !== 'STYLE' && 
-          c.id !== 'rm-lang-switcher'
-        );
-        // Troviamo la riga che divide logo da menu/pulsanti (almeno 2 colonne)
-        if (validChildren.length >= 2) {
-          flexRow = el;
+      let trueNavbar = null;
+      const elements = document.querySelectorAll(selectors.join(', '));
+
+      for (const el of elements) {
+        const rect = el.getBoundingClientRect();
+        // Condizioni ferree della VERA Navbar:
+        // 1. Inizia a ridosso del bordo superiore dello schermo (rect.top tra -10px e 60px)
+        // 2. Ha un'altezza ragionevole (tra 35px e 130px)
+        // 3. È estesa orizzontalmente (almeno il 50% della larghezza dello schermo)
+        // Questo ESCLUDE automaticamente telefonini 3D, carte prodotto e widget a metà pagina!
+        if (
+          rect.top >= -10 &&
+          rect.top <= 60 &&
+          rect.height >= 35 &&
+          rect.height <= 130 &&
+          rect.width >= window.innerWidth * 0.5
+        ) {
+          trueNavbar = el;
           break;
         }
       }
 
-      if (!flexRow) flexRow = navRoot;
+      if (!trueNavbar) return null;
+
+      // Trova la riga orizzontale (flex container) interna alla vera navbar
+      let flexRow = trueNavbar;
+      const rows = [trueNavbar, ...trueNavbar.querySelectorAll('.flex, [class*="justify-between"], [class*="items-center"]')];
+      for (const r of rows) {
+        const valid = Array.from(r.children).filter(c => 
+          c.tagName !== 'SCRIPT' && 
+          c.tagName !== 'STYLE' && 
+          c.id !== 'rm-lang-switcher'
+        );
+        if (valid.length >= 2) {
+          flexRow = r;
+          break;
+        }
+      }
 
       const validChildren = Array.from(flexRow.children).filter(c => 
         c.tagName !== 'SCRIPT' && 
@@ -169,27 +195,40 @@
       );
 
       if (validChildren.length >= 2) {
-        // Il blocco di destra è sempre l'ultimo figlio della riga
+        // L'ultimo blocco è il gruppo azioni/pulsanti a destra (es. Blog, Contatti)
         const rightCluster = validChildren[validChildren.length - 1];
-
-        // Se è un contenitore (div con i bottoni es. "Area Agenzie" e "Prova"), lo inseriamo all'inizio del blocco
         if (rightCluster.children.length > 0 && rightCluster.tagName !== 'A' && rightCluster.tagName !== 'BUTTON') {
-          rightCluster.insertBefore(switcher, rightCluster.firstChild);
+          return { target: rightCluster, method: 'prepend' };
         } else {
-          // Se è un bottone singolo, lo inseriamo subito alla sua sinistra
-          flexRow.insertBefore(switcher, rightCluster);
+          return { target: rightCluster, method: 'before', parent: flexRow };
         }
-        return true;
       }
 
+      return { target: trueNavbar, method: 'append' };
+    }
+
+    function mountSwitcher() {
+      const destination = findTrueTopNavbar();
+      if (!destination) return false;
+
+      if (destination.method === 'prepend') {
+        destination.target.insertBefore(switcher, destination.target.firstChild);
+        return true;
+      } else if (destination.method === 'before' && destination.parent) {
+        destination.parent.insertBefore(switcher, destination.target);
+        return true;
+      } else if (destination.method === 'append') {
+        destination.target.appendChild(switcher);
+        return true;
+      }
       return false;
     }
 
-    // Polling di montaggio rapido per supportare anche componenti React / Next.js
+    // Polling rapido: attende il render di React/Next.js
     let attempts = 0;
     const tryMount = setInterval(() => {
       attempts++;
-      if (mountSwitcher() || attempts > 25) {
+      if (mountSwitcher() || attempts > 30) {
         clearInterval(tryMount);
         if (!switcher.parentElement) {
           switcher.classList.add('rm-floating-top');
