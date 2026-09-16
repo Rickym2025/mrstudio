@@ -1,5 +1,5 @@
 /**
- * RM Studio - Universal Translation Engine (Smart Header Docking)
+ * RM Studio - Universal Translation Engine (Smart Right-Cluster Docking)
  */
 (function () {
   function initTranslator() {
@@ -23,6 +23,7 @@
         font-family: system-ui, -apple-system, sans-serif !important;
         transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
         flex-shrink: 0 !important;
+        margin: 0 4px !important;
         z-index: 50 !important;
       }
       #rm-lang-switcher:hover {
@@ -30,7 +31,7 @@
         box-shadow: 0 2px 18px rgba(6, 182, 212, 0.4) !important;
       }
 
-      /* Quando fluttua se non trova l'header */
+      /* Fallback fluttuante se la landing non ha navbar */
       #rm-lang-switcher.rm-floating-top {
         position: fixed !important;
         top: 18px !important;
@@ -42,35 +43,41 @@
         background: transparent !important;
         border: none !important;
         cursor: pointer !important;
-        font-size: 14px !important;
-        padding: 2px 4px !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.05em !important;
+        padding: 3px 6px !important;
         border-radius: 6px !important;
-        opacity: 0.5 !important;
-        transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease !important;
+        color: #cbd5e1 !important;
+        opacity: 0.65 !important;
+        transition: all 0.2s ease !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
         line-height: 1 !important;
+        font-family: inherit !important;
       }
       .rm-lang-btn:hover {
         opacity: 1 !important;
-        transform: scale(1.2) !important;
+        color: #fff !important;
         background: rgba(6, 182, 212, 0.2) !important;
       }
       .rm-lang-btn.active {
         opacity: 1 !important;
-        background: rgba(147, 51, 234, 0.4) !important;
-        transform: scale(1.1) !important;
+        color: #ffffff !important;
+        background: #9333ea !important; /* Badge solido viola come da tuo screenshot */
+        box-shadow: 0 0 10px rgba(147, 51, 234, 0.6) !important;
       }
 
-      @media (max-width: 640px) {
+      @media (max-width: 768px) {
         #rm-lang-switcher {
           padding: 2px 5px !important;
-          gap: 2px !important;
+          gap: 1px !important;
+          margin: 0 2px !important;
         }
         .rm-lang-btn {
-          font-size: 12px !important;
-          padding: 1px 2px !important;
+          font-size: 10px !important;
+          padding: 2px 4px !important;
         }
       }
 
@@ -87,11 +94,11 @@
 
     // 2. Lingue Supportate
     const languages = [
-      { code: 'it', flag: '🇮🇹', title: 'Italiano' },
-      { code: 'en', flag: '🇬🇧', title: 'English' },
-      { code: 'de', flag: '🇩🇪', title: 'Deutsch' },
-      { code: 'es', flag: '🇪🇸', title: 'Español' },
-      { code: 'fr', flag: '🇫🇷', title: 'Français' }
+      { code: 'it', label: 'IT', title: 'Italiano' },
+      { code: 'en', label: 'GB', title: 'English' },
+      { code: 'de', label: 'DE', title: 'Deutsch' },
+      { code: 'es', label: 'ES', title: 'Español' },
+      { code: 'fr', label: 'FR', title: 'Français' }
     ];
 
     function getStoredLang() {
@@ -115,7 +122,7 @@
       btn.className = `rm-lang-btn ${lang.code === currentLang ? 'active' : ''}`;
       btn.setAttribute('title', lang.title);
       btn.setAttribute('data-lang', lang.code);
-      btn.innerHTML = lang.flag;
+      btn.innerText = lang.label;
       btn.onclick = (e) => {
         e.preventDefault();
         changeLanguage(lang.code);
@@ -123,29 +130,54 @@
       switcher.appendChild(btn);
     });
 
-    // 4. Logica di Auto-Docking in Alto a Destra
+    // 4. Algoritmo di Aggancio Intelligente Universale
     function mountSwitcher() {
-      // Priorità A: Se hai inserito un segnaposto manuale <div id="rm-translate-slot"></div>
-      const manualSlot = document.getElementById('rm-translate-slot');
+      // Priorità 1: Se hai messo un contenitore manuale <div id="rm-lang-slot"></div>
+      const manualSlot = document.getElementById('rm-lang-slot') || document.getElementById('rm-translate-slot');
       if (manualSlot) {
         manualSlot.appendChild(switcher);
         return true;
       }
 
-      // Priorità B: Cerca il gruppo di pulsanti a destra nell'header o nav
-      const header = document.querySelector('header') || document.querySelector('nav');
-      if (header) {
-        const rightContainer = 
-          header.querySelector('.flex.items-center:last-child') ||
-          header.querySelector('.flex:last-child') ||
-          header.querySelector('div:last-child') ||
-          header;
+      // Priorità 2: Trova l'elemento header o nav
+      const navRoot = document.querySelector('header') || document.querySelector('nav');
+      if (!navRoot) return false;
 
-        if (rightContainer && rightContainer !== header) {
-          // Lo inserisce all'inizio del gruppo pulsanti di destra
-          rightContainer.insertBefore(switcher, rightContainer.firstChild);
+      // Cerca il vero contenitore orizzontale (flex con almeno 2 figli: logo e azioni)
+      let flexRow = null;
+      const candidates = [navRoot, ...navRoot.querySelectorAll('.flex, [class*="justify-between"], [class*="items-center"]')];
+      
+      for (const el of candidates) {
+        const validChildren = Array.from(el.children).filter(c => 
+          c.tagName !== 'SCRIPT' && 
+          c.tagName !== 'STYLE' && 
+          c.id !== 'rm-lang-switcher'
+        );
+        // Troviamo la riga che divide logo da menu/pulsanti (almeno 2 colonne)
+        if (validChildren.length >= 2) {
+          flexRow = el;
+          break;
+        }
+      }
+
+      if (!flexRow) flexRow = navRoot;
+
+      const validChildren = Array.from(flexRow.children).filter(c => 
+        c.tagName !== 'SCRIPT' && 
+        c.tagName !== 'STYLE' && 
+        c.id !== 'rm-lang-switcher'
+      );
+
+      if (validChildren.length >= 2) {
+        // Il blocco di destra è sempre l'ultimo figlio della riga
+        const rightCluster = validChildren[validChildren.length - 1];
+
+        // Se è un contenitore (div con i bottoni es. "Area Agenzie" e "Prova"), lo inseriamo all'inizio del blocco
+        if (rightCluster.children.length > 0 && rightCluster.tagName !== 'A' && rightCluster.tagName !== 'BUTTON') {
+          rightCluster.insertBefore(switcher, rightCluster.firstChild);
         } else {
-          header.appendChild(switcher);
+          // Se è un bottone singolo, lo inseriamo subito alla sua sinistra
+          flexRow.insertBefore(switcher, rightCluster);
         }
         return true;
       }
@@ -153,13 +185,12 @@
       return false;
     }
 
-    // Se la navbar impiega qualche millisecondo a montarsi (es. Next.js), fa tentativi rapidi
+    // Polling di montaggio rapido per supportare anche componenti React / Next.js
     let attempts = 0;
     const tryMount = setInterval(() => {
       attempts++;
-      if (mountSwitcher() || attempts > 20) {
+      if (mountSwitcher() || attempts > 25) {
         clearInterval(tryMount);
-        // Se non trova nessun header, fluttua in alto a destra
         if (!switcher.parentElement) {
           switcher.classList.add('rm-floating-top');
           document.body.appendChild(switcher);
@@ -172,7 +203,6 @@
       const domain = location.hostname;
       
       if (code === 'it') {
-        // Reset cookie per tornare all'italiano nativo pulito
         document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
         document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${domain};`;
@@ -217,7 +247,7 @@
       document.body.appendChild(gtScript);
     }
 
-    // 7. Supporto URL ?lang=...
+    // 7. Supporto parametro ?lang=...
     const urlParams = new URLSearchParams(window.location.search);
     const langParam = urlParams.get('lang');
     if (langParam && languages.some(l => l.code === langParam) && langParam !== currentLang) {
