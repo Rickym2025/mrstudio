@@ -1,5 +1,5 @@
 /**
- * RM Studio - Universal Translation Engine (Viewport Geometry Docking)
+ * RM Studio - Universal Translation Engine (Anti-Loop & Isolated Namespace)
  */
 (function () {
   function initTranslator() {
@@ -30,15 +30,12 @@
         border-color: #06b6d4 !important;
         box-shadow: 0 2px 18px rgba(6, 182, 212, 0.4) !important;
       }
-
-      /* Fallback fluttuante solo se non esiste alcuna barra di navigazione */
       #rm-lang-switcher.rm-floating-top {
         position: fixed !important;
         top: 18px !important;
         right: 20px !important;
         z-index: 99999 !important;
       }
-
       .rm-lang-btn {
         background: transparent !important;
         border: none !important;
@@ -68,7 +65,6 @@
         background: #9333ea !important;
         box-shadow: 0 0 10px rgba(147, 51, 234, 0.6) !important;
       }
-
       @media (max-width: 768px) {
         #rm-lang-switcher {
           padding: 2px 5px !important;
@@ -80,8 +76,6 @@
           padding: 2px 4px !important;
         }
       }
-
-      /* Nasconde i banner nativi e frame di Google Translate */
       .goog-te-banner-frame, .skiptranslate, #goog-gt-tt, .goog-te-balloon-frame { 
         display: none !important; 
       }
@@ -125,17 +119,16 @@
       btn.innerText = lang.label;
       btn.onclick = (e) => {
         e.preventDefault();
-        changeLanguage(lang.code);
+        window.rmChangeLanguage(lang.code, true);
       };
       switcher.appendChild(btn);
     });
 
-    // 4. Scansione Geometrica: Trova la VERA Navbar in cima allo schermo
+    // 4. Scansione Geometrica: Navbar reale
     function findTrueTopNavbar() {
       const manualSlot = document.getElementById('rm-lang-slot') || document.getElementById('rm-translate-slot');
       if (manualSlot) return { target: manualSlot, method: 'append' };
 
-      // Selettori plausibili per la barra di navigazione principale
       const selectors = [
         'header',
         'nav',
@@ -154,11 +147,6 @@
 
       for (const el of elements) {
         const rect = el.getBoundingClientRect();
-        // Condizioni ferree della VERA Navbar:
-        // 1. Inizia a ridosso del bordo superiore dello schermo (rect.top tra -10px e 60px)
-        // 2. Ha un'altezza ragionevole (tra 35px e 130px)
-        // 3. È estesa orizzontalmente (almeno il 50% della larghezza dello schermo)
-        // Questo ESCLUDE automaticamente telefonini 3D, carte prodotto e widget a metà pagina!
         if (
           rect.top >= -10 &&
           rect.top <= 60 &&
@@ -173,7 +161,6 @@
 
       if (!trueNavbar) return null;
 
-      // Trova la riga orizzontale (flex container) interna alla vera navbar
       let flexRow = trueNavbar;
       const rows = [trueNavbar, ...trueNavbar.querySelectorAll('.flex, [class*="justify-between"], [class*="items-center"]')];
       for (const r of rows) {
@@ -195,7 +182,6 @@
       );
 
       if (validChildren.length >= 2) {
-        // L'ultimo blocco è il gruppo azioni/pulsanti a destra (es. Blog, Contatti)
         const rightCluster = validChildren[validChildren.length - 1];
         if (rightCluster.children.length > 0 && rightCluster.tagName !== 'A' && rightCluster.tagName !== 'BUTTON') {
           return { target: rightCluster, method: 'prepend' };
@@ -224,7 +210,6 @@
       return false;
     }
 
-    // Polling rapido: attende il render di React/Next.js
     let attempts = 0;
     const tryMount = setInterval(() => {
       attempts++;
@@ -237,8 +222,8 @@
       }
     }, 50);
 
-    // 5. Cambio Lingua
-    window.changeLanguage = function (code) {
+    // 5. Cambio Lingua PROTETTO (Nessun reload automatico a vuoto)
+    window.rmChangeLanguage = function (code, isUserClick = false) {
       const domain = location.hostname;
       
       if (code === 'it') {
@@ -246,7 +231,14 @@
         document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
         document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${domain};`;
         localStorage.removeItem('rm_selected_lang');
-        location.reload();
+        
+        const select = document.querySelector('.goog-te-combo');
+        if (select && select.value !== 'it') {
+          select.value = 'it';
+          select.dispatchEvent(new Event('change'));
+        } else if (isUserClick) {
+          location.reload();
+        }
         return;
       }
 
@@ -260,12 +252,12 @@
       if (select) {
         select.value = code;
         select.dispatchEvent(new Event('change'));
-      } else {
+      } else if (isUserClick) {
         location.reload();
       }
     };
 
-    // 6. Iniezione Core Google Translate
+    // 6. Google Translate Init
     window.googleTranslateElementInit = function () {
       new google.translate.TranslateElement({
         pageLanguage: 'it',
@@ -290,7 +282,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const langParam = urlParams.get('lang');
     if (langParam && languages.some(l => l.code === langParam) && langParam !== currentLang) {
-      setTimeout(() => changeLanguage(langParam), 250);
+      setTimeout(() => window.rmChangeLanguage(langParam, false), 350);
     }
   }
 
