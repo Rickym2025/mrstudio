@@ -1,11 +1,12 @@
 /**
  * RM Studio - Universal Translation Engine (React Reconciliation Safe & Brand Shield)
+ * Supporta: IT, GB, DE, ES, FR, RU (Compatto a ingombro zero)
  */
 (function () {
   function initTranslator() {
     if (document.getElementById('rm-lang-switcher')) return;
 
-    // 1. BRAND SHIELD: Protezione nomi e marchi
+    // 1. BRAND SHIELD: Protezione nomi e marchi proprietari RM Studio
     const BRAND_NAMES = [
       'Lexis', 'Lexis AI', 'Dentis', 'Dentis AI', 'Concierge24',
       'DriveMotion', 'HomeTour', 'OmniaStudio', 'Vision', 'Ares',
@@ -32,49 +33,51 @@
 
     protectBrands();
 
-    // 2. Stili Dark / Neon
+    // 2. STILI ULTRA-COMPATTI (INGOMBRO IDENTICO A 5 BOTTONI)
     const style = document.createElement('style');
     style.id = 'rm-translate-styles';
     style.textContent = `
       #rm-lang-switcher {
         display: inline-flex !important;
         align-items: center !important;
-        gap: 3px !important;
-        background: rgba(8, 8, 14, 0.85) !important;
+        gap: 2px !important;
+        background: rgba(8, 8, 14, 0.88) !important;
         border: 1px solid rgba(147, 51, 234, 0.4) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
-        padding: 3px 8px !important;
+        padding: 2px 5px !important;
         border-radius: 9999px !important;
         box-shadow: 0 2px 12px rgba(0,0,0,0.6), 0 0 10px rgba(6, 182, 212, 0.2) !important;
         font-family: system-ui, -apple-system, sans-serif !important;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+        transition: border-color 0.25s ease, box-shadow 0.25s ease !important;
         flex-shrink: 0 !important;
-        margin: 0 6px !important;
+        margin: 0 4px !important;
         z-index: 50 !important;
+        max-width: 155px !important;
       }
       #rm-lang-switcher:hover {
         border-color: #06b6d4 !important;
-        box-shadow: 0 2px 18px rgba(6, 182, 212, 0.4) !important;
+        box-shadow: 0 2px 16px rgba(6, 182, 212, 0.4) !important;
       }
       #rm-lang-switcher.rm-floating-top {
         position: fixed !important;
-        top: 18px !important;
-        right: 20px !important;
+        top: 16px !important;
+        right: 18px !important;
         z-index: 99999 !important;
       }
       .rm-lang-btn {
         background: transparent !important;
         border: none !important;
         cursor: pointer !important;
-        font-size: 11px !important;
+        font-size: 10px !important;
         font-weight: 700 !important;
-        letter-spacing: 0.05em !important;
-        padding: 3px 6px !important;
-        border-radius: 6px !important;
+        letter-spacing: -0.01em !important;
+        padding: 2.5px 4px !important;
+        min-width: 19px !important;
+        border-radius: 5px !important;
         color: #cbd5e1 !important;
-        opacity: 0.65 !important;
-        transition: all 0.2s ease !important;
+        opacity: 0.7 !important;
+        transition: all 0.15s ease !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -84,23 +87,25 @@
       .rm-lang-btn:hover {
         opacity: 1 !important;
         color: #fff !important;
-        background: rgba(6, 182, 212, 0.2) !important;
+        background: rgba(6, 182, 212, 0.25) !important;
       }
       .rm-lang-btn.active {
         opacity: 1 !important;
         color: #ffffff !important;
         background: #9333ea !important;
-        box-shadow: 0 0 10px rgba(147, 51, 234, 0.6) !important;
+        box-shadow: 0 0 8px rgba(147, 51, 234, 0.7) !important;
       }
       @media (max-width: 768px) {
         #rm-lang-switcher {
-          padding: 2px 5px !important;
+          padding: 1.5px 3px !important;
           gap: 1px !important;
-          margin: 0 3px !important;
+          margin: 0 2px !important;
+          max-width: 135px !important;
         }
         .rm-lang-btn {
-          font-size: 10px !important;
-          padding: 2px 4px !important;
+          font-size: 9px !important;
+          padding: 2px 3px !important;
+          min-width: 16px !important;
         }
       }
       .goog-te-banner-frame, .skiptranslate, #goog-gt-tt, .goog-te-balloon-frame { 
@@ -113,13 +118,14 @@
     `;
     document.head.appendChild(style);
 
-    // 3. Lingue Supportate
+    // 3. LINGUE SUPPORTATE: 6 LINGUE COMPATTE
     const languages = [
       { code: 'it', label: 'IT', title: 'Italiano' },
       { code: 'en', label: 'GB', title: 'English' },
       { code: 'de', label: 'DE', title: 'Deutsch' },
       { code: 'es', label: 'ES', title: 'Español' },
-      { code: 'fr', label: 'FR', title: 'Français' }
+      { code: 'fr', label: 'FR', title: 'Français' },
+      { code: 'ru', label: 'RU', title: 'Русский' }
     ];
 
     function getStoredLang() {
@@ -137,7 +143,7 @@
 
     const currentLang = getStoredLang();
 
-    // 4. Creazione Elemento
+    // 4. CREAZIONE ELEMENTO SWITCHER
     const switcher = document.createElement('div');
     switcher.id = 'rm-lang-switcher';
     switcher.className = 'notranslate';
@@ -156,7 +162,7 @@
       switcher.appendChild(btn);
     });
 
-    // 5. Scansione Navbar con soglia minima adatta a max-w-6xl
+    // 5. SCANSIONE NAVBAR AUTOMATICA
     function findTrueTopNavbar() {
       const manualSlot = document.getElementById('rm-lang-slot') || document.getElementById('rm-translate-slot');
       if (manualSlot) return { target: manualSlot, method: 'append' };
@@ -255,7 +261,7 @@
       }
     }, 60);
 
-    // 6. Anti-Wipe MutationObserver: Se React re-renderizza e cancella lo switcher, lo rimonta subito
+    // 6. Anti-Wipe MutationObserver: rimonta lo switcher se React re-renderizza il DOM
     const observer = new MutationObserver(() => {
       if (!document.body.contains(switcher)) {
         mountSwitcher();
@@ -263,7 +269,7 @@
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
-    // 7. Cambio Lingua
+    // 7. CAMBIO LINGUA
     window.rmChangeLanguage = function (code, isUserClick = false) {
       const domain = location.hostname;
       
@@ -309,11 +315,11 @@
       setTimeout(protectBrands, 800);
     };
 
-    // 8. Core Google Translate
+    // 8. CORE GOOGLE TRANSLATE: INCLUDE ANCHE IL RUSSO (RU)
     window.googleTranslateElementInit = function () {
       new google.translate.TranslateElement({
         pageLanguage: 'it',
-        includedLanguages: 'it,en,de,es,fr',
+        includedLanguages: 'it,en,de,es,fr,ru',
         autoDisplay: false
       }, 'google_translate_element');
     };
@@ -330,7 +336,7 @@
       document.body.appendChild(gtScript);
     }
 
-    // 9. Query param ?lang=...
+    // 9. Rilevamento query param ?lang=...
     const urlParams = new URLSearchParams(window.location.search);
     const langParam = urlParams.get('lang');
     if (langParam && languages.some(l => l.code === langParam) && langParam !== currentLang) {
